@@ -3,8 +3,7 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - main
-      - master # Adicionado caso sua branch principal se chame master
+      - production
 
 jobs:
   deploy:
