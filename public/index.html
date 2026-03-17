@@ -1,98 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora Itaú Personnalité</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .transicao-panoramica { transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-        .markdown-ia p { margin-bottom: 0.75rem; }
-        .markdown-ia strong { color: #1e3a8a; } 
-        .markdown-ia ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* 🎨 Motor Gráfico HTML Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        /* 🪟 Glassmorphism & Material Design 3 */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.75);
+            -webkit-backdrop-filter: blur(28px);
+            backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #f97316;
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+            outline: none;
+        }
+
+        .transicao-panoramica {
+            transition: max-width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .markdown-ia p {
+            margin-bottom: 0.75rem;
+        }
+
+        .markdown-ia strong {
+            color: #1e3a8a;
+        }
+
+        .markdown-ia ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-    
-    <div class="w-full flex flex-col items-center">
-        
-        <div id="main-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-orange-500 transicao-panoramica relative z-10">
-            
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative text-slate-800">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="w-full flex flex-col items-center z-10 py-6 sm:py-0">
+
+        <div id="main-container"
+            class="glass-container p-6 sm:p-10 rounded-[2rem] w-full max-w-md border-t-4 border-orange-500 transicao-panoramica relative z-10">
+
             <div class="flex items-center justify-center gap-4 mb-8">
-                <img src="Itau_Personnalite.webp" alt="Itaú Personnalité" class="h-10 sm:h-12 object-contain">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">Calculadora<br>Itaú Personnalité</h2>
+                <img src="Itau_Personnalite.webp" alt="Itaú Personnalité"
+                    class="h-10 sm:h-12 object-contain drop-shadow-sm">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">Calculadora<br>Itaú Personnalité
+                </h2>
             </div>
-            
-            <form id="calc-form" class="space-y-5 max-w-lg mx-auto">
+
+            <form id="calc-form" class="space-y-6 max-w-lg mx-auto">
                 <div>
-                    <label for="moeda" class="block text-sm font-medium text-gray-700">1. Moeda da Compra</label>
-                    <select id="moeda" required title="Selecione a moeda da compra" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white truncate">
+                    <label for="moeda" class="block text-sm font-semibold text-gray-700 ml-1 mb-1">1. Moeda da
+                        Compra</label>
+                    <select id="moeda" required title="Selecione a moeda da compra"
+                        class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 truncate cursor-pointer font-medium outline-none shadow-sm">
                     </select>
                 </div>
 
-                <div id="alerta-exotica" class="hidden bg-yellow-50 border-l-4 border-yellow-500 p-3 text-xs text-yellow-800 rounded-md">
-                    <strong>Nota Comercial:</strong> A Conta Global opera nativamente em Dólar e Euro. Para esta moeda, o app simulará apenas os custos do Cartão de Crédito.
+                <div id="alerta-exotica"
+                    class="hidden glass-card bg-yellow-50/70 border-l-4 border-yellow-500 p-4 text-xs text-yellow-800 rounded-xl shadow-sm">
+                    <strong>Nota Comercial:</strong> A Conta Global opera nativamente em Dólar e Euro. Para esta moeda,
+                    o app simulará apenas os custos do Cartão de Crédito.
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-5">
                     <div>
-                        <label for="data_compra" class="block text-sm font-medium text-gray-700 whitespace-nowrap">2. Data da Transação</label>
-                        <input type="date" id="data_compra" required title="Data da transação" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white">
+                        <label for="data_compra"
+                            class="block text-sm font-semibold text-gray-700 whitespace-nowrap ml-1 mb-1">2. Data da
+                            Transação</label>
+                        <input type="date" id="data_compra" required title="Data da transação"
+                            class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-medium cursor-pointer outline-none shadow-sm">
                     </div>
                     <div>
-                        <label for="valor_original_mask" id="label_valor" class="block text-sm font-medium text-gray-700 whitespace-nowrap text-right">3. Valor (US$)</label>
-                        <input type="text" inputmode="numeric" id="valor_original_mask" placeholder="0,00" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white font-semibold text-gray-900 text-lg tracking-wide text-right" data-raw="0">
+                        <label for="valor_original_mask" id="label_valor"
+                            class="block text-sm font-semibold text-gray-700 whitespace-nowrap text-right mr-1 mb-1">3.
+                            Valor (US$)</label>
+                        <input type="text" inputmode="numeric" id="valor_original_mask" placeholder="0,00" required
+                            class="mt-1 block w-full p-4 glass-input rounded-xl font-bold text-gray-900 text-lg tracking-wide text-right outline-none shadow-sm"
+                            data-raw="0">
                     </div>
                 </div>
-                
-                <button type="submit" id="btn-submit" class="w-full bg-orange-500 text-white font-bold py-3.5 px-4 rounded-md hover:bg-orange-600 transition disabled:opacity-50 mt-2 shadow-sm outline-none">
+
+                <button type="submit" id="btn-submit"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-full hover:shadow-[0_8px_20px_rgba(249,115,22,0.4)] transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 mt-4 outline-none">
                     Analisar Cenários
                 </button>
             </form>
 
-            <div id="resultado-area" class="mt-10 hidden flex-col gap-6">
-                
-                <hr class="border-gray-200">
-                <h3 id="titulo-painel" class="text-center font-bold text-gray-800 uppercase tracking-widest text-sm text-gray-400">Painel Comparativo</h3>
+            <div id="resultado-area" class="mt-12 hidden flex-col gap-6">
+
+                <div class="flex items-center gap-4 opacity-60">
+                    <div class="h-px bg-gray-500 flex-1"></div>
+                    <h3 id="titulo-painel"
+                        class="text-center font-bold text-gray-600 uppercase tracking-[0.2em] text-xs">Painel
+                        Comparativo</h3>
+                    <div class="h-px bg-gray-500 flex-1"></div>
+                </div>
 
                 <div id="grid-comparacao" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
-                <div id="aviso-incompatibilidade" class="hidden w-full bg-blue-50 border border-blue-200 p-4 rounded-xl items-start gap-3 shadow-sm">
+                <div id="aviso-incompatibilidade"
+                    class="hidden w-full glass-card bg-blue-50/60 border-blue-200/60 p-5 rounded-xl items-start gap-4 shadow-sm">
                     <span class="text-blue-500 text-xl flex-shrink-0 mt-0.5">ℹ️</span>
-                    <p class="text-[13px] text-blue-900 leading-relaxed text-left" id="aviso-incompatibilidade-text"></p>
+                    <p class="text-[13px] text-blue-900 leading-relaxed text-left font-medium"
+                        id="aviso-incompatibilidade-text"></p>
                 </div>
 
-                <div class="p-4 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row gap-3 w-full shadow-sm">
-                    <button type="button" id="btn-copy" onclick="copiarTexto(this)" class="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-bold py-3.5 px-4 rounded-xl hover:bg-gray-200 transition shadow-sm outline-none">
+                <div
+                    class="p-2 glass-card rounded-full flex flex-col sm:flex-row gap-2 w-full shadow-sm mt-2 border border-white/60">
+                    <button type="button" id="btn-copy" onclick="copiarTexto(this)"
+                        class="flex-1 flex items-center justify-center gap-2 bg-white/70 text-gray-800 font-bold py-4 px-6 rounded-full hover:bg-white hover:shadow-sm transition-all outline-none">
                         📋 Copiar Resumo
                     </button>
-                    <button type="button" id="btn-whatsapp" onclick="abrirWhatsApp(this)" class="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#20bd5a] transition shadow-sm outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> WhatsApp
+                    <button type="button" id="btn-whatsapp" onclick="abrirWhatsApp(this)"
+                        class="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-4 px-6 rounded-full hover:bg-[#20bd5a] hover:shadow-[0_8px_20px_rgba(37,211,102,0.3)] transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+                        </svg> WhatsApp
                     </button>
                 </div>
 
-                <div class="mt-4 border-t border-gray-200 pt-8 text-center" id="oraculo-container">
+                <div class="mt-6 border-t border-gray-300/40 pt-8 text-center" id="oraculo-container">
                     <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
-                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <svg class="w-6 h-6 text-blue-600 drop-shadow-sm" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
                         Oráculo Financeiro
                     </h3>
-                    <p class="text-sm text-gray-500 mb-6 px-4">Peça à Inteligência Artificial uma análise técnica e o veredito matemático sobre a melhor escolha.</p>
-                    
-                    <button type="button" id="btn-generate-ai" class="bg-blue-600 text-white font-bold py-3.5 px-8 rounded-full hover:bg-blue-700 transition shadow-md outline-none mx-auto flex items-center justify-center gap-2">
+                    <p class="text-[14px] text-gray-600 mb-6 px-4 font-medium">Peça à Inteligência Artificial uma
+                        análise técnica e o veredito matemático sobre a melhor escolha.</p>
+
+                    <button type="button" id="btn-generate-ai"
+                        class="bg-gray-900 text-white font-bold py-4 px-8 rounded-full hover:bg-gray-800 hover:shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:scale-[1.02] active:scale-95 transition-all duration-300 outline-none mx-auto flex items-center justify-center gap-2">
                         ✨ Analisar Cenário com IA
                     </button>
-                    
-                    <div id="ai-result" class="hidden mt-6 bg-blue-50 border border-blue-200 p-6 rounded-xl text-gray-800 text-[14px] leading-relaxed markdown-ia shadow-inner text-left"></div>
+
+                    <div id="ai-result"
+                        class="hidden mt-8 glass-card border-white/70 p-6 sm:p-8 rounded-[1.5rem] text-gray-800 text-[14px] leading-relaxed markdown-ia shadow-md text-left">
+                    </div>
                 </div>
 
             </div>
         </div>
 
-        <div class="mt-6 text-center opacity-80">
-            <span class="text-[11px] font-mono text-gray-400 font-semibold tracking-[0.2em] uppercase">APP v2.04.00</span>
+        <div class="mt-8 mb-4 text-center relative z-10">
+            <span
+                class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">APP
+                v3.01.00</span>
         </div>
 
     </div>
+
+    <script>
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let time = 0;
+        function animateBg() {
+            time += 0.003;
+            ctx.clearRect(0, 0, width, height);
+
+            // Cor base do fundo (Gelo Slate)
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, width, height);
+
+            // Esferas orgânicas Material Design (Azul Gemini, Laranja Itaú, Roxo IA)
+            const orbs = [
+                { x: width / 2 + Math.cos(time) * width * 0.3, y: height / 2 + Math.sin(time) * height * 0.3, r: Math.max(width, height) * 0.4, c: 'rgba(191, 219, 254, 0.75)' },
+                { x: width / 2 + Math.cos(time + 2) * width * 0.2, y: height / 2 + Math.sin(time + 2) * height * 0.4, r: Math.max(width, height) * 0.35, c: 'rgba(254, 215, 170, 0.65)' },
+                { x: width / 2 + Math.cos(time + 4) * width * 0.25, y: height / 2 + Math.sin(time + 4) * height * 0.25, r: Math.max(width, height) * 0.3, c: 'rgba(233, 213, 255, 0.65)' }
+            ];
+
+            orbs.forEach(b => {
+                const gradient = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+                gradient.addColorStop(0, b.c);
+                gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+    </script>
 
     <script>
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
@@ -101,23 +243,23 @@
         document.getElementById('data_compra').value = dataISOHoje;
 
         const inputMask = document.getElementById('valor_original_mask');
-        inputMask.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, ''); 
+        inputMask.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
             if (value === '') { e.target.value = ''; e.target.dataset.raw = '0'; return; }
             let floatValue = parseInt(value, 10) / 100;
-            e.target.dataset.raw = floatValue; 
+            e.target.dataset.raw = floatValue;
             e.target.value = floatValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const todasMoedas = [ "AED","AFN","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BHD","BIF","BMD","BND","BOB","BSD","BWP","BYN","BZD","CAD","CDF","CHF","CLP","CNY","COP","CRC","CUP","CVE","CZK","DJF","DKK","DOP","DZD","EGP","ETB","FJD","GBP","GEL","GHS","GMD","GNF","GTQ","GYD","HKD","HNL","HTG","HUF","IDR","ILS","INR","IQD","IRR","ISK","JMD","JOD","JPY","KES","KGS","KHR","KMF","KRW","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LSL","LYD","MAD","MDL","MGA","MKD","MMK","MNT","MOP","MRU","MUR","MVR","MWK","MXN","MYR","MZN","NAD","NGN","NIO","NOK","NPR","NZD","OMR","PAB","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SCR","SDG","SEK","SGD","SHP","SLL","SOS","SRD","STN","SVC","SYP","SZL","THB","TJS","TMT","TND","TOP","TRY","TTD","TWD","TZS","UAH","UGX","UYU","UZS","VES","VND","VUV","WST","XAF","XCD","XOF","XPF","YER","ZAR","ZMW","ZWL" ];
+            const todasMoedas = ["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BSD", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ETB", "FJD", "GBP", "GEL", "GHS", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HTG", "HUF", "IDR", "ILS", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SCR", "SDG", "SEK", "SGD", "SHP", "SLL", "SOS", "SRD", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XOF", "XPF", "YER", "ZAR", "ZMW", "ZWL"];
             const tradutorBR = new Intl.DisplayNames(['pt-BR'], { type: 'currency', fallback: 'code' });
             const moedasFormatadas = todasMoedas.map(sigla => {
                 let nome = sigla;
-                try { let t = tradutorBR.of(sigla); nome = t.charAt(0).toUpperCase() + t.slice(1); } catch(e){}
+                try { let t = tradutorBR.of(sigla); nome = t.charAt(0).toUpperCase() + t.slice(1); } catch (e) { }
                 return { sigla, nome };
             }).sort((a, b) => a.nome.localeCompare(b.nome));
-            
+
             const selectMoeda = document.getElementById('moeda');
             selectMoeda.add(new Option('Dólar (US$)', 'USD'));
             selectMoeda.add(new Option('Euro (€)', 'EUR'));
@@ -129,8 +271,8 @@
             selectMoeda.value = 'USD';
         });
 
-        document.getElementById('moeda').addEventListener('change', function() {
-            let sim = this.value; 
+        document.getElementById('moeda').addEventListener('change', function () {
+            let sim = this.value;
             const alerta = document.getElementById('alerta-exotica');
             if (sim !== 'USD' && sim !== 'EUR' && sim !== '') alerta.classList.remove('hidden');
             else alerta.classList.add('hidden');
@@ -138,37 +280,37 @@
             document.getElementById('label_valor').innerText = `3. Valor (${sim})`;
         });
 
-        window.copiarTexto = function(btn) {
+        window.copiarTexto = function (btn) {
             const t = decodeURIComponent(btn.getAttribute('data-texto'));
             navigator.clipboard.writeText(t).then(() => {
                 const orig = btn.innerHTML; btn.innerHTML = '✅ Copiado!';
-                btn.classList.add('bg-green-100', 'text-green-800'); btn.classList.remove('bg-gray-100', 'text-gray-700');
-                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('bg-green-100', 'text-green-800'); btn.classList.add('bg-gray-100', 'text-gray-700'); }, 2000);
+                btn.classList.add('bg-green-100', 'text-green-800'); btn.classList.remove('bg-white/70', 'text-gray-800');
+                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('bg-green-100', 'text-green-800'); btn.classList.add('bg-white/70', 'text-gray-800'); }, 2000);
             }).catch(() => alert('Erro ao copiar.'));
         };
-        window.abrirWhatsApp = function(btn) { window.open(`https://wa.me/?text=${btn.getAttribute('data-texto')}`, '_blank'); };
+        window.abrirWhatsApp = function (btn) { window.open(`https://wa.me/?text=${btn.getAttribute('data-texto')}`, '_blank'); };
 
-        let payloadGlobalParaIA = null; 
+        let payloadGlobalParaIA = null;
 
         document.getElementById('btn-generate-ai').addEventListener('click', async () => {
             const resDiv = document.getElementById('ai-result');
             const btn = document.getElementById('btn-generate-ai');
-            
-            if (!payloadGlobalParaIA) return; 
-            
+
+            if (!payloadGlobalParaIA) return;
+
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="animate-pulse">✨ Consultando o Oráculo...</span>'; 
+            btn.innerHTML = '<span class="animate-pulse">✨ Consultando o Oráculo...</span>';
             btn.disabled = true;
-            
+
             resDiv.classList.remove('hidden');
             resDiv.innerHTML = '<span class="animate-pulse text-blue-600 font-semibold tracking-wide">Aguarde, a IA está decodificando a matriz de custos...</span>';
-            
+
             try {
                 const response = await fetch('/api/oraculo', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payloadGlobalParaIA)
                 });
-                
+
                 const data = await response.json();
                 if (response.ok) {
                     resDiv.innerHTML = data.analise
@@ -181,11 +323,10 @@
                 } else {
                     resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${data.erro}</span>`;
                 }
-            } catch (e) { resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha de rede ao conectar com a IA.</span>`; } 
+            } catch (e) { resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha de rede ao conectar com a IA.</span>`; }
             finally { btn.innerHTML = textoOriginal; btn.disabled = false; }
         });
 
-        // ⚖️ MOTOR PRINCIPAL DE CÁLCULO
         document.getElementById('calc-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
@@ -196,7 +337,7 @@
             const oraculoContainer = document.getElementById('oraculo-container');
             const avisoIncompatibilidade = document.getElementById('aviso-incompatibilidade');
             const avisoText = document.getElementById('aviso-incompatibilidade-text');
-            
+
             const moeda = document.getElementById('moeda').value;
             const valorBruto = parseFloat(document.getElementById('valor_original_mask').dataset.raw);
 
@@ -212,46 +353,46 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ moeda, data_compra: document.getElementById('data_compra').value, valor_original: valorBruto })
                 });
-                
+
                 if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("A conexão de rede falhou.");
                 const data = await response.json();
 
                 if (response.ok) {
-                    const fmt = (val) => val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    const fmt4 = (val) => val.toLocaleString('pt-BR', {minimumFractionDigits: 4, maximumFractionDigits: 4});
-                    const pct = (val) => (val * 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+                    const fmt = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const fmt4 = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+                    const pct = (val) => (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
                     const isGlobalSupported = data.global && data.global.suportada && !data.global.erro;
 
                     let cartaoHtml = '';
                     if (data.cartao && data.cartao.suportada) {
                         cartaoHtml = `
-                            <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col h-full bg-white relative">
-                                <div class="bg-gray-800 text-white text-center py-3 font-bold tracking-wider text-sm">💳 CARTÃO DE CRÉDITO</div>
-                                <div class="p-6 flex-1 space-y-4">
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
-                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-500">${data.cartao.fonte_cotacao}</p></div>
+                            <div class="glass-card rounded-[1.5rem] overflow-hidden shadow-sm flex flex-col h-full relative">
+                                <div class="bg-gray-800/90 text-white text-center py-4 font-bold tracking-wider text-sm backdrop-blur-sm border-b border-gray-700">💳 CARTÃO DE CRÉDITO</div>
+                                <div class="p-6 sm:p-8 flex-1 space-y-4">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-600">${data.cartao.fonte_cotacao}</p></div>
                                         <p class="text-[14px] font-bold text-gray-800">${moeda} 1 = R$ ${fmt4(data.cartao.taxa_utilizada)}</p>
                                     </div>
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
                                         <div><p class="text-[14px] font-semibold text-gray-800">Spread Itaú (${pct(data.cartao.spread_aplicado)})</p></div>
                                         <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.cartao.valor_spread)}</p>
                                     </div>
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
                                         <div><p class="text-[14px] font-semibold text-gray-800">IOF (${pct(data.cartao.iof_aplicado)})</p></div>
                                         <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.cartao.valor_iof)}</p>
                                     </div>
                                     <div class="flex justify-between items-center pt-2">
                                         <p class="text-[16px] font-bold text-gray-800">Total na Fatura</p>
-                                        <p class="text-[19px] font-bold text-gray-900">R$ ${fmt(data.cartao.valor_total_brl)}</p>
+                                        <p class="text-[20px] font-black text-gray-900">R$ ${fmt(data.cartao.valor_total_brl)}</p>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 p-3 text-center border-t border-gray-200">
-                                    <p class="text-[14px] font-semibold text-gray-700">VET Final: ${moeda} 1 = R$ ${fmt4(data.cartao.vet)}</p>
+                                <div class="bg-white/40 p-4 text-center border-t border-white/60 backdrop-blur-sm">
+                                    <p class="text-[14px] font-bold tracking-wide text-gray-800">VET Final: ${moeda} 1 = R$ ${fmt4(data.cartao.vet)}</p>
                                 </div>
                             </div>`;
                     } else {
-                        cartaoHtml = `<div class="bg-red-50 p-6 rounded-xl border border-red-200 text-center"><p class="text-red-700 font-bold">${data.cartao.erro}</p></div>`;
+                        cartaoHtml = `<div class="bg-red-50/80 backdrop-blur-md p-6 rounded-3xl border border-red-200 text-center"><p class="text-red-700 font-bold">${data.cartao.erro}</p></div>`;
                     }
 
                     const dataBr = document.getElementById('data_compra').value.split('-').reverse().join('/');
@@ -262,39 +403,42 @@
                         mainContainer.classList.add('max-w-4xl');
                         grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
                         tituloPainel.innerText = 'Painel Comparativo';
-                        
+
                         oraculoContainer.classList.remove('hidden');
                         avisoIncompatibilidade.classList.add('hidden');
                         avisoIncompatibilidade.classList.remove('flex');
 
-                        let alertaOperacional = data.global.is_plantao 
-                            ? `<span class="text-[12px] text-orange-600 font-bold block mt-1">Mercado Fechado</span>` 
-                            : `<span class="text-[12px] text-green-600 font-bold block mt-1">Mercado Aberto</span>`;
-                        let isWinner = (data.cartao.suportada && data.global.valor_total_brl < data.cartao.valor_total_brl) ? 'border-orange-500 border-2' : 'border-gray-200 border';
+                        let alertaOperacional = data.global.is_plantao
+                            ? `<span class="text-[11px] font-bold px-3 py-1 rounded-full bg-orange-100/80 text-orange-700 mt-1.5 inline-block shadow-sm">Mercado Fechado</span>`
+                            : `<span class="text-[11px] font-bold px-3 py-1 rounded-full bg-green-100/80 text-green-800 mt-1.5 inline-block shadow-sm">Mercado Aberto</span>`;
+
+                        let isWinner = (data.cartao.suportada && data.global.valor_total_brl < data.cartao.valor_total_brl)
+                            ? 'ring-4 ring-orange-400/40 border-orange-400'
+                            : 'border-white/50 border';
 
                         let globalHtml = `
-                            <div class="${isWinner} rounded-xl overflow-hidden shadow-sm flex flex-col h-full bg-white relative">
-                                <div class="bg-gradient-to-r from-orange-500 to-orange-400 text-white text-center py-3 font-bold tracking-wider text-sm">🌎 CONTA GLOBAL</div>
-                                <div class="p-6 flex-1 space-y-4">
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
-                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-500">${data.global.fonte_cotacao}</p></div>
+                            <div class="glass-card ${isWinner} rounded-[1.5rem] overflow-hidden flex flex-col h-full relative">
+                                <div class="bg-gradient-to-r from-orange-500/90 to-orange-400/90 text-white text-center py-4 font-bold tracking-wider text-sm shadow-inner backdrop-blur-md">🌎 CONTA GLOBAL</div>
+                                <div class="p-6 sm:p-8 flex-1 space-y-4">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-600">${data.global.fonte_cotacao}</p></div>
                                         <p class="text-[14px] font-bold text-gray-800">${moeda} 1 = R$ ${fmt4(data.global.taxa_utilizada)}</p>
                                     </div>
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
                                         <div><p class="text-[14px] font-semibold text-gray-800">Spread Institucional (${pct(data.global.spread_aplicado)})</p>${alertaOperacional}</div>
                                         <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.global.valor_spread)}</p>
                                     </div>
-                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                    <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
                                         <div><p class="text-[14px] font-semibold text-gray-800">IOF (${pct(data.global.iof_aplicado)})</p></div>
                                         <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.global.valor_iof)}</p>
                                     </div>
                                     <div class="flex justify-between items-center pt-2">
                                         <p class="text-[16px] font-bold text-gray-800">Total Debitado</p>
-                                        <p class="text-[19px] font-bold text-orange-600">R$ ${fmt(data.global.valor_total_brl)}</p>
+                                        <p class="text-[20px] font-black text-orange-600">R$ ${fmt(data.global.valor_total_brl)}</p>
                                     </div>
                                 </div>
-                                <div class="bg-orange-50 p-3 text-center border-t border-orange-100">
-                                    <p class="text-[14px] font-semibold text-orange-900">VET Final: ${moeda} 1 = R$ ${fmt4(data.global.vet)}</p>
+                                <div class="bg-orange-50/60 backdrop-blur-sm p-4 text-center border-t border-orange-200/50">
+                                    <p class="text-[14px] font-bold tracking-wide text-orange-900">VET Final: ${moeda} 1 = R$ ${fmt4(data.global.vet)}</p>
                                 </div>
                             </div>`;
 
@@ -309,7 +453,7 @@
                         zap = `🏦 *Comparativo Personnalité*\n\n🌍 *Moeda:* ${data.moeda}\n💵 *Valor:* ${data.moeda} ${fmt(valorBruto)}\n📅 *Data:* ${dataBr}\n➖➖➖➖➖➖➖➖➖➖\n`;
                         if (data.cartao.suportada) zap += `💳 *CARTÃO DE CRÉDITO*\n• Total Pago: *BRL ${fmt(data.cartao.valor_total_brl)}*\n• VET: ${fmt4(data.cartao.vet)}\n\n`;
                         zap += `🌎 *CONTA GLOBAL*\n• Total Pago: *BRL ${fmt(data.global.valor_total_brl)}*\n• VET: ${fmt4(data.global.vet)}\n➖➖➖➖➖➖➖➖➖➖\n`;
-                        
+
                         let diff = data.cartao.valor_total_brl - data.global.valor_total_brl;
                         if (diff > 0) zap += `🏆 *Melhor Escolha:* Conta Global\n💡 *Economia exata:* BRL ${fmt(diff)}\n\n`;
                         else if (diff < 0) zap += `🏆 *Melhor Escolha:* Cartão de Crédito\n💡 *Economia exata:* BRL ${fmt(Math.abs(diff))}\n\n`;
@@ -319,14 +463,14 @@
                         mainContainer.classList.add('max-w-md');
                         grid.className = 'grid grid-cols-1 gap-6';
                         tituloPainel.innerText = 'Resultado da Simulação';
-                        
-                        oraculoContainer.classList.add('hidden'); 
+
+                        oraculoContainer.classList.add('hidden');
                         payloadGlobalParaIA = null;
-                        
+
                         avisoText.innerHTML = `A <strong>Conta Global Itaú</strong> opera nativamente apenas com saldos em <strong>Dólar (US$)</strong> e <strong>Euro (€)</strong>.<br>Para simular <strong>${data.moeda}</strong>, o sistema está refletindo exclusivamente a conversão pelo Cartão de Crédito.`;
                         avisoIncompatibilidade.classList.remove('hidden');
                         avisoIncompatibilidade.classList.add('flex');
-                        
+
                         grid.innerHTML = cartaoHtml;
 
                         zap = `🏦 *Simulação Itaú Personnalité*\n\n💳 *Meio:* Cartão de Crédito\n🌍 *Moeda:* ${data.moeda}\n📅 *Data:* ${dataBr}\n\n💵 *Valor Original:* ${data.moeda} ${fmt(valorBruto)}\n➖➖➖➖➖➖➖➖➖➖\n`;
@@ -340,9 +484,9 @@
                             zap += `⚠️ *Falha:* ${data.cartao.erro}\n➖➖➖➖➖➖➖➖➖➖\n`;
                         }
                     }
-                    
-                    // A assinatura final dinâmica no texto do WhatsApp
-                    const zapEncoded = encodeURIComponent(zap + `_Gerado por Calculadora Personnalité (APP v2.03.00)_`);
+
+                    // Tag de Versão Injetada no WhatsApp
+                    const zapEncoded = encodeURIComponent(zap + `_Gerado por APP v3.01.00_`);
                     document.getElementById('btn-copy').setAttribute('data-texto', zapEncoded);
                     document.getElementById('btn-whatsapp').setAttribute('data-texto', zapEncoded);
 
@@ -350,9 +494,10 @@
                     resultArea.classList.add('flex');
 
                 } else { alert('Aviso: ' + data.erro); }
-            } catch (err) { alert('Falha ao acionar os motores matemáticos.'); } 
+            } catch (err) { alert('Falha ao acionar os motores matemáticos.'); }
             finally { btn.disabled = false; btn.innerText = 'Analisar Cenários'; }
         });
     </script>
 </body>
+
 </html>

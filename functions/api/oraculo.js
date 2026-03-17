@@ -3,14 +3,15 @@ export async function onRequestPost(context) {
         const { request, env } = context;
         const promptData = await request.json();
 
-       // Recupera a chave do Google Gemini a partir das variáveis de ambiente criptografadas (Secrets)
+        // Recupera a chave do Google Gemini a partir das variáveis de ambiente criptografadas (Secrets)
         const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
-        if (!GEMINI_API_KEY) {            return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
+        if (!GEMINI_API_KEY) {
+            return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
 
         // O sistema já escolhe automaticamente o modelo mais rápido e inteligente do Google nos bastidores
-        const modelName = "gemini-2.5-pro"; 
+        const modelName = "gemini-2.5-pro";
         const generateUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
         const instrucao = "Aja como um oráculo financeiro implacável, focado estritamente na matemática cambial e otimização para clientes VIP do Itaú Personnalité. Forneça uma análise técnica concisa e direta (máximo de 2 a 3 parágrafos curtos), apontando a diferença de custos (como spread e IOF) entre o Cartão de Crédito e a Conta Global. Responda em Português do Brasil. Sem saudações. Analise criticamente os seguintes dados numéricos para apontar o vencedor e cravar o valor exato economizado em Reais: \n\n";
