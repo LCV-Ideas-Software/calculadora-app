@@ -1,0 +1,9 @@
+{
+  "d1_databases": [
+    {
+      "binding": "itau_calc_db",
+      "database_name": "itau-calc-db",
+      "database_id": "db259ea6-5583-4820-b7af-c514485cfc9c"
+    }
+  ]
+}

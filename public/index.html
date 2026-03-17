@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Itaú Personnalité</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .transicao-panoramica { transition: max-width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .markdown-ia p { margin-bottom: 0.75rem; }
+        .markdown-ia strong { color: #1e3a8a; } 
+        .markdown-ia ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    
+    <div class="w-full flex flex-col items-center">
+        
+        <div id="main-container" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-orange-500 transicao-panoramica relative z-10">
+            
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <img src="Itau_Personnalite.webp" alt="Itaú Personnalité" class="h-10 sm:h-12 object-contain">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">Calculadora<br>Itaú Personnalité</h2>
+            </div>
+            
+            <form id="calc-form" class="space-y-5 max-w-lg mx-auto">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">1. Moeda da Compra</label>
+                    <select id="moeda" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white truncate">
+                    </select>
+                </div>
+
+                <div id="alerta-exotica" class="hidden bg-yellow-50 border-l-4 border-yellow-500 p-3 text-xs text-yellow-800 rounded-md">
+                    <strong>Nota Comercial:</strong> A Conta Global opera nativamente em Dólar e Euro. Para esta moeda, o app simulará apenas os custos do Cartão de Crédito.
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 whitespace-nowrap">2. Data da Transação</label>
+                        <input type="date" id="data_compra" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white">
+                    </div>
+                    <div>
+                        <label id="label_valor" class="block text-sm font-medium text-gray-700 whitespace-nowrap text-right">3. Valor (US$)</label>
+                        <input type="text" inputmode="numeric" id="valor_original_mask" placeholder="0,00" required class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 outline-none bg-white font-semibold text-gray-900 text-lg tracking-wide text-right" data-raw="0">
+                    </div>
+                </div>
+                
+                <button type="submit" id="btn-submit" class="w-full bg-orange-500 text-white font-bold py-3.5 px-4 rounded-md hover:bg-orange-600 transition disabled:opacity-50 mt-2 shadow-sm outline-none">
+                    Analisar Cenários
+                </button>
+            </form>
+
+            <div id="resultado-area" class="mt-10 hidden flex-col gap-6">
+                
+                <hr class="border-gray-200">
+                <h3 id="titulo-painel" class="text-center font-bold text-gray-800 uppercase tracking-widest text-sm text-gray-400">Painel Comparativo</h3>
+
+                <div id="grid-comparacao" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+                <div id="aviso-incompatibilidade" class="hidden w-full bg-blue-50 border border-blue-200 p-4 rounded-xl items-start gap-3 shadow-sm">
+                    <span class="text-blue-500 text-xl flex-shrink-0 mt-0.5">ℹ️</span>
+                    <p class="text-[13px] text-blue-900 leading-relaxed text-left" id="aviso-incompatibilidade-text"></p>
+                </div>
+
+                <div class="p-4 bg-white border border-gray-100 rounded-xl flex flex-col sm:flex-row gap-3 w-full shadow-sm">
+                    <button type="button" id="btn-copy" onclick="copiarTexto(this)" class="flex-1 flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-bold py-3.5 px-4 rounded-xl hover:bg-gray-200 transition shadow-sm outline-none">
+                        📋 Copiar Resumo
+                    </button>
+                    <button type="button" id="btn-whatsapp" onclick="abrirWhatsApp(this)" class="flex-1 flex items-center justify-center gap-2 bg-[#25D366] text-white font-bold py-3.5 px-4 rounded-xl hover:bg-[#20bd5a] transition shadow-sm outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg> WhatsApp
+                    </button>
+                </div>
+
+                <div class="mt-4 border-t border-gray-200 pt-8 text-center" id="oraculo-container">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
+                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        Oráculo Financeiro
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-6 px-4">Peça à Inteligência Artificial uma análise técnica e o veredito matemático sobre a melhor escolha.</p>
+                    
+                    <button type="button" id="btn-generate-ai" class="bg-blue-600 text-white font-bold py-3.5 px-8 rounded-full hover:bg-blue-700 transition shadow-md outline-none mx-auto flex items-center justify-center gap-2">
+                        ✨ Analisar Cenário com IA
+                    </button>
+                    
+                    <div id="ai-result" class="hidden mt-6 bg-blue-50 border border-blue-200 p-6 rounded-xl text-gray-800 text-[14px] leading-relaxed markdown-ia shadow-inner text-left"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="mt-6 text-center opacity-80">
+            <span class="text-[11px] font-mono text-gray-400 font-semibold tracking-[0.2em] uppercase">APP v2.04.00</span>
+        </div>
+
+    </div>
+
+    <script>
+        const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+        const dataISOHoje = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+        document.getElementById('data_compra').max = dataISOHoje;
+        document.getElementById('data_compra').value = dataISOHoje;
+
+        const inputMask = document.getElementById('valor_original_mask');
+        inputMask.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); 
+            if (value === '') { e.target.value = ''; e.target.dataset.raw = '0'; return; }
+            let floatValue = parseInt(value, 10) / 100;
+            e.target.dataset.raw = floatValue; 
+            e.target.value = floatValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const todasMoedas = [ "AED","AFN","ALL","AMD","ANG","AOA","ARS","AUD","AWG","AZN","BAM","BBD","BDT","BGN","BHD","BIF","BMD","BND","BOB","BSD","BWP","BYN","BZD","CAD","CDF","CHF","CLP","CNY","COP","CRC","CUP","CVE","CZK","DJF","DKK","DOP","DZD","EGP","ETB","FJD","GBP","GEL","GHS","GMD","GNF","GTQ","GYD","HKD","HNL","HTG","HUF","IDR","ILS","INR","IQD","IRR","ISK","JMD","JOD","JPY","KES","KGS","KHR","KMF","KRW","KWD","KYD","KZT","LAK","LBP","LKR","LRD","LSL","LYD","MAD","MDL","MGA","MKD","MMK","MNT","MOP","MRU","MUR","MVR","MWK","MXN","MYR","MZN","NAD","NGN","NIO","NOK","NPR","NZD","OMR","PAB","PEN","PGK","PHP","PKR","PLN","PYG","QAR","RON","RSD","RUB","RWF","SAR","SCR","SDG","SEK","SGD","SHP","SLL","SOS","SRD","STN","SVC","SYP","SZL","THB","TJS","TMT","TND","TOP","TRY","TTD","TWD","TZS","UAH","UGX","UYU","UZS","VES","VND","VUV","WST","XAF","XCD","XOF","XPF","YER","ZAR","ZMW","ZWL" ];
+            const tradutorBR = new Intl.DisplayNames(['pt-BR'], { type: 'currency', fallback: 'code' });
+            const moedasFormatadas = todasMoedas.map(sigla => {
+                let nome = sigla;
+                try { let t = tradutorBR.of(sigla); nome = t.charAt(0).toUpperCase() + t.slice(1); } catch(e){}
+                return { sigla, nome };
+            }).sort((a, b) => a.nome.localeCompare(b.nome));
+            
+            const selectMoeda = document.getElementById('moeda');
+            selectMoeda.add(new Option('Dólar (US$)', 'USD'));
+            selectMoeda.add(new Option('Euro (€)', 'EUR'));
+            const separador = new Option('──────────', '');
+            separador.disabled = true; selectMoeda.add(separador);
+            moedasFormatadas.filter(m => m.sigla !== 'USD' && m.sigla !== 'EUR').forEach(m => {
+                selectMoeda.add(new Option(`${m.nome} (${m.sigla})`, m.sigla));
+            });
+            selectMoeda.value = 'USD';
+        });
+
+        document.getElementById('moeda').addEventListener('change', function() {
+            let sim = this.value; 
+            const alerta = document.getElementById('alerta-exotica');
+            if (sim !== 'USD' && sim !== 'EUR' && sim !== '') alerta.classList.remove('hidden');
+            else alerta.classList.add('hidden');
+            if (sim === 'USD') sim = 'US$'; else if (sim === 'EUR') sim = '€'; else if (sim === 'GBP') sim = '£'; else if (sim === 'JPY') sim = '¥';
+            document.getElementById('label_valor').innerText = `3. Valor (${sim})`;
+        });
+
+        window.copiarTexto = function(btn) {
+            const t = decodeURIComponent(btn.getAttribute('data-texto'));
+            navigator.clipboard.writeText(t).then(() => {
+                const orig = btn.innerHTML; btn.innerHTML = '✅ Copiado!';
+                btn.classList.add('bg-green-100', 'text-green-800'); btn.classList.remove('bg-gray-100', 'text-gray-700');
+                setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('bg-green-100', 'text-green-800'); btn.classList.add('bg-gray-100', 'text-gray-700'); }, 2000);
+            }).catch(() => alert('Erro ao copiar.'));
+        };
+        window.abrirWhatsApp = function(btn) { window.open(`https://wa.me/?text=${btn.getAttribute('data-texto')}`, '_blank'); };
+
+        let payloadGlobalParaIA = null; 
+
+        document.getElementById('btn-generate-ai').addEventListener('click', async () => {
+            const resDiv = document.getElementById('ai-result');
+            const btn = document.getElementById('btn-generate-ai');
+            
+            if (!payloadGlobalParaIA) return; 
+            
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-pulse">✨ Consultando o Oráculo...</span>'; 
+            btn.disabled = true;
+            
+            resDiv.classList.remove('hidden');
+            resDiv.innerHTML = '<span class="animate-pulse text-blue-600 font-semibold tracking-wide">Aguarde, a IA está decodificando a matriz de custos...</span>';
+            
+            try {
+                const response = await fetch('/api/oraculo', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payloadGlobalParaIA)
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    resDiv.innerHTML = data.analise
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>')
+                        .replace(/^/g, '<p>')
+                        .replace(/$/g, '</p>');
+                } else {
+                    resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${data.erro}</span>`;
+                }
+            } catch (e) { resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha de rede ao conectar com a IA.</span>`; } 
+            finally { btn.innerHTML = textoOriginal; btn.disabled = false; }
+        });
+
+        // ⚖️ MOTOR PRINCIPAL DE CÁLCULO
+        document.getElementById('calc-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            const resultArea = document.getElementById('resultado-area');
+            const mainContainer = document.getElementById('main-container');
+            const grid = document.getElementById('grid-comparacao');
+            const tituloPainel = document.getElementById('titulo-painel');
+            const oraculoContainer = document.getElementById('oraculo-container');
+            const avisoIncompatibilidade = document.getElementById('aviso-incompatibilidade');
+            const avisoText = document.getElementById('aviso-incompatibilidade-text');
+            
+            const moeda = document.getElementById('moeda').value;
+            const valorBruto = parseFloat(document.getElementById('valor_original_mask').dataset.raw);
+
+            if (!moeda || isNaN(valorBruto) || valorBruto <= 0) return alert("Digite um valor válido.");
+
+            btn.disabled = true; btn.innerText = 'Processando...';
+            resultArea.classList.add('hidden');
+            document.getElementById('ai-result').classList.add('hidden');
+            document.getElementById('ai-result').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/calcular', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ moeda, data_compra: document.getElementById('data_compra').value, valor_original: valorBruto })
+                });
+                
+                if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("A conexão de rede falhou.");
+                const data = await response.json();
+
+                if (response.ok) {
+                    const fmt = (val) => val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    const fmt4 = (val) => val.toLocaleString('pt-BR', {minimumFractionDigits: 4, maximumFractionDigits: 4});
+                    const pct = (val) => (val * 100).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+
+                    const isGlobalSupported = data.global && data.global.suportada && !data.global.erro;
+
+                    let cartaoHtml = '';
+                    if (data.cartao && data.cartao.suportada) {
+                        cartaoHtml = `
+                            <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col h-full bg-white relative">
+                                <div class="bg-gray-800 text-white text-center py-3 font-bold tracking-wider text-sm">💳 CARTÃO DE CRÉDITO</div>
+                                <div class="p-6 flex-1 space-y-4">
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-500">${data.cartao.fonte_cotacao}</p></div>
+                                        <p class="text-[14px] font-bold text-gray-800">${moeda} 1 = R$ ${fmt4(data.cartao.taxa_utilizada)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Spread Itaú (${pct(data.cartao.spread_aplicado)})</p></div>
+                                        <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.cartao.valor_spread)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">IOF (${pct(data.cartao.iof_aplicado)})</p></div>
+                                        <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.cartao.valor_iof)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-2">
+                                        <p class="text-[16px] font-bold text-gray-800">Total na Fatura</p>
+                                        <p class="text-[19px] font-bold text-gray-900">R$ ${fmt(data.cartao.valor_total_brl)}</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-3 text-center border-t border-gray-200">
+                                    <p class="text-[14px] font-semibold text-gray-700">VET Final: ${moeda} 1 = R$ ${fmt4(data.cartao.vet)}</p>
+                                </div>
+                            </div>`;
+                    } else {
+                        cartaoHtml = `<div class="bg-red-50 p-6 rounded-xl border border-red-200 text-center"><p class="text-red-700 font-bold">${data.cartao.erro}</p></div>`;
+                    }
+
+                    const dataBr = document.getElementById('data_compra').value.split('-').reverse().join('/');
+                    let zap = '';
+
+                    if (isGlobalSupported) {
+                        mainContainer.classList.remove('max-w-md');
+                        mainContainer.classList.add('max-w-4xl');
+                        grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+                        tituloPainel.innerText = 'Painel Comparativo';
+                        
+                        oraculoContainer.classList.remove('hidden');
+                        avisoIncompatibilidade.classList.add('hidden');
+                        avisoIncompatibilidade.classList.remove('flex');
+
+                        let alertaOperacional = data.global.is_plantao 
+                            ? `<span class="text-[12px] text-orange-600 font-bold block mt-1">Mercado Fechado</span>` 
+                            : `<span class="text-[12px] text-green-600 font-bold block mt-1">Mercado Aberto</span>`;
+                        let isWinner = (data.cartao.suportada && data.global.valor_total_brl < data.cartao.valor_total_brl) ? 'border-orange-500 border-2' : 'border-gray-200 border';
+
+                        let globalHtml = `
+                            <div class="${isWinner} rounded-xl overflow-hidden shadow-sm flex flex-col h-full bg-white relative">
+                                <div class="bg-gradient-to-r from-orange-500 to-orange-400 text-white text-center py-3 font-bold tracking-wider text-sm">🌎 CONTA GLOBAL</div>
+                                <div class="p-6 flex-1 space-y-4">
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-500">${data.global.fonte_cotacao}</p></div>
+                                        <p class="text-[14px] font-bold text-gray-800">${moeda} 1 = R$ ${fmt4(data.global.taxa_utilizada)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">Spread Institucional (${pct(data.global.spread_aplicado)})</p>${alertaOperacional}</div>
+                                        <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.global.valor_spread)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                        <div><p class="text-[14px] font-semibold text-gray-800">IOF (${pct(data.global.iof_aplicado)})</p></div>
+                                        <p class="text-[14px] text-gray-800">+ R$ ${fmt(data.global.valor_iof)}</p>
+                                    </div>
+                                    <div class="flex justify-between items-center pt-2">
+                                        <p class="text-[16px] font-bold text-gray-800">Total Debitado</p>
+                                        <p class="text-[19px] font-bold text-orange-600">R$ ${fmt(data.global.valor_total_brl)}</p>
+                                    </div>
+                                </div>
+                                <div class="bg-orange-50 p-3 text-center border-t border-orange-100">
+                                    <p class="text-[14px] font-semibold text-orange-900">VET Final: ${moeda} 1 = R$ ${fmt4(data.global.vet)}</p>
+                                </div>
+                            </div>`;
+
+                        grid.innerHTML = cartaoHtml + globalHtml;
+
+                        payloadGlobalParaIA = {
+                            transacao: { moeda: data.moeda, valor_original: data.valor_original },
+                            cartao_credito: data.cartao.suportada ? { total_em_reais: data.cartao.valor_total_brl, vet: data.cartao.vet, taxa_spread: data.cartao.spread_aplicado, taxa_iof: data.cartao.iof_aplicado } : "Indisponível",
+                            conta_global: { total_em_reais: data.global.valor_total_brl, vet: data.global.vet, taxa_spread: data.global.spread_aplicado, taxa_iof: data.global.iof_aplicado, mercado_fechado: data.global.is_plantao }
+                        };
+
+                        zap = `🏦 *Comparativo Personnalité*\n\n🌍 *Moeda:* ${data.moeda}\n💵 *Valor:* ${data.moeda} ${fmt(valorBruto)}\n📅 *Data:* ${dataBr}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        if (data.cartao.suportada) zap += `💳 *CARTÃO DE CRÉDITO*\n• Total Pago: *BRL ${fmt(data.cartao.valor_total_brl)}*\n• VET: ${fmt4(data.cartao.vet)}\n\n`;
+                        zap += `🌎 *CONTA GLOBAL*\n• Total Pago: *BRL ${fmt(data.global.valor_total_brl)}*\n• VET: ${fmt4(data.global.vet)}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        
+                        let diff = data.cartao.valor_total_brl - data.global.valor_total_brl;
+                        if (diff > 0) zap += `🏆 *Melhor Escolha:* Conta Global\n💡 *Economia exata:* BRL ${fmt(diff)}\n\n`;
+                        else if (diff < 0) zap += `🏆 *Melhor Escolha:* Cartão de Crédito\n💡 *Economia exata:* BRL ${fmt(Math.abs(diff))}\n\n`;
+
+                    } else {
+                        mainContainer.classList.remove('max-w-4xl');
+                        mainContainer.classList.add('max-w-md');
+                        grid.className = 'grid grid-cols-1 gap-6';
+                        tituloPainel.innerText = 'Resultado da Simulação';
+                        
+                        oraculoContainer.classList.add('hidden'); 
+                        payloadGlobalParaIA = null;
+                        
+                        avisoText.innerHTML = `A <strong>Conta Global Itaú</strong> opera nativamente apenas com saldos em <strong>Dólar (US$)</strong> e <strong>Euro (€)</strong>.<br>Para simular <strong>${data.moeda}</strong>, o sistema está refletindo exclusivamente a conversão pelo Cartão de Crédito.`;
+                        avisoIncompatibilidade.classList.remove('hidden');
+                        avisoIncompatibilidade.classList.add('flex');
+                        
+                        grid.innerHTML = cartaoHtml;
+
+                        zap = `🏦 *Simulação Itaú Personnalité*\n\n💳 *Meio:* Cartão de Crédito\n🌍 *Moeda:* ${data.moeda}\n📅 *Data:* ${dataBr}\n\n💵 *Valor Original:* ${data.moeda} ${fmt(valorBruto)}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        if (data.cartao.suportada) {
+                            zap += `*Câmbio Base:* BRL ${fmt(data.cartao.base_brl)} (Cot: ${fmt4(data.cartao.taxa_utilizada)})\n`;
+                            zap += `*Spread Itaú (${pct(data.cartao.spread_aplicado)}):* + BRL ${fmt(data.cartao.valor_spread)}\n`;
+                            zap += `*IOF (${pct(data.cartao.iof_aplicado)}):* + BRL ${fmt(data.cartao.valor_iof)}\n\n`;
+                            zap += `💰 *Total na Fatura:* *BRL ${fmt(data.cartao.valor_total_brl)}*\n➖➖➖➖➖➖➖➖➖➖\n`;
+                            zap += `📊 *VET final:* BRL ${fmt4(data.cartao.vet)}\n\n`;
+                        } else {
+                            zap += `⚠️ *Falha:* ${data.cartao.erro}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        }
+                    }
+                    
+                    // A assinatura final dinâmica no texto do WhatsApp
+                    const zapEncoded = encodeURIComponent(zap + `_Gerado por Calculadora Personnalité (APP v2.03.00)_`);
+                    document.getElementById('btn-copy').setAttribute('data-texto', zapEncoded);
+                    document.getElementById('btn-whatsapp').setAttribute('data-texto', zapEncoded);
+
+                    resultArea.classList.remove('hidden');
+                    resultArea.classList.add('flex');
+
+                } else { alert('Aviso: ' + data.erro); }
+            } catch (err) { alert('Falha ao acionar os motores matemáticos.'); } 
+            finally { btn.disabled = false; btn.innerText = 'Analisar Cenários'; }
+        });
+    </script>
+</body>
+</html>

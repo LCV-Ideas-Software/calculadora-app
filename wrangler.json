@@ -1,0 +1,12 @@
+{
+  "name": "itau-calculadora",
+  "compatibility_date": "2026-03-10",
+  "pages_build_output_dir": "public",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "itau-calc-db",
+      "database_id": "db259ea6-5583-4820-b7af-c514485cfc9c"
+    }
+  ]
+}
