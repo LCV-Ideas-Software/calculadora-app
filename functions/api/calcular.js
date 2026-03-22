@@ -36,8 +36,9 @@ export async function onRequestPost(context) {
         const is_plantao = (diaSemana === 0 || diaSemana === 6 || is_feriado || hora < 9 || hora >= 17);
 
         const arredondar = (num, casas = 2) => {
-            const fator = Math.pow(10, casas);
-            return Math.round(num * fator) / fator;
+            // toPrecision evita erros de representação IEEE 754 
+            // (ex: 1.005 * 100 = 100.49999... → corrigido para 100.5)
+            return Number(Math.round(parseFloat(num + 'e' + casas)) + 'e-' + casas);
         };
 
         // ═══════════════════════════════════════════════════

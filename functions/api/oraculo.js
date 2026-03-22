@@ -12,23 +12,9 @@ export async function onRequestPost(context) {
         const modelName = "gemini-2.5-pro";
         const generateUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
-        const systemInstruction = {
-            parts: [{
-                text: `Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité.
+        const instrucao = `Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.
 
-Sua comunicação é:
-- Clara e direta — sem rodeios, sem saudações, sem rodapé
-- Acessível — quando usar um termo técnico, explique brevemente entre parênteses
-- Profissional — tom de relatório executivo, não de conversa informal
-- Baseada em dados — use EXCLUSIVAMENTE os números fornecidos, nunca invente valores
-
-Formatação obrigatória:
-- Use **negrito** para destacar valores em Reais, percentuais-chave e o nome da opção vencedora
-- Use linguagem em Português do Brasil`
-            }]
-        };
-
-        const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
+Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
 Resumo Executivo:
 Aponte qual opção é a mais econômica e quanto se economiza em Reais. Se houver um cenário de "saldo já carregado" (uso de saldo previamente convertido), inclua-o na comparação. Resuma o veredito de forma clara para alguém que não é especialista em câmbio. Máximo 1 parágrafo.
@@ -43,7 +29,6 @@ Dados da simulação:
 `;
 
         const geminiPayload = {
-            systemInstruction: systemInstruction,
             contents: [{ parts: [{ text: `${instrucao}${JSON.stringify(promptData, null, 2)}` }] }],
             generationConfig: {
                 temperature: 0.3,
