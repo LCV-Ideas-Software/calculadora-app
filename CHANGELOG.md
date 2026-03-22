@@ -1,5 +1,10 @@
 # Changelog — Itaú Calculadora
 
+## [v03.21.00] — 2026-03-22
+### Infra
+- `deploy-admin.yml` ajustado para modo **disabled** com gatilho impossível (`__disabled__`), garantindo somente um fluxo automático efetivo de deploy
+- Deploy contínuo permanece centralizado em `.github/workflows/deploy.yml` (job único)
+
 ## [v03.20.00] — 2026-03-22
 ### Infra
 - Workflow `deploy-admin.yml` marcado como **deprecated** e convertido para `workflow_dispatch` + `noop`, eliminando execução duplicada em `push`
