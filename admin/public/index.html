@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Itaú Calculadora — Admin</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">Painel protegido por Cloudflare Access</p>
+      <h1>Itaú Calculadora — Admin</h1>
+      <p class="subtitle">Subdomínio administrativo dedicado (nunca em rota /admin).</p>
+      <p id="admin-email" class="meta">Carregando sessão...</p>
+    </header>
+
+    <section class="grid" id="overview-cards">
+      <article class="card">
+        <h2>Mercado</h2>
+        <p id="mercado-status">—</p>
+      </article>
+      <article class="card">
+        <h2>MAPE 7d</h2>
+        <p id="mape-7d">—</p>
+      </article>
+      <article class="card">
+        <h2>Observações 7d</h2>
+        <p id="obs-7d">—</p>
+      </article>
+      <article class="card">
+        <h2>Total backtests</h2>
+        <p id="obs-total">—</p>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="row-between">
+        <h2>Parâmetros vigentes</h2>
+        <button id="btn-refresh" type="button" class="btn ghost">Atualizar</button>
+      </div>
+
+      <form id="param-form" class="form-grid">
+        <label>IOF Cartão (%)<input type="number" step="0.0001" id="iof_cartao_percent" required /></label>
+        <label>IOF Global (%)<input type="number" step="0.0001" id="iof_global_percent" required /></label>
+        <label>Spread Cartão (%)<input type="number" step="0.0001" id="spread_cartao_percent" required /></label>
+        <label>Spread Global Aberto (%)<input type="number" step="0.0001" id="spread_global_aberto_percent" required /></label>
+        <label>Spread Global Fechado (%)<input type="number" step="0.0001" id="spread_global_fechado_percent" required /></label>
+        <label>Fator de calibragem<input type="number" step="0.000001" id="fator_calibragem_global" required /></label>
+        <label>MAPE Boa (%)<input type="number" step="0.01" id="backtest_mape_boa_percent" required /></label>
+        <label>MAPE Atenção (%)<input type="number" step="0.01" id="backtest_mape_atencao_percent" required /></label>
+
+        <div class="actions">
+          <button id="btn-save" type="submit" class="btn primary">Salvar parâmetros</button>
+        </div>
+      </form>
+
+      <p id="status" class="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>Últimas observações do backtest</h2>
+      <ul id="ultimas-observacoes" class="list"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Auditoria de parâmetros</h2>
+      <ul id="auditoria-parametros" class="list"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,5 +1,27 @@
 # Changelog — Itaú Calculadora
 
+## [v03.19.00] — 2026-03-22
+### Infra
+- Pipeline consolidado em **um único** `.github/workflows/deploy.yml`, com deploy do admin (`itau-calculadora-admin`) e do app principal no mesmo job
+- Padronização explícita do deploy Cloudflare Pages para `--branch=production` em ambos os projetos
+- Remoção do workflow separado `deploy-admin.yml` para evitar duplicidade operacional
+
+## [v03.18.00] — 2026-03-22
+### Corrigido
+- Correção de compatibilidade no carregamento do módulo do Oráculo para evitar falha quando o navegador mantém versão anterior em cache (`obterAnaliseOraculoComMeta is not a function`)
+
+### Alterado
+- Inclusão de trilha de auditoria para alterações de parâmetros no admin (registro de antes/depois, usuário e timestamp)
+- Inclusão de seção visual no painel admin para consulta das últimas alterações auditadas
+
+## [v03.17.00] — 2026-03-22
+### Alterado
+- Inclusão do botão **Limpar dados locais** no bloco de histórico da IA para remover histórico + telemetria da sessão local, sem invalidar o cache de resposta do Oráculo
+
+### Infra
+- Criação do app administrativo separado em `admin/`, preparado para deploy exclusivo em subdomínio dedicado com Cloudflare Access
+- Inclusão de workflow `.github/workflows/deploy-admin.yml` para deploy independente do admin via Wrangler
+
 ## [v03.16.00] — 2026-03-22
 ### Alterado
 - Inclusão de skeleton loading no painel do Oráculo para reduzir sensação de espera durante consultas e refresh forçado
