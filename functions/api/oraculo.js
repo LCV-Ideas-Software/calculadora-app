@@ -29,11 +29,17 @@ Dados da simulação:
 `;
 
         const geminiPayload = {
+            systemInstruction: {
+                parts: [{ text: "Você é um analista financeiro sênior. Responda sempre em Português do Brasil, de forma clara e acessível. Use **negrito** para valores-chave." }]
+            },
             contents: [{ parts: [{ text: `${instrucao}${JSON.stringify(promptData, null, 2)}` }] }],
             generationConfig: {
                 temperature: 0.3,
                 topP: 0.8,
-                maxOutputTokens: 1500
+                maxOutputTokens: 4096,
+                thinkingConfig: {
+                    thinkingBudget: 1024
+                }
             }
         };
 
@@ -45,12 +51,27 @@ Dados da simulação:
 
         if (!response.ok) {
             const errText = await response.text();
-            console.error('Gemini API error:', errText);
-            return new Response(JSON.stringify({ erro: `Falha na IA do Google.` }), { status: 502, headers: { "Content-Type": "application/json" } });
+            console.error('Gemini API error:', response.status, errText);
+            return new Response(JSON.stringify({ erro: `Falha na IA do Google (${response.status}).` }), { status: 502, headers: { "Content-Type": "application/json" } });
         }
 
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Análise concluída sem retorno de texto.";
+
+        // gemini-2.5-pro pode retornar "thoughts" e "text" em parts separados
+        let text = '';
+        const parts = data.candidates?.[0]?.content?.parts;
+        if (parts && parts.length > 0) {
+            // Filtrar apenas parts com texto visível (ignorar thoughts)
+            for (const part of parts) {
+                if (part.text && !part.thought) {
+                    text += part.text;
+                }
+            }
+        }
+
+        if (!text) {
+            text = "Análise indisponível no momento. Tente novamente.";
+        }
 
         return new Response(JSON.stringify({ analise: text }), { headers: { "Content-Type": "application/json" } });
 
