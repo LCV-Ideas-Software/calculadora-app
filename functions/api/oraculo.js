@@ -12,7 +12,9 @@ export async function onRequestPost(context) {
         // Documentação oficial REST usa v1beta para system_instruction e thinkingConfig
         // Ref: https://ai.google.dev/gemini-api/docs/system-instructions
         // Ref: https://ai.google.dev/gemini-api/docs/thinking
-        const modelName = "gemini-3.1-pro-preview";
+        // Alias "latest" aponta automaticamente para o Pro mais recente
+        // Ref: https://ai.google.dev/gemini-api/docs/models#latest
+        const modelName = "gemini-pro-latest";
         const generateUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
         const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
@@ -47,26 +49,41 @@ Dados da simulação:
                 topP: 0.8,
                 maxOutputTokens: 4096,
                 thinkingConfig: {
-                    thinkingBudget: 1024
+                    thinkingBudget: -1  // dinâmico: o modelo decide a profundidade
                 }
-            }
+            },
+            safetySettings: [
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" }
+            ]
         };
 
-        const response = await fetch(generateUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(geminiPayload)
-        });
+        // Retry: 1 tentativa extra em caso de falha transitória
+        let response;
+        for (let tentativa = 0; tentativa < 2; tentativa++) {
+            response = await fetch(generateUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(geminiPayload)
+            });
+            if (response.ok) break;
+            if (tentativa === 0) {
+                console.warn(`Gemini tentativa 1 falhou (${response.status}), retrying...`);
+                await new Promise(r => setTimeout(r, 800));
+            }
+        }
 
         if (!response.ok) {
             const errText = await response.text();
-            console.error('Gemini API error:', response.status, errText);
+            console.error('Gemini API error após retry:', response.status, errText);
             return new Response(JSON.stringify({ erro: `Falha na IA do Google (${response.status}).` }), { status: 502, headers: { "Content-Type": "application/json" } });
         }
 
         const data = await response.json();
 
-        // gemini-2.5-pro retorna thoughts + text em parts separados
+        // Modelos thinking retornam thoughts + text em parts separados
         // Filtrar apenas partes com texto visível (ignorar thoughts)
         let text = '';
         const parts = data.candidates?.[0]?.content?.parts;
