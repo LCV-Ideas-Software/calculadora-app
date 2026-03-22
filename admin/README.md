@@ -18,6 +18,8 @@ Painel administrativo separado para o `itau-calculadora`.
 - `GET /api/admin/overview`
 - `GET /api/admin/parametros`
 - `POST /api/admin/parametros`
+- `GET /api/admin/rate-limit`
+- `POST /api/admin/rate-limit`
 
 Todos os endpoints exigem headers de autenticação do Cloudflare Access.
 

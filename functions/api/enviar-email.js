@@ -1,3 +1,5 @@
+import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
+
 export async function onRequestPost(context) {
     const { request, env } = context;
     const headers = { "Content-Type": "application/json" };
@@ -21,26 +23,26 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ success: false, error: "Chave do Resend não configurada." }), { status: 500, headers });
         }
 
-        // Rate-limit via D1 (4 envios por hora por IP)
-        const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-        const windowMs = 60 * 60 * 1000;
-        const maxPerHour = 4;
-
-        try {
-            const cutoff = Date.now() - windowMs;
-            await env.DB.prepare("DELETE FROM email_rate_limit WHERE timestamp < ?").bind(cutoff).run();
-            const count = await env.DB.prepare("SELECT COUNT(*) as total FROM email_rate_limit WHERE ip = ? AND timestamp >= ?").bind(ip, cutoff).first();
-
-            if (count && count.total >= maxPerHour) {
-                return new Response(JSON.stringify({ success: false, error: "Limite de envios atingido. Aguarde antes de tentar novamente." }), { status: 429, headers });
-            }
-
-            await env.DB.prepare("INSERT INTO email_rate_limit (ip, timestamp) VALUES (?, ?)").bind(ip, Date.now()).run();
-        } catch (e) {
-            try {
-                await env.DB.prepare("CREATE TABLE IF NOT EXISTS email_rate_limit (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, timestamp INTEGER NOT NULL)").run();
-                await env.DB.prepare("INSERT INTO email_rate_limit (ip, timestamp) VALUES (?, ?)").bind(ip, Date.now()).run();
-            } catch (e2) { /* prosseguir sem rate-limit */ }
+        // Rate-limit configurável via D1 (por IP)
+        const rate = await checkAndTrackRateLimit({ env, request, routeKey: 'enviar_email' });
+        if (!rate.allowed) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: `Limite de envios atingido. Tente novamente em ${rate.retry_after_seconds}s.`,
+                code: 'RATE_LIMITED',
+                retry_after_seconds: rate.retry_after_seconds,
+                policy: {
+                    enabled: rate.policy?.enabled === 1,
+                    max_requests: rate.policy?.max_requests,
+                    window_minutes: rate.policy?.window_minutes
+                }
+            }), {
+                status: 429,
+                headers: {
+                    ...headers,
+                    "Retry-After": String(rate.retry_after_seconds)
+                }
+            });
         }
 
         const res = await fetch('https://api.resend.com/emails', {

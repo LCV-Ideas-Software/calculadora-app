@@ -1,5 +1,24 @@
 # Changelog — Itaú Calculadora
 
+## [v03.23.00] — 2026-03-22
+### Alterado
+- Implantado no admin painel de controle de rate limit para **Síntese da IA** e **Envio de E-mail**, com ativação/desativação, limites por IP e janela em minutos
+- Endpoint de IA (`/api/oraculo`) e endpoint de e-mail (`/api/enviar-email`) passam a respeitar políticas configuráveis no D1 por rota
+- Admin passa a oferecer ação de **restaurar padrão** para cada política de rate limit
+
+### Infra
+- Novo módulo compartilhado `functions/api/_lib/rate-limit.mjs` para políticas/hits de rate limit
+- Novo endpoint admin `GET/POST /api/admin/rate-limit` para leitura e atualização das políticas
+
+## [v03.22.00] — 2026-03-22
+### Alterado
+- Painéis de **Telemetria da IA** e **Histórico de Análises** removidos do frontend público e movidos para o painel admin
+- Frontend principal passa a enviar eventos de execução do Oráculo para backend (`/api/oraculo-observabilidade`) em vez de manter observabilidade apenas em `localStorage`
+- Admin passa a exibir telemetria e histórico centralizados do Oráculo via `GET /api/admin/overview`
+
+### Infra
+- Novo endpoint `functions/api/oraculo-observabilidade.js` para persistência de observabilidade da IA no D1
+
 ## [v03.21.00] — 2026-03-22
 ### Infra
 - `deploy-admin.yml` ajustado para modo **disabled** com gatilho impossível (`__disabled__`), garantindo somente um fluxo automático efetivo de deploy

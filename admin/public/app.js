@@ -23,6 +23,127 @@ function fmtNumber(value, max = 4) {
   });
 }
 
+let rateLimitPolicies = [];
+
+function getRateRouteLabel(routeKey) {
+  if (routeKey === 'oraculo_ia') return 'Síntese da IA';
+  if (routeKey === 'enviar_email') return 'Envio de E-mail';
+  return routeKey;
+}
+
+function renderRateLimitPanels() {
+  const host = document.getElementById('rate-limit-panels');
+  if (!host) return;
+
+  if (!rateLimitPolicies.length) {
+    host.innerHTML = '<p>Sem políticas carregadas.</p>';
+    return;
+  }
+
+  host.innerHTML = rateLimitPolicies.map((policy) => {
+    const enabled = Boolean(policy.enabled);
+    const statusText = enabled ? 'ATIVO' : 'INATIVO';
+    const dotClass = enabled ? 'rate-dot' : 'rate-dot off';
+    return `
+      <article class="rate-panel" data-route-key="${policy.route_key}">
+        <div class="rate-panel-head">
+          <label class="rate-title">
+            <input type="checkbox" data-field="enabled" ${enabled ? 'checked' : ''}>
+            Habilitar Escudo (${getRateRouteLabel(policy.route_key)})
+          </label>
+          <button type="button" class="btn warn" data-action="restore">Restaurar padrão</button>
+        </div>
+        <p>Quando ativo, bloqueia temporariamente excessos de requisição por IP nesta rota.</p>
+        <div class="rate-pill">
+          <span class="${dotClass}"></span>
+          ${statusText} • ${policy.max_requests} REQ / ${policy.window_minutes} MIN
+        </div>
+
+        <div class="rate-inputs">
+          <label>MÁX. REQUISIÇÕES POR IP
+            <input type="number" min="1" step="1" data-field="max_requests" value="${policy.max_requests}">
+          </label>
+          <label>JANELA (MINUTOS)
+            <input type="number" min="1" step="1" data-field="window_minutes" value="${policy.window_minutes}">
+          </label>
+        </div>
+
+        <p>Janela atual: ${policy.stats?.total_requests_window ?? 0} reqs / ${policy.stats?.distinct_ips_window ?? 0} IPs</p>
+
+        <div class="rate-actions">
+          <button type="button" class="btn primary" data-action="save">Salvar</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  host.querySelectorAll('[data-action="save"]').forEach((btn) => {
+    btn.addEventListener('click', async (event) => {
+      const panel = event.currentTarget.closest('.rate-panel');
+      const routeKey = panel?.getAttribute('data-route-key');
+      if (!routeKey) return;
+
+      const enabled = panel.querySelector('[data-field="enabled"]').checked;
+      const maxRequests = Number(panel.querySelector('[data-field="max_requests"]').value);
+      const windowMinutes = Number(panel.querySelector('[data-field="window_minutes"]').value);
+
+      setStatus('Salvando política de rate limit...');
+
+      try {
+        const payload = {
+          route_key: routeKey,
+          action: 'update',
+          enabled,
+          max_requests: maxRequests,
+          window_minutes: windowMinutes
+        };
+
+        const response = await fetchJson('/api/admin/rate-limit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        rateLimitPolicies = response.policies || [];
+        renderRateLimitPanels();
+        setStatus('Política atualizada com sucesso.');
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    });
+  });
+
+  host.querySelectorAll('[data-action="restore"]').forEach((btn) => {
+    btn.addEventListener('click', async (event) => {
+      const panel = event.currentTarget.closest('.rate-panel');
+      const routeKey = panel?.getAttribute('data-route-key');
+      if (!routeKey) return;
+
+      setStatus('Restaurando política padrão...');
+
+      try {
+        const response = await fetchJson('/api/admin/rate-limit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ route_key: routeKey, action: 'restore_default' })
+        });
+
+        rateLimitPolicies = response.policies || [];
+        renderRateLimitPanels();
+        setStatus('Política restaurada para o padrão.');
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    });
+  });
+}
+
+async function loadRateLimitPanel() {
+  const data = await fetchJson('/api/admin/rate-limit');
+  rateLimitPolicies = data.policies || [];
+  renderRateLimitPanels();
+}
+
 function fillParamForm(formData) {
   const ids = [
     'iof_cartao_percent',
@@ -103,6 +224,45 @@ function renderOverview(data) {
       return `<li>${when} · <strong>${item.chave}</strong>: ${before} → ${after} · ${item.admin_email}</li>`;
     })
     .join('');
+
+  const telemetriaList = document.getElementById('ai-telemetria-admin');
+  const telemetria = data?.oraculo_telemetria || {};
+  const total = Number(telemetria.total || 0);
+  const cacheHits = Number(telemetria.cache_hits || 0);
+  const hitRate = total > 0 ? ((cacheHits / total) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : '0';
+
+  telemetriaList.innerHTML = [
+    `<li><strong>Consultas:</strong> ${fmtNumber(total, 0)}</li>`,
+    `<li><strong>Cache hit rate:</strong> ${hitRate}%</li>`,
+    `<li><strong>Tempo médio:</strong> ${fmtNumber(telemetria.avg_duration_ms, 0)}ms</li>`,
+    `<li><strong>Última resposta:</strong> ${fmtNumber(telemetria.last_duration_ms, 0)}ms</li>`,
+    `<li><strong>Falhas:</strong> ${fmtNumber(telemetria.errors, 0)}</li>`
+  ].join('');
+
+  const historicoList = document.getElementById('ai-historico-admin');
+  const historico = data?.oraculo_historico?.ultimas_analises || [];
+  if (!historico.length) {
+    historicoList.innerHTML = '<li>Sem análises registradas.</li>';
+    return;
+  }
+
+  historicoList.innerHTML = historico.map((item) => {
+    const dt = new Date(Number(item.created_at));
+    const when = Number.isFinite(dt.getTime())
+      ? dt.toLocaleString('pt-BR', { hour12: false })
+      : 'N/A';
+    const origem = item.from_cache ? 'cache' : 'live';
+    const refresh = item.force_refresh ? ' · refresh' : '';
+    const status = item.status === 'error' ? 'erro' : 'ok';
+    const valor = Number.isFinite(Number(item.valor_original))
+      ? Number(item.valor_original).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : '-';
+    const texto = item.status === 'error'
+      ? (item.error_message || 'Falha sem detalhe')
+      : (item.preview || 'Sem prévia');
+
+    return `<li><strong>${when}</strong> · ${status} · ${origem}${refresh} · ${item.moeda || '-'} ${valor}<br>${texto}</li>`;
+  }).join('');
 }
 
 async function loadOverviewAndParams() {
@@ -115,6 +275,7 @@ async function loadOverviewAndParams() {
 
   renderOverview(overview);
   fillParamForm(parametros?.parametros_form || {});
+  await loadRateLimitPanel();
   setStatus('Painel atualizado.');
 }
 
@@ -145,6 +306,12 @@ async function saveParams(event) {
 document.getElementById('param-form').addEventListener('submit', saveParams);
 document.getElementById('btn-refresh').addEventListener('click', () => {
   loadOverviewAndParams().catch((error) => setStatus(error.message, true));
+});
+
+document.getElementById('btn-refresh-rate-limit').addEventListener('click', () => {
+  loadRateLimitPanel()
+    .then(() => setStatus('Painel de rate limit atualizado.'))
+    .catch((error) => setStatus(error.message, true));
 });
 
 loadOverviewAndParams().catch((error) => setStatus(error.message, true));

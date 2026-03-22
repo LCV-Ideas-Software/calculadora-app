@@ -46,6 +46,22 @@ async function ensureTables(env) {
       origem TEXT NOT NULL
     )
   `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS oraculo_observabilidade (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      created_at INTEGER NOT NULL,
+      status TEXT NOT NULL,
+      from_cache INTEGER NOT NULL,
+      force_refresh INTEGER NOT NULL,
+      duration_ms INTEGER,
+      moeda TEXT,
+      valor_original REAL,
+      preview TEXT,
+      error_message TEXT,
+      app_version TEXT
+    )
+  `).run();
 }
 
 async function readParams(env) {
@@ -102,6 +118,25 @@ export async function onRequestGet(context) {
       .prepare('SELECT created_at, admin_email, chave, valor_anterior, valor_novo, origem FROM parametros_auditoria ORDER BY created_at DESC LIMIT 20')
       .all();
 
+    const telemetryRow = await env.DB.prepare(`
+      SELECT
+        COUNT(1) AS total,
+        SUM(CASE WHEN from_cache = 1 THEN 1 ELSE 0 END) AS cache_hits,
+        AVG(duration_ms) AS avg_duration,
+        MAX(duration_ms) AS last_duration,
+        SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) AS errors
+      FROM oraculo_observabilidade
+    `).first();
+
+    const historicoRows = await env.DB
+      .prepare(`
+        SELECT created_at, status, from_cache, force_refresh, moeda, valor_original, preview, error_message
+        FROM oraculo_observabilidade
+        ORDER BY created_at DESC
+        LIMIT 20
+      `)
+      .all();
+
     return json({
       admin_email: access.email,
       contexto_operacional: getMercadoContexto(new Date()),
@@ -128,6 +163,25 @@ export async function onRequestGet(context) {
           valor_anterior: item.valor_anterior,
           valor_novo: item.valor_novo,
           origem: item.origem
+        }))
+      },
+      oraculo_telemetria: {
+        total: Number(telemetryRow?.total || 0),
+        cache_hits: Number(telemetryRow?.cache_hits || 0),
+        avg_duration_ms: Number.isFinite(Number(telemetryRow?.avg_duration)) ? Math.round(Number(telemetryRow.avg_duration)) : null,
+        last_duration_ms: Number.isFinite(Number(telemetryRow?.last_duration)) ? Math.round(Number(telemetryRow.last_duration)) : null,
+        errors: Number(telemetryRow?.errors || 0)
+      },
+      oraculo_historico: {
+        ultimas_analises: (historicoRows.results || []).map((item) => ({
+          created_at: Number(item.created_at),
+          status: item.status,
+          from_cache: Number(item.from_cache || 0) === 1,
+          force_refresh: Number(item.force_refresh || 0) === 1,
+          moeda: item.moeda,
+          valor_original: Number.isFinite(Number(item.valor_original)) ? Number(item.valor_original) : null,
+          preview: item.preview,
+          error_message: item.error_message
         }))
       }
     });

@@ -2,10 +2,32 @@
 // Versão: v03.12.00
 // Descrição: API do Oráculo IA — gemini-pro-latest, v1beta, thinkingLevel HIGH, safetySettings, retry.
 
+import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
+
 export async function onRequestPost(context) {
     try {
         const { request, env } = context;
         const promptData = await request.json();
+
+        const rate = await checkAndTrackRateLimit({ env, request, routeKey: 'oraculo_ia' });
+        if (!rate.allowed) {
+            return new Response(JSON.stringify({
+                erro: `Limite temporário do Oráculo atingido. Tente novamente em ${rate.retry_after_seconds}s.`,
+                code: 'RATE_LIMITED',
+                retry_after_seconds: rate.retry_after_seconds,
+                policy: {
+                    enabled: rate.policy?.enabled === 1,
+                    max_requests: rate.policy?.max_requests,
+                    window_minutes: rate.policy?.window_minutes
+                }
+            }), {
+                status: 429,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Retry-After": String(rate.retry_after_seconds)
+                }
+            });
+        }
 
         const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
