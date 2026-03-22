@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora Itaú Personnalité</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/tailwind.css">
     <style>
         body {
             margin: 0;
@@ -42,7 +42,8 @@
 
         .glass-input {
             background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 4px 12px -10px rgba(15, 23, 42, 0.55);
             transition: all 0.3s ease;
         }
 
@@ -53,12 +54,72 @@
             outline: none;
         }
 
+        .field-box {
+            position: relative;
+            padding: 0.75rem 0.85rem 0.9rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.56), rgba(241, 245, 249, 0.5));
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 12px 24px -22px rgba(15, 23, 42, 0.9);
+            overflow: hidden;
+        }
+
+        .field-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+            background-size: 14px 14px;
+            opacity: 0.3;
+        }
+
+        .field-box > label,
+        .field-box > p,
+        .field-box > input,
+        .field-box > select {
+            position: relative;
+            z-index: 1;
+        }
+
+        .field-box > label {
+            white-space: normal;
+            overflow-wrap: anywhere;
+            line-height: 1.3;
+        }
+
+        @media (min-width: 640px) {
+            .field-box > label {
+                white-space: nowrap;
+                overflow-wrap: normal;
+            }
+        }
+
         .transicao-panoramica {
             transition: max-width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
+        .frame-fluid {
+            width: 50vw;
+        }
+
+        @media (max-width: 1024px) {
+            .frame-fluid {
+                width: 92vw;
+                max-width: none;
+            }
+        }
+
+        .markdown-ia {
+            text-align: justify;
+        }
+
         .markdown-ia p {
             margin-bottom: 0.75rem;
+            text-align: justify;
+            text-indent: 1.5em;
         }
 
         .markdown-ia strong {
@@ -70,6 +131,61 @@
             margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
+
+        .markdown-ia .ai-bloco {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 0.9rem;
+            padding: 0.8rem 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .markdown-ia .ai-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .markdown-ia .ai-tag--resumo {
+            background: rgba(234, 88, 12, 0.12);
+            color: #9a3412;
+        }
+
+        .markdown-ia .ai-tag--base {
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+        }
+
+        .markdown-ia .ai-tag--recomendacao {
+            background: rgba(22, 163, 74, 0.12);
+            color: #15803d;
+        }
+
+        .markdown-ia .ai-paragrafo {
+            margin: 0;
+            text-align: justify;
+            text-indent: 1.5em;
+            color: #1f2937;
+            line-height: 1.7;
+        }
+
+        .save-badge {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            background: rgba(240, 253, 244, 0.95);
+            color: #166534;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.01em;
+        }
     </style>
 </head>
 
@@ -80,7 +196,7 @@
     <div class="w-full flex flex-col items-center z-10 py-6 sm:py-0">
 
         <div id="main-container"
-            class="glass-container p-6 sm:p-10 rounded-[2rem] w-full max-w-md border-t-4 border-orange-500 transicao-panoramica relative z-10">
+            class="glass-container frame-fluid p-6 sm:p-10 rounded-[2rem] border-t-4 border-orange-500 transicao-panoramica relative z-10">
 
             <div class="flex items-center justify-center gap-4 mb-8">
                 <img src="Itau_Personnalite.webp" alt="Itaú Personnalité"
@@ -89,11 +205,11 @@
                 </h2>
             </div>
 
-            <form id="calc-form" class="space-y-6 max-w-lg mx-auto">
-                <div>
+            <form id="calc-form" class="space-y-6 w-full" autocomplete="off">
+                <div class="field-box">
                     <label for="moeda" class="block text-sm font-semibold text-gray-700 ml-1 mb-1">1. Moeda da
                         Compra</label>
-                    <select id="moeda" required title="Selecione a moeda da compra"
+                    <select id="moeda" name="currency" required title="Selecione a moeda da compra" autocomplete="off"
                         class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 truncate cursor-pointer font-medium outline-none shadow-sm">
                     </select>
                 </div>
@@ -104,28 +220,73 @@
                     o app simulará apenas os custos do Cartão de Crédito.
                 </div>
 
-                <div class="grid grid-cols-2 gap-5">
-                    <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="field-box">
                         <label for="data_compra"
-                            class="block text-sm font-semibold text-gray-700 whitespace-nowrap ml-1 mb-1">2. Data da
+                            class="block text-sm font-semibold text-gray-700 ml-1 mb-1">2. Data da
                             Transação</label>
-                        <input type="date" id="data_compra" required title="Data da transação"
+                        <input type="date" id="data_compra" name="purchaseDate" required title="Data da transação" autocomplete="off"
                             class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-medium cursor-pointer outline-none shadow-sm">
                     </div>
-                    <div>
+                    <div class="field-box">
                         <label for="valor_original_mask" id="label_valor"
-                            class="block text-sm font-semibold text-gray-700 whitespace-nowrap text-right mr-1 mb-1">3.
+                            class="block text-sm font-semibold text-gray-700 text-right mr-1 mb-1">3.
                             Valor (US$)</label>
-                        <input type="text" inputmode="numeric" id="valor_original_mask" placeholder="0,00" required
+                        <input type="text" inputmode="numeric" id="valor_original_mask" name="purchaseAmount" autocomplete="transaction-amount" placeholder="0,00" required
                             class="mt-1 block w-full p-4 glass-input rounded-xl font-bold text-gray-900 text-lg tracking-wide text-right outline-none shadow-sm"
                             data-raw="0">
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="field-box">
+                        <label for="spread_percent"
+                            class="block text-sm font-semibold text-gray-700 ml-1 mb-1">4. Spread Cartão de Crédito (%)</label>
+                        <input type="text" inputmode="decimal" id="spread_percent" name="spreadPercent" autocomplete="off"
+                            placeholder="Ex.: 5,50"
+                            class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-semibold tracking-wide outline-none shadow-sm">
+                    </div>
+                    <div class="field-box">
+                        <label for="iof_percent"
+                            class="block text-sm font-semibold text-gray-700 text-right mr-1 mb-1">5. IOF (%)</label>
+                        <input type="text" inputmode="decimal" id="iof_percent" name="iofPercent" autocomplete="off"
+                            placeholder="Ex.: 3,50"
+                            class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-semibold tracking-wide text-right outline-none shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="field-box">
+                        <label for="global_spread_aberto_percent"
+                            class="block text-sm font-semibold text-gray-700 ml-1 mb-1">6. Taxa Conta Global Mercado Aberto (%)</label>
+                        <input type="text" inputmode="decimal" id="global_spread_aberto_percent" name="globalSpreadAbertoPercent" autocomplete="off"
+                            placeholder="Ex.: 0,78"
+                            class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-semibold tracking-wide outline-none shadow-sm">
+                    </div>
+                    <div class="field-box">
+                        <label for="global_spread_fechado_percent"
+                            class="block text-sm font-semibold text-gray-700 text-right mr-1 mb-1">7. Taxa Conta Global Mercado Fechado (%)</label>
+                        <input type="text" inputmode="decimal" id="global_spread_fechado_percent" name="globalSpreadFechadoPercent" autocomplete="off"
+                            placeholder="Ex.: 1,18"
+                            class="mt-1 block w-full p-4 glass-input rounded-xl text-gray-800 font-semibold tracking-wide text-right outline-none shadow-sm">
+                    </div>
+                </div>
+
+                <div id="saldo-existente-area" class="hidden field-box">
+                    <label for="vet_saldo_existente" id="label_vet_saldo"
+                        class="block text-sm font-semibold text-gray-700 ml-1 mb-1">8. VET do saldo já carregado (R$/US$)</label>
+                    <input type="text" inputmode="decimal" id="vet_saldo_existente" name="existingBalanceVet" autocomplete="off"
+                        placeholder="Ex.: 5,2812"
+                        class="mt-1 block w-full p-4 glass-input rounded-xl font-semibold text-gray-900 tracking-wide outline-none shadow-sm">
+                    <p class="mt-2 text-[12px] leading-relaxed text-gray-500 ml-1">Opcional. Preencha apenas se você já possui saldo na Conta Global e quer comparar o <strong>uso do saldo histórico</strong> contra uma nova compra de moeda agora.</p>
                 </div>
 
                 <button type="submit" id="btn-submit"
                     class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-full hover:shadow-[0_8px_20px_rgba(249,115,22,0.4)] transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 mt-4 outline-none">
                     Analisar Cenários
                 </button>
+
+                <div id="save-status-badge" class="hidden save-badge"></div>
             </form>
 
             <div id="resultado-area" class="mt-12 hidden flex-col gap-6">
@@ -140,6 +301,12 @@
 
                 <div id="grid-comparacao" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
+                <div id="parametros-vigentes"
+                    class="hidden w-full glass-card bg-slate-50/70 border border-slate-200/70 p-5 rounded-xl shadow-sm">
+                    <h4 class="text-[13px] font-extrabold tracking-[0.08em] uppercase text-slate-700 mb-3">Parâmetros vigentes usados no cálculo</h4>
+                    <div id="parametros-vigentes-conteudo" class="text-[13px] leading-relaxed text-slate-700"></div>
+                </div>
+
                 <div id="aviso-incompatibilidade"
                     class="hidden w-full glass-card bg-blue-50/60 border-blue-200/60 p-5 rounded-xl items-start gap-4 shadow-sm">
                     <span class="text-blue-500 text-xl flex-shrink-0 mt-0.5">ℹ️</span>
@@ -150,7 +317,7 @@
                 <div
                     class="p-2 glass-card rounded-full flex flex-col sm:flex-row gap-2 w-full shadow-sm mt-2 border border-white/60">
                     <button type="button" id="btn-copy" onclick="copiarTexto(this)"
-                        class="flex-1 flex items-center justify-center gap-2 bg-white/70 text-gray-800 font-bold py-4 px-6 rounded-full hover:bg-white hover:shadow-sm transition-all outline-none">
+                        class="flex-1 flex items-center justify-center gap-2 bg-white/70 text-gray-800 font-bold py-4 px-6 rounded-full hover:bg-white hover:shadow-sm transition-all outline-none border border-transparent">
                         📋 Copiar Resumo
                     </button>
                     <button type="button" id="btn-whatsapp" onclick="abrirWhatsApp(this)"
@@ -161,7 +328,68 @@
                                 d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
                         </svg> WhatsApp
                     </button>
+                    <button type="button" id="btn-email" onclick="abrirEmail(this)"
+                        class="flex-1 flex items-center justify-center gap-2 bg-[#0ea5e9] text-white font-bold py-4 px-6 rounded-full hover:bg-[#0284c7] hover:shadow-[0_8px_20px_rgba(14,165,233,0.3)] transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 outline-none disabled:bg-gray-400 disabled:cursor-wait">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path d="M4 4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4zm0 1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2V6a1 1 0 0 1 1-1zm13 2.383-4.758 2.855L15 11.114v-3.731zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.441A1 1 0 0 0 4 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.731z"/>
+                        </svg> E-Mail
+                    </button>
                 </div>
+
+                <!-- Modal de E-Mail -->
+                <div id="email-modal-overlay" class="hidden fixed inset-0 bg-gray-800/50 backdrop-blur-sm flex items-center justify-center z-[11000] email-modal-overlay">
+                    <div class="bg-white rounded-[1.5rem] shadow-2xl max-w-sm w-full mx-4 p-8 relative email-modal-content">
+                        <button type="button" title="Fechar diálogo" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors" onclick="fecharEmailModal()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </button>
+
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#0284c7" viewBox="0 0 16 16">
+                                    <path d="M4 4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4zm0 1h12a1 1 0 0 1 1 1v.217l-7 4.2-7-4.2V6a1 1 0 0 1 1-1zm13 2.383-4.758 2.855L15 11.114v-3.731zm-.034 6.878L9.271 8.82 8 9.583 6.728 8.82l-5.694 3.441A1 1 0 0 0 4 13h12a1 1 0 0 0 .966-.739zM1 11.114l4.758-2.876L1 5.383v5.731z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-800 mb-2">Enviar por E-Mail</h2>
+                            <p class="text-sm text-gray-600">Digite o e-mail para receber o resultado da calculadora</p>
+                        </div>
+
+                        <form id="email-form" onsubmit="enviarEmail(event)">
+                            <input type="email" id="email-input" name="destinatario" placeholder="seu@email.com" required autocomplete="email"
+                                class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                            <button type="submit" id="email-submit-btn" class="w-full bg-[#0ea5e9] text-white font-bold py-3 px-4 rounded-full hover:bg-[#0284c7] transition-all duration-300 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M15.854.146a.5.5 0 0 1 .11.54l-5 13a.5.5 0 0 1-.986-.06l-2.693-7.418-7.418-2.693a.5.5 0 0 1-.06-.986l13-5a.5.5 0 0 1 .54.11z"/>
+                                </svg>
+                                ENVIAR
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <style>
+                    @keyframes slideUp {
+                        from {
+                            opacity: 0;
+                            transform: translateY(20px) scale(0.95);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0) scale(1);
+                        }
+                    }
+                    
+                    #email-modal-overlay {
+                        transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    
+                    #email-modal-overlay.hidden {
+                        opacity: 0;
+                        pointer-events: none;
+                    }
+                </style>
 
                 <div class="mt-6 border-t border-gray-300/40 pt-8 text-center" id="oraculo-container">
                     <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center justify-center gap-2">
@@ -189,7 +417,7 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">APP
-                v3.01.00</span>
+                <span id="app-version-text">v03.05.0</span></span>
         </div>
 
     </div>
@@ -235,8 +463,253 @@
         }
         animateBg();
     </script>
+    <script>
+    // --- Notificações Toast ---
+    function showNotification(message, type = 'info') {
+        let toast = document.getElementById('toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.style.position = 'fixed';
+            toast.style.top = '32px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.zIndex = 99999;
+            toast.style.padding = '18px 32px';
+            toast.style.borderRadius = '100px';
+            toast.style.fontWeight = 'bold';
+            toast.style.fontSize = '15px';
+            toast.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)';
+            toast.style.transition = 'all 0.4s cubic-bezier(0.16,1,0.3,1)';
+            toast.style.opacity = 0;
+            document.body.appendChild(toast);
+        }
+        toast.innerText = message;
+        toast.style.background = type === 'error' ? '#dc2626' : (type === 'success' ? '#22c55e' : '#0ea5e9');
+        toast.style.color = '#fff';
+        toast.style.opacity = 1;
+        setTimeout(() => { toast.style.opacity = 0; }, 4000);
+    }
+
+    // --- Modal E-Mail ---
+    function abrirEmail(btn) {
+        document.getElementById('email-modal-overlay').classList.remove('hidden');
+        document.getElementById('email-input').value = '';
+        document.getElementById('email-input').focus();
+    }
+    function fecharEmailModal() {
+        document.getElementById('email-modal-overlay').classList.add('hidden');
+    }
+
+    // --- Envio de E-Mail ---
+    async function enviarEmail(event) {
+        event.preventDefault();
+        const email = document.getElementById('email-input').value.trim();
+        const btn = document.getElementById('email-submit-btn');
+        if (!/^\S+@\S+\.\S+$/.test(email)) {
+            showNotification('E-mail inválido.', 'error');
+            return;
+        }
+        if (!window.dadosEmail) {
+            showNotification('Faça uma simulação antes de enviar.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-pulse">Enviando...</span>';
+
+        try {
+            const d = window.dadosEmail;
+            const fmt = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmt4 = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            const pct = (val) => (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+            
+            let cartaoBloco = '';
+            if (d.cartao && d.cartao.suportada) {
+                cartaoBloco = `
+                <table width="100%" cellpadding="15" cellspacing="0" style="margin-bottom: 20px; border: 1px solid ${d.melhorOpcao === 'cartao' ? '#fb923c' : '#e2e8f0'}; border-radius: 12px; background-color: #ffffff; font-family: sans-serif;">
+                    <tr>
+                        <th colspan="2" style="background-color: #1f2937; color: #ffffff; padding: 12px; font-size: 14px; text-transform: uppercase;">💳 Cartão de Crédito ${d.melhorOpcao === 'cartao' ? '(Mais Barato)' : ''}</th>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Câmbio Base<br><small style="color: #94a3b8;">${d.cartao.fonte_cotacao}</small></td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">${d.moeda} 1 = R$ ${fmt4(d.cartao.taxa_utilizada)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Spread Itaú (${pct(d.cartao.spread_aplicado)})</td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">+ R$ ${fmt(d.cartao.valor_spread)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">IOF (${pct(d.cartao.iof_aplicado)})</td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">+ R$ ${fmt(d.cartao.valor_iof)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #1e293b; font-size: 16px; font-weight: bold; padding-top: 15px;">Total na Fatura</td>
+                        <td align="right" style="color: #0f172a; font-size: 18px; font-weight: bold; padding-top: 15px;">R$ ${fmt(d.cartao.valor_total_brl)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #f8fafc; color: #0f172a; font-size: 13px; font-weight: bold; padding: 10px; border-top: 1px solid #e2e8f0;">VET Final: ${d.moeda} 1 = R$ ${fmt4(d.cartao.vet)}</td>
+                    </tr>
+                </table>
+                `;
+            }
+
+            let globalBloco = '';
+            if (d.global && d.global.suportada) {
+                globalBloco = `
+                <table width="100%" cellpadding="15" cellspacing="0" style="margin-bottom: 20px; border: 1px solid ${d.melhorOpcao === 'global' ? '#fb923c' : '#e2e8f0'}; border-radius: 12px; background-color: #ffffff; font-family: sans-serif;">
+                    <tr>
+                        <th colspan="2" style="background-color: #f97316; color: #ffffff; padding: 12px; font-size: 14px; text-transform: uppercase;">🌎 Conta Global — Compra Agora ${d.melhorOpcao === 'global' ? '(Mais Barato)' : ''}</th>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Câmbio Base<br><small style="color: #94a3b8;">${d.global.fonte_cotacao}</small></td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">${d.moeda} 1 = R$ ${fmt4(d.global.taxa_utilizada)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Spread Institucional (${pct(d.global.spread_aplicado)})<br><small style="color: #ea580c;">${d.global.is_plantao ? 'Mercado Fechado' : 'Mercado Aberto'}</small></td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">+ R$ ${fmt(d.global.valor_spread)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">IOF (${pct(d.global.iof_aplicado)})</td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">+ R$ ${fmt(d.global.valor_iof)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #1e293b; font-size: 16px; font-weight: bold; padding-top: 15px;">Total Debitado</td>
+                        <td align="right" style="color: #ea580c; font-size: 18px; font-weight: bold; padding-top: 15px;">R$ ${fmt(d.global.valor_total_brl)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #fff7ed; color: #7c2d12; font-size: 13px; font-weight: bold; padding: 10px; border-top: 1px solid #ffedd5;">VET Final: ${d.moeda} 1 = R$ ${fmt4(d.global.vet)}</td>
+                    </tr>
+                </table>
+                `;
+            }
+            
+            let saldoBloco = '';
+            if (d.saldo_existente && d.saldo_existente.suportada) {
+                saldoBloco = `
+                <table width="100%" cellpadding="15" cellspacing="0" style="margin-bottom: 20px; border: 1px solid ${d.melhorOpcao === 'saldo' ? '#fb923c' : '#e2e8f0'}; border-radius: 12px; background-color: #ffffff; font-family: sans-serif;">
+                    <tr>
+                        <th colspan="2" style="background-color: #0284c7; color: #ffffff; padding: 12px; font-size: 14px; text-transform: uppercase;">💼 Conta Global — Saldo Já Carregado ${d.melhorOpcao === 'saldo' ? '(Mais Barato)' : ''}</th>
+                    </tr>
+                    <tr>
+                        <td style="color: #475569; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Metodologia<br><small style="color: #94a3b8;">${d.saldo_existente.metodologia}</small></td>
+                        <td align="right" style="color: #1e293b; font-size: 14px; font-weight: bold; border-bottom: 1px solid #f1f5f9;">VET informado: R$ ${fmt4(d.saldo_existente.vet_informado)}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #1e293b; font-size: 16px; font-weight: bold; padding-top: 15px;">Custo Econômico do Gasto</td>
+                        <td align="right" style="color: #0369a1; font-size: 18px; font-weight: bold; padding-top: 15px;">R$ ${fmt(d.saldo_existente.valor_total_brl)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center" style="background-color: #f0f9ff; color: #0c4a6e; font-size: 13px; font-weight: bold; padding: 10px; border-top: 1px solid #e0f2fe;">VET Histórico: ${d.moeda} 1 = R$ ${fmt4(d.saldo_existente.vet)}</td>
+                    </tr>
+                </table>
+                `;
+            }
+
+            // Capturar análise da IA se disponível
+            let analiseIABloco = '';
+            const aiResultDiv = document.getElementById('ai-result');
+            if (aiResultDiv && !aiResultDiv.classList.contains('hidden') && aiResultDiv.innerHTML.trim()) {
+                // Converter o HTML renderizado da IA para formato compatível com e-mail
+                const aiClone = aiResultDiv.cloneNode(true);
+                // Substituir classes CSS por estilos inline para compatibilidade
+                aiClone.querySelectorAll('.ai-bloco').forEach(bloco => {
+                    bloco.style.cssText = 'border: 1px solid #e2e8f0; background-color: #f8fafc; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;';
+                });
+                aiClone.querySelectorAll('.ai-tag').forEach(tag => {
+                    const isResumo = tag.classList.contains('ai-tag--resumo');
+                    const isRecomendacao = tag.classList.contains('ai-tag--recomendacao');
+                    const bgColor = isResumo ? '#fff7ed' : isRecomendacao ? '#f0fdf4' : '#eff6ff';
+                    const txtColor = isResumo ? '#9a3412' : isRecomendacao ? '#15803d' : '#1d4ed8';
+                    tag.style.cssText = `display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 999px; padding: 3px 8px; margin-bottom: 6px; background-color: ${bgColor}; color: ${txtColor};`;
+                });
+                aiClone.querySelectorAll('.ai-paragrafo').forEach(p => {
+                    p.style.cssText = 'margin: 0; text-align: justify; color: #1f2937; line-height: 1.7; font-size: 14px;';
+                });
+
+                analiseIABloco = `
+                <table width="100%" cellpadding="15" cellspacing="0" style="margin-top: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; font-family: sans-serif;">
+                    <tr>
+                        <th style="background-color: #0f172a; color: #ffffff; padding: 12px; font-size: 14px; text-transform: uppercase;">✨ Oráculo Financeiro — Análise da IA</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px; color: #1f2937; font-size: 14px; line-height: 1.7;">
+                            ${aiClone.innerHTML}
+                        </td>
+                    </tr>
+                </table>
+                `;
+            }
+
+            const htmlFinal = `
+                <!DOCTYPE html>
+                <html><head><meta charset="UTF-8"></head>
+                <body style="background-color: #f1f5f9; padding: 20px; font-family: system-ui, -apple-system, Arial, sans-serif;">
+                    <table width="100%" max-width="600" align="center" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+                        <tr>
+                            <td style="padding: 30px; text-align: center; border-bottom: 3px solid #f97316;">
+                                <h1 style="color: #0f172a; font-size: 24px; margin: 0;">Simulação Itaú Personnalité</h1>
+                                <p style="color: #475569; font-size: 16px; margin: 10px 0 0;">Valor: <strong style="color: #0f172a;">${d.moeda} ${fmt(d.valorBruto)}</strong><br>Data: ${d.dataBr}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 30px; background-color: #f8fafc;">
+                                ${globalBloco}
+                                ${saldoBloco}
+                                ${cartaoBloco}
+                                ${analiseIABloco}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 20px 30px;">
+                                <div style="font-size: 0.8rem; color: #666; text-align: justify;">
+                                    <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e não possui vínculo, homologação ou integração sistêmica com o Banco Itaú Unibanco S.A. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não substituem as informações emitidas pela instituição financeira. Para propostas reais e contratações, consulte exclusivamente os canais oficiais do banco.
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background-color: #1e293b; color: #94a3b8; padding: 20px; text-align: center; font-size: 12px;">
+                                Simulação gerada pela Calculadora Itaú Personnalité
+                            </td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const resumo = decodeURIComponent(document.getElementById('btn-copy').getAttribute('data-texto') || '');
+
+            const resp = await fetch('/api/enviar-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    emailDestino: email,
+                    html: htmlFinal,
+                    relatorioTexto: resumo
+                })
+            });
+            const data = await resp.json();
+
+            if (resp.ok && data.success) {
+                showNotification('E-mail enviado com sucesso!', 'success');
+                fecharEmailModal();
+            } else {
+                showNotification(data.error || 'Erro ao enviar e-mail.', 'error');
+            }
+        } catch (e) {
+            console.error('Erro ao preparar e-mail:', e);
+            showNotification('Falha ao preparar o e-mail para envio.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5 13a.5.5 0 0 1-.986-.06l-2.693-7.418-7.418-2.693a.5.5 0 0 1-.06-.986l13-5a.5.5 0 0 1 .54.11z"/></svg> ENVIAR';
+        }
+    }
+    </script>
 
     <script>
+        const APP_VERSION = 'v03.05.0';
+        document.getElementById('app-version-text').innerText = APP_VERSION;
+
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
         const dataISOHoje = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
         document.getElementById('data_compra').max = dataISOHoje;
@@ -250,6 +723,120 @@
             e.target.dataset.raw = floatValue;
             e.target.value = floatValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         });
+
+        function parseLocalizedNumber(value) {
+            const normalized = value.trim().replace(/\s+/g, '');
+            if (!normalized) return null;
+            if (normalized.includes(',') && normalized.includes('.')) return Number(normalized.replace(/\./g, '').replace(',', '.'));
+            if (normalized.includes(',')) return Number(normalized.replace(',', '.'));
+            return Number(normalized);
+        }
+
+        function formatPercentInputFromRate(rate) {
+            if (!Number.isFinite(rate)) return '';
+            return (rate * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function carregarParametrosCustomizados() {
+            try {
+                const response = await fetch('/api/parametros');
+                if (!response.ok) return;
+                const data = await response.json();
+
+                const spreadInput = document.getElementById('spread_percent');
+                const iofInput = document.getElementById('iof_percent');
+                const globalAbertoInput = document.getElementById('global_spread_aberto_percent');
+                const globalFechadoInput = document.getElementById('global_spread_fechado_percent');
+
+                const spread = Number(data?.parametros_vigentes?.spread_cartao);
+                const iof = Number(data?.parametros_vigentes?.iof_cartao);
+                const spreadGlobalAberto = Number(data?.parametros_vigentes?.spread_global_aberto);
+                const spreadGlobalFechado = Number(data?.parametros_vigentes?.spread_global_fechado);
+
+                spreadInput.value = formatPercentInputFromRate(spread);
+                iofInput.value = formatPercentInputFromRate(iof);
+                globalAbertoInput.value = formatPercentInputFromRate(spreadGlobalAberto);
+                globalFechadoInput.value = formatPercentInputFromRate(spreadGlobalFechado);
+            } catch (e) {
+                // Falha de carregamento dos parâmetros não deve bloquear o uso da calculadora.
+            }
+        }
+
+        function escaparHtml(texto) {
+            return String(texto)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function markdownBasico(texto) {
+            return texto
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        function detectarClasseTagAI(texto) {
+            const normalizado = texto.toLowerCase();
+            if (normalizado.startsWith('resumo executivo:')) return 'ai-tag--resumo';
+            if (normalizado.startsWith('base matemática:') || normalizado.startsWith('base matematica:')) return 'ai-tag--base';
+            if (normalizado.startsWith('recomendação prática:') || normalizado.startsWith('recomendacao pratica:')) return 'ai-tag--recomendacao';
+            return 'ai-tag--base';
+        }
+
+        function formatarAnaliseIA(textoBruto) {
+            const textoSeguro = escaparHtml(textoBruto || 'Análise concluída sem retorno de texto.');
+            const paragrafos = textoSeguro
+                .split(/\n\s*\n/)
+                .map(p => p.trim())
+                .filter(Boolean);
+
+            if (!paragrafos.length) {
+                return '<div class="ai-bloco"><p class="ai-paragrafo">Análise concluída sem retorno de texto.</p></div>';
+            }
+
+            return paragrafos.map((paragrafo) => {
+                const htmlParagrafo = markdownBasico(paragrafo).replace(/\n/g, '<br>');
+                const classeTag = detectarClasseTagAI(paragrafo);
+
+                return `
+                    <div class="ai-bloco">
+                        <span class="ai-tag ${classeTag}">${classeTag === 'ai-tag--resumo' ? 'Resumo Executivo' : classeTag === 'ai-tag--recomendacao' ? 'Recomendação Prática' : 'Base Matemática'}</span>
+                        <p class="ai-paragrafo">${htmlParagrafo}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function moedaParaSimbolo(sigla) {
+            if (sigla === 'USD') return 'US$';
+            if (sigla === 'EUR') return '€';
+            if (sigla === 'GBP') return '£';
+            if (sigla === 'JPY') return '¥';
+            return sigla;
+        }
+
+        function atualizarContextoMoeda() {
+            const sigla = document.getElementById('moeda').value;
+            const alerta = document.getElementById('alerta-exotica');
+            const saldoArea = document.getElementById('saldo-existente-area');
+            const vetInput = document.getElementById('vet_saldo_existente');
+            const labelSaldo = document.getElementById('label_vet_saldo');
+
+            if (sigla !== 'USD' && sigla !== 'EUR' && sigla !== '') alerta.classList.remove('hidden');
+            else alerta.classList.add('hidden');
+
+            document.getElementById('label_valor').innerText = `3. Valor (${moedaParaSimbolo(sigla || 'USD')})`;
+
+            if (sigla === 'USD' || sigla === 'EUR') {
+                saldoArea.classList.remove('hidden');
+                labelSaldo.innerText = `8. VET do saldo já carregado (R$/${sigla === 'USD' ? 'US$' : '€'})`;
+            } else {
+                saldoArea.classList.add('hidden');
+                vetInput.value = '';
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const todasMoedas = ["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND", "BOB", "BSD", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ETB", "FJD", "GBP", "GEL", "GHS", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HTG", "HUF", "IDR", "ILS", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SCR", "SDG", "SEK", "SGD", "SHP", "SLL", "SOS", "SRD", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "UYU", "UZS", "VES", "VND", "VUV", "WST", "XAF", "XCD", "XOF", "XPF", "YER", "ZAR", "ZMW", "ZWL"];
@@ -269,16 +856,11 @@
                 selectMoeda.add(new Option(`${m.nome} (${m.sigla})`, m.sigla));
             });
             selectMoeda.value = 'USD';
+            atualizarContextoMoeda();
+            carregarParametrosCustomizados();
         });
 
-        document.getElementById('moeda').addEventListener('change', function () {
-            let sim = this.value;
-            const alerta = document.getElementById('alerta-exotica');
-            if (sim !== 'USD' && sim !== 'EUR' && sim !== '') alerta.classList.remove('hidden');
-            else alerta.classList.add('hidden');
-            if (sim === 'USD') sim = 'US$'; else if (sim === 'EUR') sim = '€'; else if (sim === 'GBP') sim = '£'; else if (sim === 'JPY') sim = '¥';
-            document.getElementById('label_valor').innerText = `3. Valor (${sim})`;
-        });
+        document.getElementById('moeda').addEventListener('change', atualizarContextoMoeda);
 
         window.copiarTexto = function (btn) {
             const t = decodeURIComponent(btn.getAttribute('data-texto'));
@@ -313,13 +895,7 @@
 
                 const data = await response.json();
                 if (response.ok) {
-                    resDiv.innerHTML = data.analise
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\n\n/g, '</p><p>')
-                        .replace(/\n/g, '<br>')
-                        .replace(/^/g, '<p>')
-                        .replace(/$/g, '</p>');
+                    resDiv.innerHTML = formatarAnaliseIA(data.analise);
                 } else {
                     resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${data.erro}</span>`;
                 }
@@ -330,6 +906,7 @@
         document.getElementById('calc-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
+            const saveBadge = document.getElementById('save-status-badge');
             const resultArea = document.getElementById('resultado-area');
             const mainContainer = document.getElementById('main-container');
             const grid = document.getElementById('grid-comparacao');
@@ -337,13 +914,27 @@
             const oraculoContainer = document.getElementById('oraculo-container');
             const avisoIncompatibilidade = document.getElementById('aviso-incompatibilidade');
             const avisoText = document.getElementById('aviso-incompatibilidade-text');
+            const parametrosVigentes = document.getElementById('parametros-vigentes');
+            const parametrosVigentesConteudo = document.getElementById('parametros-vigentes-conteudo');
 
             const moeda = document.getElementById('moeda').value;
             const valorBruto = parseFloat(document.getElementById('valor_original_mask').dataset.raw);
+            const vetSaldoInformado = parseLocalizedNumber(document.getElementById('vet_saldo_existente').value || '');
+            const spreadPercentInformado = parseLocalizedNumber(document.getElementById('spread_percent').value || '');
+            const iofPercentInformado = parseLocalizedNumber(document.getElementById('iof_percent').value || '');
+            const globalSpreadAbertoInformado = parseLocalizedNumber(document.getElementById('global_spread_aberto_percent').value || '');
+            const globalSpreadFechadoInformado = parseLocalizedNumber(document.getElementById('global_spread_fechado_percent').value || '');
 
             if (!moeda || isNaN(valorBruto) || valorBruto <= 0) return alert("Digite um valor válido.");
+            if (document.getElementById('vet_saldo_existente').value.trim() && (!Number.isFinite(vetSaldoInformado) || vetSaldoInformado <= 0)) return alert("Digite um VET histórico válido para o saldo existente.");
+            if (document.getElementById('spread_percent').value.trim() && (!Number.isFinite(spreadPercentInformado) || spreadPercentInformado < 0 || spreadPercentInformado > 100)) return alert("Digite um Spread válido entre 0% e 100%.");
+            if (document.getElementById('iof_percent').value.trim() && (!Number.isFinite(iofPercentInformado) || iofPercentInformado < 0 || iofPercentInformado > 100)) return alert("Digite um IOF válido entre 0% e 100%.");
+            if (document.getElementById('global_spread_aberto_percent').value.trim() && (!Number.isFinite(globalSpreadAbertoInformado) || globalSpreadAbertoInformado < 0 || globalSpreadAbertoInformado > 100)) return alert("Digite uma taxa de mercado aberto válida entre 0% e 100%.");
+            if (document.getElementById('global_spread_fechado_percent').value.trim() && (!Number.isFinite(globalSpreadFechadoInformado) || globalSpreadFechadoInformado < 0 || globalSpreadFechadoInformado > 100)) return alert("Digite uma taxa de mercado fechado válida entre 0% e 100%.");
 
             btn.disabled = true; btn.innerText = 'Processando...';
+            saveBadge.classList.add('hidden');
+            saveBadge.textContent = '';
             resultArea.classList.add('hidden');
             document.getElementById('ai-result').classList.add('hidden');
             document.getElementById('ai-result').innerHTML = '';
@@ -351,23 +942,46 @@
             try {
                 const response = await fetch('/api/calcular', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ moeda, data_compra: document.getElementById('data_compra').value, valor_original: valorBruto })
+                    body: JSON.stringify({
+                        moeda,
+                        data_compra: document.getElementById('data_compra').value,
+                        valor_original: valorBruto,
+                        vet_saldo_existente: vetSaldoInformado,
+                        spread_percent: Number.isFinite(spreadPercentInformado) ? spreadPercentInformado : null,
+                        iof_percent: Number.isFinite(iofPercentInformado) ? iofPercentInformado : null,
+                        global_spread_aberto_percent: Number.isFinite(globalSpreadAbertoInformado) ? globalSpreadAbertoInformado : null,
+                        global_spread_fechado_percent: Number.isFinite(globalSpreadFechadoInformado) ? globalSpreadFechadoInformado : null
+                    })
                 });
 
                 if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("A conexão de rede falhou.");
                 const data = await response.json();
 
                 if (response.ok) {
+                    if (data.parametros_customizados_salvos) {
+                        const dt = data.parametros_customizados_em ? new Date(data.parametros_customizados_em) : new Date();
+                        const dataHora = dt.toLocaleString('pt-BR', { hour12: false });
+                        saveBadge.textContent = `✅ Parâmetros customizados salvos no D1 em ${dataHora}.`;
+                        saveBadge.classList.remove('hidden');
+                    }
+
                     const fmt = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                     const fmt4 = (val) => val.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
                     const pct = (val) => (val * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 
                     const isGlobalSupported = data.global && data.global.suportada && !data.global.erro;
+                    const isSaldoExistenteSupported = data.global_saldo_existente && data.global_saldo_existente.suportada && !data.global_saldo_existente.erro;
+                    const candidatos = [];
+                    if (data.cartao && data.cartao.suportada) candidatos.push({ chave: 'cartao', total: data.cartao.valor_total_brl });
+                    if (isGlobalSupported) candidatos.push({ chave: 'global', total: data.global.valor_total_brl });
+                    if (isSaldoExistenteSupported) candidatos.push({ chave: 'saldo', total: data.global_saldo_existente.valor_total_brl });
+                    const melhorOpcao = candidatos.length ? candidatos.reduce((melhor, atual) => atual.total < melhor.total ? atual : melhor) : null;
 
                     let cartaoHtml = '';
                     if (data.cartao && data.cartao.suportada) {
+                        const destaqueCartao = melhorOpcao?.chave === 'cartao' ? 'ring-4 ring-orange-400/40 border-orange-400' : 'border-white/50 border';
                         cartaoHtml = `
-                            <div class="glass-card rounded-[1.5rem] overflow-hidden shadow-sm flex flex-col h-full relative">
+                            <div class="glass-card ${destaqueCartao} rounded-[1.5rem] overflow-hidden shadow-sm flex flex-col h-full relative">
                                 <div class="bg-gray-800/90 text-white text-center py-4 font-bold tracking-wider text-sm backdrop-blur-sm border-b border-gray-700">💳 CARTÃO DE CRÉDITO</div>
                                 <div class="p-6 sm:p-8 flex-1 space-y-4">
                                     <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
@@ -398,10 +1012,31 @@
                     const dataBr = document.getElementById('data_compra').value.split('-').reverse().join('/');
                     let zap = '';
 
+                    const iofCartaoPct = data.cartao?.suportada ? pct(data.cartao.iof_aplicado) : '3,50%';
+                    const spreadCartaoPct = data.cartao?.suportada ? pct(data.cartao.spread_aplicado) : '5,50%';
+                    const iofGlobalPct = data.global?.suportada ? pct(data.global.iof_aplicado) : '3,50%';
+                    const spreadGlobalAbertoPct = data.parametros_vigentes?.spread_global_aberto !== undefined
+                        ? pct(data.parametros_vigentes.spread_global_aberto)
+                        : '0,78%';
+                    const spreadGlobalFechadoPct = data.parametros_vigentes?.spread_global_fechado !== undefined
+                        ? pct(data.parametros_vigentes.spread_global_fechado)
+                        : '1,18%';
+                    const mercadoStatus = data.global?.suportada
+                        ? (data.global.is_plantao ? 'Fechado/Plantão' : 'Aberto')
+                        : 'N/A';
+
+                    parametrosVigentesConteudo.innerHTML = `
+                        <ul class="list-disc ml-5 space-y-1">
+                            <li><strong>IOF (2026):</strong> Cartão internacional e operações de compra/remessa em câmbio considerados em <strong>${iofCartaoPct}</strong> / <strong>${iofGlobalPct}</strong>.</li>
+                            <li><strong>Spread Cartão Itaú:</strong> <strong>${spreadCartaoPct}</strong>.</li>
+                            <li><strong>Conta Global Itaú:</strong> <strong>${spreadGlobalAbertoPct}</strong> (mercado aberto) e <strong>${spreadGlobalFechadoPct}</strong> (mercado fechado).</li>
+                            <li><strong>Status operacional no momento do cálculo:</strong> <strong>${mercadoStatus}</strong>.</li>
+                        </ul>
+                    `;
+                    parametrosVigentes.classList.remove('hidden');
+
                     if (isGlobalSupported) {
-                        mainContainer.classList.remove('max-w-md');
-                        mainContainer.classList.add('max-w-4xl');
-                        grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+                        grid.className = isSaldoExistenteSupported ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'grid grid-cols-1 md:grid-cols-2 gap-6';
                         tituloPainel.innerText = 'Painel Comparativo';
 
                         oraculoContainer.classList.remove('hidden');
@@ -412,13 +1047,13 @@
                             ? `<span class="text-[11px] font-bold px-3 py-1 rounded-full bg-orange-100/80 text-orange-700 mt-1.5 inline-block shadow-sm">Mercado Fechado</span>`
                             : `<span class="text-[11px] font-bold px-3 py-1 rounded-full bg-green-100/80 text-green-800 mt-1.5 inline-block shadow-sm">Mercado Aberto</span>`;
 
-                        let isWinner = (data.cartao.suportada && data.global.valor_total_brl < data.cartao.valor_total_brl)
+                        let isWinner = melhorOpcao?.chave === 'global'
                             ? 'ring-4 ring-orange-400/40 border-orange-400'
                             : 'border-white/50 border';
 
                         let globalHtml = `
                             <div class="glass-card ${isWinner} rounded-[1.5rem] overflow-hidden flex flex-col h-full relative">
-                                <div class="bg-gradient-to-r from-orange-500/90 to-orange-400/90 text-white text-center py-4 font-bold tracking-wider text-sm shadow-inner backdrop-blur-md">🌎 CONTA GLOBAL</div>
+                                <div class="bg-gradient-to-r from-orange-500/90 to-orange-400/90 text-white text-center py-4 font-bold tracking-wider text-sm shadow-inner backdrop-blur-md">🌎 CONTA GLOBAL — COMPRA AGORA</div>
                                 <div class="p-6 sm:p-8 flex-1 space-y-4">
                                     <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
                                         <div><p class="text-[14px] font-semibold text-gray-800">Câmbio Base</p><p class="text-[12px] text-gray-600">${data.global.fonte_cotacao}</p></div>
@@ -442,25 +1077,102 @@
                                 </div>
                             </div>`;
 
-                        grid.innerHTML = cartaoHtml + globalHtml;
+                        let saldoExistenteHtml = '';
+                        if (isSaldoExistenteSupported) {
+                            const destaqueSaldo = melhorOpcao?.chave === 'saldo' ? 'ring-4 ring-orange-400/40 border-orange-400' : 'border-white/50 border';
+                            saldoExistenteHtml = `
+                                <div class="glass-card ${destaqueSaldo} rounded-[1.5rem] overflow-hidden flex flex-col h-full relative">
+                                    <div class="bg-gradient-to-r from-sky-600/90 to-blue-500/90 text-white text-center py-4 font-bold tracking-wider text-sm shadow-inner backdrop-blur-md">💼 CONTA GLOBAL — SALDO JÁ CARREGADO</div>
+                                    <div class="p-6 sm:p-8 flex-1 space-y-4">
+                                        <div class="flex justify-between items-start border-b border-gray-300/50 pb-3">
+                                            <div><p class="text-[14px] font-semibold text-gray-800">Metodologia</p><p class="text-[12px] text-gray-600">${data.global_saldo_existente.metodologia}</p></div>
+                                            <p class="text-[14px] font-bold text-gray-800">VET informado: R$ ${fmt4(data.global_saldo_existente.vet_informado)}</p>
+                                        </div>
+                                        <div class="flex justify-between items-center pt-2">
+                                            <p class="text-[16px] font-bold text-gray-800">Custo Econômico do Gasto</p>
+                                            <p class="text-[20px] font-black text-sky-700">R$ ${fmt(data.global_saldo_existente.valor_total_brl)}</p>
+                                        </div>
+                                        <p class="text-[12px] text-gray-600 leading-relaxed">Neste cenário, não há nova compra de moeda agora: o app usa o custo histórico do saldo já carregado informado por você.</p>
+                                    </div>
+                                    <div class="bg-sky-50/60 backdrop-blur-sm p-4 text-center border-t border-sky-200/50">
+                                        <p class="text-[14px] font-bold tracking-wide text-sky-900">VET Histórico: ${moeda} 1 = R$ ${fmt4(data.global_saldo_existente.vet)}</p>
+                                    </div>
+                                </div>`;
+                        }
+
+                        grid.innerHTML = cartaoHtml + globalHtml + saldoExistenteHtml;
 
                         payloadGlobalParaIA = {
-                            transacao: { moeda: data.moeda, valor_original: data.valor_original },
-                            cartao_credito: data.cartao.suportada ? { total_em_reais: data.cartao.valor_total_brl, vet: data.cartao.vet, taxa_spread: data.cartao.spread_aplicado, taxa_iof: data.cartao.iof_aplicado } : "Indisponível",
-                            conta_global: { total_em_reais: data.global.valor_total_brl, vet: data.global.vet, taxa_spread: data.global.spread_aplicado, taxa_iof: data.global.iof_aplicado, mercado_fechado: data.global.is_plantao }
+                            transacao: {
+                                moeda: data.moeda,
+                                valor_original: data.valor_original,
+                                data_compra: data.data_compra
+                            },
+                            parametros_vigentes: {
+                                iof_cartao: data.parametros_vigentes?.iof_cartao ?? data.cartao?.iof_aplicado,
+                                iof_global: data.parametros_vigentes?.iof_global ?? data.global?.iof_aplicado,
+                                spread_cartao: data.parametros_vigentes?.spread_cartao ?? data.cartao?.spread_aplicado,
+                                spread_global_aberto: data.parametros_vigentes?.spread_global_aberto,
+                                spread_global_fechado: data.parametros_vigentes?.spread_global_fechado,
+                                origem_parametros: data.parametros_vigentes?.origem || null
+                            },
+                            contexto_operacional: data.contexto_operacional || {
+                                mercado_fechado: data.global?.is_plantao ?? null
+                            },
+                            cenarios: {
+                                cartao_credito: data.cartao?.suportada
+                                    ? {
+                                        total_em_reais: data.cartao.valor_total_brl,
+                                        vet: data.cartao.vet,
+                                        taxa_spread: data.cartao.spread_aplicado,
+                                        taxa_iof: data.cartao.iof_aplicado,
+                                        taxa_base: data.cartao.taxa_utilizada,
+                                        fonte_cotacao: data.cartao.fonte_cotacao
+                                    }
+                                    : "Indisponível",
+                                conta_global_compra_agora: data.global?.suportada
+                                    ? {
+                                        total_em_reais: data.global.valor_total_brl,
+                                        vet: data.global.vet,
+                                        taxa_spread: data.global.spread_aplicado,
+                                        taxa_iof: data.global.iof_aplicado,
+                                        taxa_executada: data.global.taxa_utilizada,
+                                        fonte_cotacao: data.global.fonte_cotacao,
+                                        mercado_fechado: data.global.is_plantao,
+                                        usou_contingencia: data.global.usou_contingencia
+                                    }
+                                    : "Indisponível",
+                                conta_global_saldo_ja_carregado: isSaldoExistenteSupported
+                                    ? {
+                                        total_em_reais: data.global_saldo_existente.valor_total_brl,
+                                        vet_historico: data.global_saldo_existente.vet,
+                                        vet_informado: data.global_saldo_existente.vet_informado,
+                                        metodologia: data.global_saldo_existente.metodologia
+                                    }
+                                    : "Indisponível"
+                            }
                         };
 
                         zap = `🏦 *Comparativo Personnalité*\n\n🌍 *Moeda:* ${data.moeda}\n💵 *Valor:* ${data.moeda} ${fmt(valorBruto)}\n📅 *Data:* ${dataBr}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        zap += `📌 *Parâmetros Vigentes 2026*\n`;
+                        zap += `• IOF Cartão/Compra em câmbio: ${iofCartaoPct}\n`;
+                        zap += `• Spread Cartão Itaú: ${spreadCartaoPct}\n`;
+                        zap += `• Spread Conta Global (aberto/fechado): ${spreadGlobalAbertoPct} / ${spreadGlobalFechadoPct}\n`;
+                        zap += `• Mercado no cálculo: ${mercadoStatus}\n\n`;
                         if (data.cartao.suportada) zap += `💳 *CARTÃO DE CRÉDITO*\n• Total Pago: *BRL ${fmt(data.cartao.valor_total_brl)}*\n• VET: ${fmt4(data.cartao.vet)}\n\n`;
-                        zap += `🌎 *CONTA GLOBAL*\n• Total Pago: *BRL ${fmt(data.global.valor_total_brl)}*\n• VET: ${fmt4(data.global.vet)}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        zap += `🌎 *CONTA GLOBAL — COMPRA AGORA*\n• Total Pago: *BRL ${fmt(data.global.valor_total_brl)}*\n• VET: ${fmt4(data.global.vet)}\n\n`;
+                        if (isSaldoExistenteSupported) zap += `💼 *CONTA GLOBAL — SALDO JÁ CARREGADO*\n• Custo Econômico: *BRL ${fmt(data.global_saldo_existente.valor_total_brl)}*\n• VET Histórico: ${fmt4(data.global_saldo_existente.vet)}\n\n`;
+                        zap += `➖➖➖➖➖➖➖➖➖➖\n`;
 
-                        let diff = data.cartao.valor_total_brl - data.global.valor_total_brl;
-                        if (diff > 0) zap += `🏆 *Melhor Escolha:* Conta Global\n💡 *Economia exata:* BRL ${fmt(diff)}\n\n`;
-                        else if (diff < 0) zap += `🏆 *Melhor Escolha:* Cartão de Crédito\n💡 *Economia exata:* BRL ${fmt(Math.abs(diff))}\n\n`;
+                        if (melhorOpcao) {
+                            const melhorNome = melhorOpcao.chave === 'cartao' ? 'Cartão de Crédito' : melhorOpcao.chave === 'global' ? 'Conta Global (Compra Agora)' : 'Conta Global (Saldo Já Carregado)';
+                            const piorTotal = Math.max(...candidatos.map(c => c.total));
+                            const economia = piorTotal - melhorOpcao.total;
+                            zap += `🏆 *Melhor Escolha:* ${melhorNome}\n`;
+                            if (economia > 0) zap += `💡 *Economia máxima contra o cenário mais caro:* BRL ${fmt(economia)}\n\n`;
+                        }
 
                     } else {
-                        mainContainer.classList.remove('max-w-4xl');
-                        mainContainer.classList.add('max-w-md');
                         grid.className = 'grid grid-cols-1 gap-6';
                         tituloPainel.innerText = 'Resultado da Simulação';
 
@@ -474,6 +1186,9 @@
                         grid.innerHTML = cartaoHtml;
 
                         zap = `🏦 *Simulação Itaú Personnalité*\n\n💳 *Meio:* Cartão de Crédito\n🌍 *Moeda:* ${data.moeda}\n📅 *Data:* ${dataBr}\n\n💵 *Valor Original:* ${data.moeda} ${fmt(valorBruto)}\n➖➖➖➖➖➖➖➖➖➖\n`;
+                        zap += `📌 *Parâmetros Vigentes 2026*\n`;
+                        zap += `• IOF Cartão/Compra em câmbio: ${iofCartaoPct}\n`;
+                        zap += `• Spread Cartão Itaú: ${spreadCartaoPct}\n\n`;
                         if (data.cartao.suportada) {
                             zap += `*Câmbio Base:* BRL ${fmt(data.cartao.base_brl)} (Cot: ${fmt4(data.cartao.taxa_utilizada)})\n`;
                             zap += `*Spread Itaú (${pct(data.cartao.spread_aplicado)}):* + BRL ${fmt(data.cartao.valor_spread)}\n`;
@@ -485,8 +1200,17 @@
                         }
                     }
 
-                    // 🏷️ Update da Versão v3.01.00 no texto copiado para o WhatsApp
-                    const zapEncoded = encodeURIComponent(zap + `_Gerado por APP v3.01.00_`);
+                    window.dadosEmail = {
+                        moeda: data.moeda,
+                        valorBruto: valorBruto,
+                        dataBr: dataBr,
+                        melhorOpcao: melhorOpcao ? melhorOpcao.chave : null,
+                        cartao: data.cartao,
+                        global: isGlobalSupported ? data.global : null,
+                        saldo_existente: isSaldoExistenteSupported ? data.global_saldo_existente : null
+                    };
+
+                    const zapEncoded = encodeURIComponent(zap + `_Gerado por APP ${APP_VERSION}_`);
                     document.getElementById('btn-copy').setAttribute('data-texto', zapEncoded);
                     document.getElementById('btn-whatsapp').setAttribute('data-texto', zapEncoded);
 
@@ -494,10 +1218,13 @@
                     resultArea.classList.add('flex');
 
                 } else { alert('Aviso: ' + data.erro); }
-            } catch (err) { alert('Falha ao acionar os motores matemáticos.'); }
-            finally { btn.disabled = false; btn.innerText = 'Analisar Cenários'; }
+            } catch (err) {
+                alert('Falha ao acionar os motores matemáticos.');
+                parametrosVigentes.classList.add('hidden');
+            } finally { btn.disabled = false; btn.innerText = 'Analisar Cenários'; }
         });
     </script>
-</body>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a5835b20a209435b83df823e5f65597f"}'></script><!-- Cloudflare Pages Analytics --><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"3dd3336961404cc299257e2fce0d2d91","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e06fa27eb49646c',t:'MTc3NDIwMTE4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 
 </html>
