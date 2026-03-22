@@ -1,3 +1,7 @@
+import { getOperationalContext } from './contexto-operacional.mjs';
+import { calcularBandasSensibilidade } from './sensibilidade.mjs';
+import { calcularErroPercentual, calcularMape, classificarMapePercent } from './backtest.mjs';
+
 export async function onRequestPost(context) {
     const defaultHeaders = { "Content-Type": "application/json" };
     try {
@@ -14,26 +18,15 @@ export async function onRequestPost(context) {
         const iofPercentInformado = payload.iof_percent;
         const globalSpreadAbertoInformado = payload.global_spread_aberto_percent;
         const globalSpreadFechadoInformado = payload.global_spread_fechado_percent;
+        const backtestMapeBoaInformado = payload.backtest_mape_boa_percent;
+        const backtestMapeAtencaoInformado = payload.backtest_mape_atencao_percent;
 
         if (!data_compra || !valor_original || !moeda) {
             return new Response(JSON.stringify({ erro: "Dados incompletos." }), { status: 400, headers: defaultHeaders });
         }
 
-        // 🕰️ RELÓGIO MATEMÁTICO UNIVERSAL
-        const agoraUTC = new Date();
-        const brTime = new Date(agoraUTC.getTime() - (3 * 60 * 60 * 1000));
-        const hora = brTime.getUTCHours();
-        const minuto = String(brTime.getUTCMinutes()).padStart(2, '0');
-        const diaSemana = brTime.getUTCDay();
-        const ano = brTime.getUTCFullYear();
-        const mes = String(brTime.getUTCMonth() + 1).padStart(2, '0');
-        const dia = String(brTime.getUTCDate()).padStart(2, '0');
-        const dataBrasilISO = `${ano}-${mes}-${dia}`;
-        const mesDia = `${mes}-${dia}`;
-
-        const feriadosFixos = ['01-01', '04-21', '05-01', '09-07', '10-12', '11-02', '11-15', '11-20', '12-25'];
-        const is_feriado = feriadosFixos.includes(mesDia);
-        const is_plantao = (diaSemana === 0 || diaSemana === 6 || is_feriado || hora < 9 || hora >= 17);
+        // 🕰️ CONTEXTO OPERACIONAL (compartilhado)
+        const { hora, minuto, diaSemana, dataBrasilISO, is_feriado, is_plantao } = getOperationalContext(new Date());
 
         const arredondar = (num, casas = 2) => {
             // toPrecision evita erros de representação IEEE 754 
@@ -81,6 +74,20 @@ export async function onRequestPost(context) {
         const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (env.FATOR_CALIBRAGEM_GLOBAL ? parseFloat(env.FATOR_CALIBRAGEM_GLOBAL) : 0.99934);
         if ('fator_calibragem_global' in parametrosD1) origem.fator_calibragem_global = 'd1';
 
+        const resolveMetricParam = (d1Key, envKey, fallback) => {
+            if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
+            if (envKey && env[envKey] !== undefined) {
+                const v = parseFloat(env[envKey]);
+                if (Number.isFinite(v)) return v;
+            }
+            return fallback;
+        };
+
+        const BACKTEST_MAPE_BOA_PERCENT = resolveMetricParam('backtest_mape_boa_percent', 'BACKTEST_MAPE_BOA_PERCENT', 1.0);
+        const BACKTEST_MAPE_ATENCAO_PERCENT = resolveMetricParam('backtest_mape_atencao_percent', 'BACKTEST_MAPE_ATENCAO_PERCENT', 2.0);
+        if ('backtest_mape_boa_percent' in parametrosD1) origem.backtest_mape_boa_percent = 'd1';
+        if ('backtest_mape_atencao_percent' in parametrosD1) origem.backtest_mape_atencao_percent = 'd1';
+
         const SPREAD_GLOBAL = is_plantao ? SPREAD_GLOBAL_FECHADO : SPREAD_GLOBAL_ABERTO;
 
         // ═══════════════════════════════════════════════════
@@ -98,6 +105,8 @@ export async function onRequestPost(context) {
         }
         if (Number.isFinite(globalSpreadAbertoInformado)) paramsSalvar.taxa_spread_global_aberto = globalSpreadAbertoInformado / 100;
         if (Number.isFinite(globalSpreadFechadoInformado)) paramsSalvar.taxa_spread_global_fechado = globalSpreadFechadoInformado / 100;
+        if (Number.isFinite(backtestMapeBoaInformado)) paramsSalvar.backtest_mape_boa_percent = backtestMapeBoaInformado;
+        if (Number.isFinite(backtestMapeAtencaoInformado)) paramsSalvar.backtest_mape_atencao_percent = backtestMapeAtencaoInformado;
 
         if (Object.keys(paramsSalvar).length > 0) {
             try {
@@ -332,9 +341,98 @@ export async function onRequestPost(context) {
                 spread_global_aberto: SPREAD_GLOBAL_ABERTO,
                 spread_global_fechado: SPREAD_GLOBAL_FECHADO,
                 fator_calibragem_global: CALIBRAGEM,
+                backtest_mape_boa_percent: BACKTEST_MAPE_BOA_PERCENT,
+                backtest_mape_atencao_percent: BACKTEST_MAPE_ATENCAO_PERCENT,
                 origem
             }
         };
+
+        const sensibilidade = {};
+        if (cartaoResult?.suportada) {
+            sensibilidade.cartao = calcularBandasSensibilidade({
+                valorOriginal: valor_original,
+                taxaCambio: cartaoResult.taxa_utilizada,
+                spread: cartaoResult.spread_aplicado,
+                iof: cartaoResult.iof_aplicado
+            });
+        }
+
+        if (globalResult?.suportada) {
+            sensibilidade.global = calcularBandasSensibilidade({
+                valorOriginal: valor_original,
+                taxaCambio: globalResult.taxa_utilizada,
+                spread: globalResult.spread_aplicado,
+                iof: globalResult.iof_aplicado
+            });
+        }
+
+        if (Object.keys(sensibilidade).length > 0) {
+            responseBody.sensibilidade = sensibilidade;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // 📉 BACKTEST SIMPLES (SPOT vs PTAX referência)
+        // ═══════════════════════════════════════════════════
+        if (globalResult?.suportada && cartaoResult?.suportada && (moeda === 'USD' || moeda === 'EUR')) {
+            const erroPercentual = calcularErroPercentual(globalResult.taxa_utilizada, cartaoResult.taxa_utilizada);
+
+            if (Number.isFinite(erroPercentual)) {
+                try {
+                    await env.DB.prepare(`
+                        CREATE TABLE IF NOT EXISTS backtest_spot_vs_ptax (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            created_at INTEGER NOT NULL,
+                            moeda TEXT NOT NULL,
+                            data_compra TEXT NOT NULL,
+                            taxa_prevista REAL NOT NULL,
+                            taxa_observada REAL NOT NULL,
+                            erro_percentual REAL NOT NULL
+                        )
+                    `).run();
+
+                    await env.DB.prepare(`
+                        INSERT INTO backtest_spot_vs_ptax (created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    `).bind(
+                        Date.now(),
+                        moeda,
+                        data_compra,
+                        globalResult.taxa_utilizada,
+                        cartaoResult.taxa_utilizada,
+                        erroPercentual
+                    ).run();
+
+                    const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                    const rows = await env.DB.prepare(`
+                        SELECT erro_percentual
+                        FROM backtest_spot_vs_ptax
+                        WHERE created_at >= ?
+                        ORDER BY created_at DESC
+                        LIMIT 200
+                    `).bind(cutoff).all();
+
+                    const erros = (rows.results || []).map((r) => Number(r.erro_percentual));
+                    const mape7d = calcularMape(erros);
+                    const mape7dPercent = Number.isFinite(mape7d) ? arredondar(mape7d * 100, 4) : null;
+                    const qualidade = classificarMapePercent(mape7dPercent, BACKTEST_MAPE_BOA_PERCENT, BACKTEST_MAPE_ATENCAO_PERCENT);
+
+                    responseBody.backtest = {
+                        referencia: 'spot_global_vs_ptax_cartao',
+                        erro_percentual_atual: erroPercentual,
+                        mape_7d: mape7d,
+                        mape_7d_percent: mape7dPercent,
+                        observacoes_7d: erros.length,
+                        qualidade,
+                        faixas_percent: {
+                            boa: BACKTEST_MAPE_BOA_PERCENT,
+                            atencao: BACKTEST_MAPE_ATENCAO_PERCENT
+                        }
+                    };
+                } catch (e) {
+                    // Não bloquear cálculo por falha de backtest
+                }
+            }
+        }
 
         if (saldoExistenteResult) {
             responseBody.global_saldo_existente = saldoExistenteResult;
