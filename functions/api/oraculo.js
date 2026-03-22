@@ -3,21 +3,53 @@ export async function onRequestPost(context) {
         const { request, env } = context;
         const promptData = await request.json();
 
-        // Recupera a chave do Google Gemini a partir das variáveis de ambiente criptografadas (Secrets)
         const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
         if (!GEMINI_API_KEY) {
             return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
 
-        // O sistema já escolhe automaticamente o modelo mais rápido e inteligente do Google nos bastidores
         const modelName = "gemini-2.5-pro";
         const generateUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
-        const instrucao = "Aja como um oráculo financeiro implacável, focado estritamente na matemática cambial e otimização para clientes VIP do Itaú Personnalité. Forneça uma análise técnica concisa e direta (máximo de 2 a 3 parágrafos curtos), apontando a diferença de custos (como spread e IOF) entre o Cartão de Crédito e a Conta Global. Responda em Português do Brasil. Sem saudações. Analise criticamente os seguintes dados numéricos para apontar o vencedor e cravar o valor exato economizado em Reais: \n\n";
+        const systemInstruction = {
+            parts: [{
+                text: `Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité.
+
+Sua comunicação é:
+- Clara e direta — sem rodeios, sem saudações, sem rodapé
+- Acessível — quando usar um termo técnico, explique brevemente entre parênteses
+- Profissional — tom de relatório executivo, não de conversa informal
+- Baseada em dados — use EXCLUSIVAMENTE os números fornecidos, nunca invente valores
+
+Formatação obrigatória:
+- Use **negrito** para destacar valores em Reais, percentuais-chave e o nome da opção vencedora
+- Use linguagem em Português do Brasil`
+            }]
+        };
+
+        const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
+
+Resumo Executivo:
+Aponte qual opção é a mais econômica e quanto se economiza em Reais. Se houver um cenário de "saldo já carregado" (uso de saldo previamente convertido), inclua-o na comparação. Resuma o veredito de forma clara para alguém que não é especialista em câmbio. Máximo 1 parágrafo.
+
+Base Matemática:
+Mostre a decomposição dos custos de cada cenário: câmbio base × valor, + spread, + IOF = total. Compare os VETs — explique que VET (Valor Efetivo Total) é o custo real que você paga por cada unidade de moeda estrangeira, incluindo todas as taxas. Use os números exatos da simulação. Máximo 2 parágrafos.
+
+Recomendação Prática:
+Dê uma recomendação contextualizada. Considere o status do mercado (aberto ou fechado/plantão), se há vantagem em aguardar uma janela de mercado diferente, e qualquer nuance relevante como a diferença entre comprar saldo agora vs usar saldo existente. Máximo 1 parágrafo.
+
+Dados da simulação:
+`;
 
         const geminiPayload = {
-            contents: [{ parts: [{ text: `${instrucao}${JSON.stringify(promptData)}` }] }]
+            systemInstruction: systemInstruction,
+            contents: [{ parts: [{ text: `${instrucao}${JSON.stringify(promptData, null, 2)}` }] }],
+            generationConfig: {
+                temperature: 0.3,
+                topP: 0.8,
+                maxOutputTokens: 1500
+            }
         };
 
         const response = await fetch(generateUrl, {
@@ -28,6 +60,7 @@ export async function onRequestPost(context) {
 
         if (!response.ok) {
             const errText = await response.text();
+            console.error('Gemini API error:', errText);
             return new Response(JSON.stringify({ erro: `Falha na IA do Google.` }), { status: 502, headers: { "Content-Type": "application/json" } });
         }
 
@@ -37,6 +70,7 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ analise: text }), { headers: { "Content-Type": "application/json" } });
 
     } catch (error) {
+        console.error('Oráculo error:', error.message);
         return new Response(JSON.stringify({ erro: "Erro interno no servidor do Oráculo." }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 }

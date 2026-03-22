@@ -35,7 +35,10 @@ export async function onRequestPost(context) {
         const is_feriado = feriadosFixos.includes(mesDia);
         const is_plantao = (diaSemana === 0 || diaSemana === 6 || is_feriado || hora < 9 || hora >= 17);
 
-        const arredondar = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+        const arredondar = (num, casas = 2) => {
+            const fator = Math.pow(10, casas);
+            return Math.round(num * fator) / fator;
+        };
 
         // ═══════════════════════════════════════════════════
         // 📊 CARREGAR PARÂMETROS DO D1 (com fallback env/default)
@@ -173,11 +176,12 @@ export async function onRequestPost(context) {
             }
 
             if (taxa_cartao) {
-                const baseBrl = arredondar(valor_original * taxa_cartao);
-                const valorSpread = arredondar(baseBrl * SPREAD_CARTAO);
-                const baseComSpread = arredondar(baseBrl + valorSpread);
-                const valorIof = arredondar(baseComSpread * IOF_CARTAO);
-                const valorTotalBrl = arredondar(baseComSpread + valorIof);
+                // Precisão total na cadeia — arredonda apenas na saída
+                const baseBrl_full = valor_original * taxa_cartao;
+                const valorSpread_full = baseBrl_full * SPREAD_CARTAO;
+                const baseComSpread_full = baseBrl_full + valorSpread_full;
+                const valorIof_full = baseComSpread_full * IOF_CARTAO;
+                const valorTotalBrl_full = baseComSpread_full + valorIof_full;
 
                 cartaoResult = {
                     suportada: true,
@@ -187,11 +191,11 @@ export async function onRequestPost(context) {
                     data_cotacao: data_ptax,
                     spread_aplicado: SPREAD_CARTAO,
                     iof_aplicado: IOF_CARTAO,
-                    base_brl: baseBrl,
-                    valor_spread: valorSpread,
-                    valor_iof: valorIof,
-                    valor_total_brl: valorTotalBrl,
-                    vet: valorTotalBrl / valor_original
+                    base_brl: arredondar(baseBrl_full),
+                    valor_spread: arredondar(valorSpread_full),
+                    valor_iof: arredondar(valorIof_full),
+                    valor_total_brl: arredondar(valorTotalBrl_full),
+                    vet: arredondar(valorTotalBrl_full / valor_original, 6)
                 };
             } else { cartaoResult = { suportada: false, erro: "Cotação PTAX indisponível nesta data." }; }
         } catch (e) { cartaoResult = { suportada: false, erro: "Falha ao calcular Cartão." }; }
@@ -260,11 +264,12 @@ export async function onRequestPost(context) {
                 }
 
                 if (taxa_global) {
-                    const baseBrl = arredondar(valor_original * taxa_global);
-                    const valorSpread = arredondar(baseBrl * SPREAD_GLOBAL);
-                    const baseComSpread = arredondar(baseBrl + valorSpread);
-                    const valorIof = arredondar(baseComSpread * IOF_GLOBAL);
-                    const valorTotalBrl = arredondar(baseComSpread + valorIof);
+                    // Precisão total na cadeia — arredonda apenas na saída
+                    const baseBrl_full = valor_original * taxa_global;
+                    const valorSpread_full = baseBrl_full * SPREAD_GLOBAL;
+                    const baseComSpread_full = baseBrl_full + valorSpread_full;
+                    const valorIof_full = baseComSpread_full * IOF_GLOBAL;
+                    const valorTotalBrl_full = baseComSpread_full + valorIof_full;
 
                     globalResult = {
                         suportada: true,
@@ -275,11 +280,11 @@ export async function onRequestPost(context) {
                         iof_aplicado: IOF_GLOBAL,
                         is_plantao: is_plantao,
                         usou_contingencia: usou_contingencia,
-                        base_brl: baseBrl,
-                        valor_spread: valorSpread,
-                        valor_iof: valorIof,
-                        valor_total_brl: valorTotalBrl,
-                        vet: valorTotalBrl / valor_original
+                        base_brl: arredondar(baseBrl_full),
+                        valor_spread: arredondar(valorSpread_full),
+                        valor_iof: arredondar(valorIof_full),
+                        valor_total_brl: arredondar(valorTotalBrl_full),
+                        vet: arredondar(valorTotalBrl_full / valor_original, 6)
                     };
                 } else { globalResult = { suportada: false, erro: "Câmbio Global Indisponível." }; }
             } catch (e) { globalResult = { suportada: false, erro: "Falha ao calcular Conta Global." }; }
