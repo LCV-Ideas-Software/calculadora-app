@@ -1,5 +1,10 @@
 # Changelog — Itaú Calculadora
 
+## [v03.20.00] — 2026-03-22
+### Infra
+- Workflow `deploy-admin.yml` marcado como **deprecated** e convertido para `workflow_dispatch` + `noop`, eliminando execução duplicada em `push`
+- Deploy contínuo permanece centralizado em `.github/workflows/deploy.yml` com job único
+
 ## [v03.19.00] — 2026-03-22
 ### Infra
 - Pipeline consolidado em **um único** `.github/workflows/deploy.yml`, com deploy do admin (`itau-calculadora-admin`) e do app principal no mesmo job
