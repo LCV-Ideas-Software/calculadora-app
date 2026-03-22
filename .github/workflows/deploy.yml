@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout do Repositório
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.2
 
       - name: Deploy na Cloudflare
-        uses: cloudflare/wrangler-action@v6
+        uses: cloudflare/wrangler-action@v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
