@@ -49,7 +49,7 @@ Dados da simulação:
                 topP: 0.8,
                 maxOutputTokens: 4096,
                 thinkingConfig: {
-                    thinkingBudget: -1  // dinâmico: o modelo decide a profundidade
+                    thinkingLevel: "HIGH"  // Gemini 3+: recomendado usar thinkingLevel
                 }
             },
             safetySettings: [
