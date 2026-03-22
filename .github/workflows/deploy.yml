@@ -4,6 +4,11 @@ on:
   push:
     branches: ["main"]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  NODE_OPTIONS: "--no-deprecation"
+  WRANGLER_VERSION: "latest"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,4 +25,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy public --project-name="itau-calculadora" --branch="production"
+          command: pages deploy public --project-name="itau-calculadora" --branch="production" --commit-dirty=true
