@@ -1,3 +1,7 @@
+// Módulo: itau-calculadora/functions/api/oraculo.js
+// Versão: v03.06.00
+// Descrição: API do Oráculo IA — gemini-pro-latest, v1beta, thinkingLevel HIGH, safetySettings, retry.
+
 export async function onRequestPost(context) {
     try {
         const { request, env } = context;

@@ -416,8 +416,8 @@
 
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
-                class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">APP
-                <span id="app-version-text">v03.05.0</span></span>
+                class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
+                <span id="app-version-text">APP v03.06.00</span></span>
         </div>
 
     </div>
@@ -761,7 +761,7 @@
     </script>
 
     <script>
-        const APP_VERSION = 'v03.05.0';
+        const APP_VERSION = 'APP v03.06.00';
         document.getElementById('app-version-text').innerText = APP_VERSION;
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
@@ -1264,7 +1264,7 @@
                         saldo_existente: isSaldoExistenteSupported ? data.global_saldo_existente : null
                     };
 
-                    const zapEncoded = encodeURIComponent(zap + `_Gerado por APP ${APP_VERSION}_`);
+                    const zapEncoded = encodeURIComponent(zap + `_Gerado por ${APP_VERSION}_`);
                     document.getElementById('btn-copy').setAttribute('data-texto', zapEncoded);
                     document.getElementById('btn-whatsapp').setAttribute('data-texto', zapEncoded);
 
