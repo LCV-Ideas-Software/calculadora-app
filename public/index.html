@@ -186,6 +186,31 @@
             text-align: center;
             letter-spacing: 0.01em;
         }
+
+        @keyframes aiShimmer {
+            0% {
+                background-position: -220px 0;
+            }
+            100% {
+                background-position: calc(220px + 100%) 0;
+            }
+        }
+
+        .ai-skeleton-line {
+            height: 11px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(226, 232, 240, 0.7) 25%, rgba(203, 213, 225, 0.95) 50%, rgba(226, 232, 240, 0.7) 75%);
+            background-size: 220px 100%;
+            animation: aiShimmer 1.6s infinite linear;
+        }
+
+        .ai-skeleton-block {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 0.9rem;
+            padding: 0.8rem 0.9rem;
+            margin-bottom: 0.9rem;
+        }
     </style>
 </head>
 
@@ -435,8 +460,28 @@
                         ✨ Analisar Cenário com IA
                     </button>
 
+                    <button type="button" id="btn-refresh-ai"
+                        class="hidden mt-3 bg-white/80 text-slate-700 font-bold py-3 px-6 rounded-full hover:bg-white hover:shadow-sm transition-all duration-300 outline-none mx-auto items-center justify-center gap-2 border border-slate-200/80">
+                        🔄 Atualizar análise sem usar cache
+                    </button>
+
+                    <div id="ai-cache-status"
+                        class="hidden mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold tracking-[0.04em] uppercase"></div>
+
                     <div id="ai-result"
                         class="hidden mt-8 glass-card border-white/70 p-6 sm:p-8 rounded-[1.5rem] text-gray-800 text-[14px] leading-relaxed markdown-ia shadow-md text-left">
+                    </div>
+
+                    <div id="ai-telemetry"
+                        class="hidden mt-4 w-full glass-card bg-slate-50/70 border border-slate-200/70 p-4 rounded-xl shadow-sm text-left">
+                        <h4 class="text-[12px] font-extrabold tracking-[0.08em] uppercase text-slate-700 mb-2">Telemetria local da IA</h4>
+                        <div id="ai-telemetry-content" class="text-[12px] text-slate-700 leading-relaxed"></div>
+                    </div>
+
+                    <div id="ai-history"
+                        class="hidden mt-4 w-full glass-card bg-slate-50/70 border border-slate-200/70 p-4 rounded-xl shadow-sm text-left">
+                        <h4 class="text-[12px] font-extrabold tracking-[0.08em] uppercase text-slate-700 mb-2">Histórico local de análises</h4>
+                        <div id="ai-history-content" class="text-[12px] text-slate-700 leading-relaxed"></div>
                     </div>
                 </div>
 
@@ -446,7 +491,7 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
-                <span id="app-version-text">APP v03.12.00</span></span>
+                <span id="app-version-text">APP v03.16.00</span></span>
         </div>
 
     </div>
@@ -522,6 +567,12 @@
 
     let emailFeatureModulePromise = null;
     let oraculoFeatureModulePromise = null;
+    let oraculoPrewarmPromise = null;
+    let opportunisticPreloadHandle = null;
+    let simulationGeneration = 0;
+    const AI_HISTORY_STORAGE_KEY = 'itau-calculadora:ai-history:v1';
+    const AI_TELEMETRY_STORAGE_KEY = 'itau-calculadora:ai-telemetry:v1';
+    const AI_HISTORY_MAX_ITEMS = 12;
 
     function loadEmailFeatureModule() {
         if (!emailFeatureModulePromise) emailFeatureModulePromise = import('/js/email-feature.js');
@@ -533,8 +584,375 @@
         return oraculoFeatureModulePromise;
     }
 
+    function runWhenIdle(task, timeout = 1200) {
+        if (typeof window.requestIdleCallback === 'function') {
+            return window.requestIdleCallback(task, { timeout });
+        }
+
+        return window.setTimeout(task, 250);
+    }
+
+    function cancelWhenIdle(handle) {
+        if (!handle) return;
+
+        if (typeof window.cancelIdleCallback === 'function') {
+            window.cancelIdleCallback(handle);
+            return;
+        }
+
+        window.clearTimeout(handle);
+    }
+
+    function canUseSpeculativePrewarm() {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        if (!connection) return true;
+        if (connection.saveData) return false;
+
+        const effectiveType = String(connection.effectiveType || '').toLowerCase();
+        return !effectiveType.includes('2g') && effectiveType !== 'slow-2g';
+    }
+
+    function formatDurationShort(ms) {
+        const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        if (minutes <= 0) return `${seconds}s`;
+        if (seconds === 0) return `${minutes}min`;
+        return `${minutes}min ${seconds}s`;
+    }
+
+    function setAiCacheStatus(kind = null, meta = null) {
+        const badge = document.getElementById('ai-cache-status');
+        if (!badge) return;
+
+        badge.className = 'hidden mt-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold tracking-[0.04em] uppercase';
+        badge.textContent = '';
+
+        if (!kind) return;
+
+        const ttlText = meta?.expiresInMs != null ? formatDurationShort(meta.expiresInMs) : null;
+
+        const variants = {
+            cache: {
+                text: ttlText ? `⚡ Cache da sessão · expira em ${ttlText}` : '⚡ Análise recuperada do cache da sessão',
+                classes: 'mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 px-3 py-1.5 text-[11px] font-bold tracking-[0.04em] uppercase'
+            },
+            live: {
+                text: ttlText ? `✨ Oráculo atualizado · cache por ${ttlText}` : '✨ Análise atualizada pelo Oráculo',
+                classes: 'mt-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 text-sky-700 px-3 py-1.5 text-[11px] font-bold tracking-[0.04em] uppercase'
+            }
+        };
+
+        const variant = variants[kind];
+        if (!variant) return;
+
+        badge.className = variant.classes;
+        badge.textContent = variant.text;
+    }
+
+    function resetAiState() {
+        document.getElementById('ai-result').classList.add('hidden');
+        document.getElementById('ai-result').innerHTML = '';
+        setAiCacheStatus(null);
+    }
+
+    function setRefreshAiButtonVisible(visible) {
+        const btn = document.getElementById('btn-refresh-ai');
+        if (!btn) return;
+        btn.classList.toggle('hidden', !visible);
+        btn.classList.toggle('inline-flex', visible);
+    }
+
+    function stableStringify(value) {
+        if (Array.isArray(value)) {
+            return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+        }
+        if (value && typeof value === 'object') {
+            const keys = Object.keys(value).sort();
+            return `{${keys.map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`;
+        }
+        return JSON.stringify(value);
+    }
+
+    function renderAiSkeleton(forceRefresh = false) {
+        const titulo = forceRefresh ? 'Atualizando análise com dados frescos...' : 'Processando análise técnica da IA...';
+        return `
+            <div class="ai-skeleton-block">
+                <div class="ai-skeleton-line" style="width: 36%; margin-bottom: 10px;"></div>
+                <div class="ai-skeleton-line" style="width: 92%; margin-bottom: 8px;"></div>
+                <div class="ai-skeleton-line" style="width: 86%; margin-bottom: 8px;"></div>
+                <div class="ai-skeleton-line" style="width: 78%;"></div>
+            </div>
+            <div class="ai-skeleton-block">
+                <div class="ai-skeleton-line" style="width: 28%; margin-bottom: 10px;"></div>
+                <div class="ai-skeleton-line" style="width: 88%; margin-bottom: 8px;"></div>
+                <div class="ai-skeleton-line" style="width: 82%; margin-bottom: 8px;"></div>
+                <div class="ai-skeleton-line" style="width: 74%;"></div>
+            </div>
+            <p class="text-[12px] text-blue-700 font-semibold mt-2">${titulo}</p>
+        `;
+    }
+
+    function getAiHistory() {
+        try {
+            const raw = localStorage.getItem(AI_HISTORY_STORAGE_KEY);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveAiHistory(items) {
+        try {
+            localStorage.setItem(AI_HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, AI_HISTORY_MAX_ITEMS)));
+        } catch {
+            // Histórico local é best effort.
+        }
+    }
+
+    function addAiHistoryEntry(entry) {
+        const current = getAiHistory();
+        current.unshift(entry);
+        saveAiHistory(current);
+        return current;
+    }
+
+    function renderAiHistory() {
+        const wrap = document.getElementById('ai-history');
+        const content = document.getElementById('ai-history-content');
+        if (!wrap || !content) return;
+
+        const history = getAiHistory();
+        if (!history.length) {
+            wrap.classList.add('hidden');
+            content.innerHTML = '';
+            return;
+        }
+
+        content.innerHTML = history.slice(0, 6).map((item) => {
+            const dt = new Date(item.createdAt);
+            const when = Number.isFinite(dt.getTime()) ? dt.toLocaleString('pt-BR', { hour12: false }) : 'N/A';
+            const sourceBadge = item.fromCache
+                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">cache</span>'
+                : '<span class="inline-flex px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-bold">live</span>';
+            const refreshBadge = item.forceRefresh
+                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">refresh</span>'
+                : '';
+            return `
+                <div class="border border-slate-200/80 rounded-lg p-2.5 mb-2 bg-white/70">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-1">${sourceBadge}${refreshBadge}</div>
+                    <p class="text-[11px] text-slate-500 mb-1">${when} · ${item.moeda || '-'} ${Number.isFinite(item.valorOriginal) ? item.valorOriginal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}</p>
+                    <p class="text-[12px] text-slate-700 line-clamp-2">${item.preview || 'Análise sem prévia.'}</p>
+                </div>
+            `;
+        }).join('');
+
+        wrap.classList.remove('hidden');
+    }
+
+    function getAiTelemetry() {
+        try {
+            const raw = localStorage.getItem(AI_TELEMETRY_STORAGE_KEY);
+            const parsed = raw ? JSON.parse(raw) : null;
+            if (!parsed || typeof parsed !== 'object') return null;
+            return parsed;
+        } catch {
+            return null;
+        }
+    }
+
+    function saveAiTelemetry(telemetry) {
+        try {
+            localStorage.setItem(AI_TELEMETRY_STORAGE_KEY, JSON.stringify(telemetry));
+        } catch {
+            // Telemetria local é best effort.
+        }
+    }
+
+    function updateAiTelemetry({ fromCache, durationMs, isError }) {
+        const current = getAiTelemetry() || {
+            total: 0,
+            cacheHits: 0,
+            liveHits: 0,
+            errors: 0,
+            avgMs: 0,
+            lastMs: 0,
+            updatedAt: null
+        };
+
+        current.total += 1;
+        if (fromCache) current.cacheHits += 1;
+        else current.liveHits += 1;
+        if (isError) current.errors += 1;
+
+        if (Number.isFinite(durationMs) && durationMs >= 0) {
+            current.lastMs = Math.round(durationMs);
+            current.avgMs = Math.round((((current.avgMs || 0) * (current.total - 1)) + durationMs) / current.total);
+        }
+
+        current.updatedAt = Date.now();
+        saveAiTelemetry(current);
+        return current;
+    }
+
+    function renderAiTelemetry() {
+        const wrap = document.getElementById('ai-telemetry');
+        const content = document.getElementById('ai-telemetry-content');
+        if (!wrap || !content) return;
+
+        const telemetry = getAiTelemetry();
+        if (!telemetry) {
+            wrap.classList.add('hidden');
+            content.innerHTML = '';
+            return;
+        }
+
+        const ratioCache = telemetry.total > 0
+            ? ((telemetry.cacheHits / telemetry.total) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+            : '0';
+
+        content.innerHTML = `
+            <ul class="list-disc ml-5 space-y-1">
+                <li><strong>Consultas locais:</strong> ${telemetry.total}</li>
+                <li><strong>Cache hit rate:</strong> ${ratioCache}%</li>
+                <li><strong>Tempo médio:</strong> ${Number.isFinite(telemetry.avgMs) ? telemetry.avgMs : 0}ms</li>
+                <li><strong>Última resposta:</strong> ${Number.isFinite(telemetry.lastMs) ? telemetry.lastMs : 0}ms</li>
+                <li><strong>Falhas:</strong> ${telemetry.errors || 0}</li>
+            </ul>
+        `;
+
+        wrap.classList.remove('hidden');
+    }
+
+    async function executarAnaliseIA(options = {}) {
+        const { forceRefresh = false, triggerButtonId = 'btn-generate-ai' } = options;
+        const resDiv = document.getElementById('ai-result');
+        const btn = document.getElementById(triggerButtonId);
+        const primaryBtn = document.getElementById('btn-generate-ai');
+        const refreshBtn = document.getElementById('btn-refresh-ai');
+
+        if (!payloadGlobalParaIA || !btn) return;
+
+        const textoOriginal = btn.innerHTML;
+        btn.innerHTML = '<span class="animate-pulse">✨ Consultando o Oráculo...</span>';
+        btn.disabled = true;
+        if (primaryBtn && primaryBtn !== btn) primaryBtn.disabled = true;
+        if (refreshBtn && refreshBtn !== btn) refreshBtn.disabled = true;
+
+        const startedAt = performance.now();
+        resDiv.classList.remove('hidden');
+        resDiv.innerHTML = renderAiSkeleton(forceRefresh);
+        setAiCacheStatus(null);
+
+        try {
+            const { obterAnaliseOraculoComMeta } = await loadOraculoFeatureModule();
+            const resultado = await obterAnaliseOraculoComMeta(payloadGlobalParaIA, { forceRefresh });
+            const durationMs = performance.now() - startedAt;
+
+            resDiv.innerHTML = resultado.html;
+            setAiCacheStatus(resultado.fromCache ? 'cache' : 'live', resultado);
+
+            const preview = String(resDiv.textContent || '').trim().slice(0, 180);
+            addAiHistoryEntry({
+                createdAt: Date.now(),
+                signature: stableStringify(payloadGlobalParaIA),
+                moeda: payloadGlobalParaIA?.transacao?.moeda,
+                valorOriginal: Number(payloadGlobalParaIA?.transacao?.valor_original),
+                fromCache: Boolean(resultado.fromCache),
+                forceRefresh: Boolean(forceRefresh),
+                durationMs: Math.round(durationMs),
+                preview
+            });
+
+            updateAiTelemetry({
+                fromCache: Boolean(resultado.fromCache),
+                durationMs,
+                isError: false
+            });
+
+            renderAiHistory();
+            renderAiTelemetry();
+        } catch (e) {
+            const durationMs = performance.now() - startedAt;
+            resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${e.message}</span>`;
+            updateAiTelemetry({ fromCache: false, durationMs, isError: true });
+            renderAiTelemetry();
+        } finally {
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            if (primaryBtn) primaryBtn.disabled = false;
+            if (refreshBtn) refreshBtn.disabled = false;
+        }
+    }
+
+    function scheduleOpportunisticPreload() {
+        if (!window.dadosEmail) return;
+
+        cancelWhenIdle(opportunisticPreloadHandle);
+        const generationAtSchedule = simulationGeneration;
+
+        opportunisticPreloadHandle = runWhenIdle(() => {
+            opportunisticPreloadHandle = null;
+            if (generationAtSchedule !== simulationGeneration) return;
+
+            loadEmailFeatureModule().catch(() => null);
+            if (payloadGlobalParaIA) {
+                loadOraculoFeatureModule().catch(() => null);
+                if (canUseSpeculativePrewarm()) {
+                    prewarmOraculoIfLikely(generationAtSchedule).catch(() => null);
+                }
+            }
+        }, 1500);
+    }
+
+    function prewarmOraculoIfLikely(expectedGeneration = simulationGeneration) {
+        if (!payloadGlobalParaIA) {
+            return loadOraculoFeatureModule().catch(() => null);
+        }
+
+        if (expectedGeneration !== simulationGeneration) {
+            return Promise.resolve(null);
+        }
+
+        if (oraculoPrewarmPromise) return oraculoPrewarmPromise;
+
+        oraculoPrewarmPromise = loadOraculoFeatureModule()
+            .then(({ prewarmOraculo }) => prewarmOraculo(payloadGlobalParaIA))
+            .catch(() => null)
+            .finally(() => {
+                oraculoPrewarmPromise = null;
+            });
+
+        return oraculoPrewarmPromise;
+    }
+
+    function conectarPreloadsOportunistas() {
+        const btnEmail = document.getElementById('btn-email');
+        const btnGenerateAI = document.getElementById('btn-generate-ai');
+
+        const aquecerEmail = () => {
+            loadEmailFeatureModule().catch(() => null);
+        };
+
+        const aquecerOraculo = () => {
+            if (canUseSpeculativePrewarm()) {
+                prewarmOraculoIfLikely().catch(() => null);
+            } else {
+                loadOraculoFeatureModule().catch(() => null);
+            }
+        };
+
+        ['mouseenter', 'focus', 'touchstart'].forEach((eventName) => {
+            btnEmail.addEventListener(eventName, aquecerEmail, { passive: true });
+            btnGenerateAI.addEventListener(eventName, aquecerOraculo, { passive: true });
+        });
+    }
+
     // --- Modal E-Mail ---
     function abrirEmail(btn) {
+        loadEmailFeatureModule().catch(() => null);
         document.getElementById('email-modal-overlay').classList.remove('hidden');
         document.getElementById('email-input').value = '';
         document.getElementById('email-input').focus();
@@ -588,7 +1006,7 @@
     </script>
 
     <script>
-        const APP_VERSION = 'APP v03.12.00';
+        const APP_VERSION = 'APP v03.16.00';
         document.getElementById('app-version-text').innerText = APP_VERSION;
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
@@ -698,6 +1116,10 @@
             selectMoeda.value = 'USD';
             atualizarContextoMoeda();
             carregarParametrosCustomizados();
+            conectarPreloadsOportunistas();
+            setRefreshAiButtonVisible(false);
+            renderAiHistory();
+            renderAiTelemetry();
         });
 
         document.getElementById('moeda').addEventListener('change', atualizarContextoMoeda);
@@ -714,25 +1136,8 @@
 
         let payloadGlobalParaIA = null;
 
-        document.getElementById('btn-generate-ai').addEventListener('click', async () => {
-            const resDiv = document.getElementById('ai-result');
-            const btn = document.getElementById('btn-generate-ai');
-
-            if (!payloadGlobalParaIA) return;
-
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="animate-pulse">✨ Consultando o Oráculo...</span>';
-            btn.disabled = true;
-
-            resDiv.classList.remove('hidden');
-            resDiv.innerHTML = '<span class="animate-pulse text-blue-600 font-semibold tracking-wide">Aguarde, a IA está decodificando a matriz de custos...</span>';
-
-            try {
-                const { obterAnaliseOraculo } = await loadOraculoFeatureModule();
-                resDiv.innerHTML = await obterAnaliseOraculo(payloadGlobalParaIA);
-            } catch (e) { resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${e.message}</span>`; }
-            finally { btn.innerHTML = textoOriginal; btn.disabled = false; }
-        });
+        document.getElementById('btn-generate-ai').addEventListener('click', () => executarAnaliseIA({ triggerButtonId: 'btn-generate-ai' }));
+        document.getElementById('btn-refresh-ai').addEventListener('click', () => executarAnaliseIA({ forceRefresh: true, triggerButtonId: 'btn-refresh-ai' }));
 
         document.getElementById('calc-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -776,8 +1181,11 @@
             saveBadge.classList.add('hidden');
             saveBadge.textContent = '';
             resultArea.classList.add('hidden');
-            document.getElementById('ai-result').classList.add('hidden');
-            document.getElementById('ai-result').innerHTML = '';
+            simulationGeneration += 1;
+            cancelWhenIdle(opportunisticPreloadHandle);
+            opportunisticPreloadHandle = null;
+            oraculoPrewarmPromise = null;
+            resetAiState();
             backtestIndicadores.classList.add('hidden');
             backtestIndicadoresConteudo.innerHTML = '';
 
@@ -1066,6 +1474,9 @@
                             }
                         };
 
+                        setRefreshAiButtonVisible(true);
+                        scheduleOpportunisticPreload();
+
                         zap = `🏦 *Comparativo Personnalité*\n\n🌍 *Moeda:* ${data.moeda}\n💵 *Valor:* ${data.moeda} ${fmt(valorBruto)}\n📅 *Data:* ${dataBr}\n➖➖➖➖➖➖➖➖➖➖\n`;
                         zap += `📌 *Parâmetros Vigentes 2026*\n`;
                         zap += `• IOF Cartão/Compra em câmbio: ${iofCartaoPct}\n`;
@@ -1096,6 +1507,9 @@
 
                         oraculoContainer.classList.add('hidden');
                         payloadGlobalParaIA = null;
+                        oraculoPrewarmPromise = null;
+                        setAiCacheStatus(null);
+                        setRefreshAiButtonVisible(false);
                         sensibilidadeCenarios.classList.add('hidden');
                         sensibilidadeCenariosConteudo.innerHTML = '';
                         backtestIndicadores.classList.add('hidden');

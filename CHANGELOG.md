@@ -1,5 +1,36 @@
 # Changelog — Itaú Calculadora
 
+## [v03.16.00] — 2026-03-22
+### Alterado
+- Inclusão de skeleton loading no painel do Oráculo para reduzir sensação de espera durante consultas e refresh forçado
+- Inclusão de histórico local das últimas análises do Oráculo (com origem cache/live e marcador de refresh manual)
+- Inclusão de telemetria local de uso do Oráculo (consultas totais, taxa de cache hit, tempo médio, última resposta e falhas)
+
+### Observabilidade
+- Coleta local de métricas de latência e origem de resposta (cache vs live), preservadas em `localStorage` para feedback contínuo ao usuário
+
+## [v03.15.00] — 2026-03-22
+### Alterado
+- Inclusão de botão para forçar nova análise do Oráculo, ignorando o cache da sessão quando o usuário desejar atualizar a resposta manualmente
+- Badge do Oráculo passa a exibir a validade restante do cache, diferenciando análise reaproveitada vs análise recém-gerada
+
+## [v03.14.00] — 2026-03-22
+### Alterado
+- Inclusão de indicador visual no bloco do Oráculo para distinguir análise recém-gerada vs análise reaproveitada do cache da sessão
+
+### Performance
+- Prewarm especulativo do Oráculo refinado com heurística de conexão (`saveData` / `effectiveType`) para evitar antecipação agressiva em redes lentas
+- Agendamentos oportunistas passam a ser invalidados quando uma nova simulação substitui o cenário anterior
+
+## [v03.13.00] — 2026-03-22
+### Alterado
+- Inclusão de cache inteligente do Oráculo Financeiro por payload da simulação, com reaproveitamento instantâneo de análises repetidas na mesma sessão
+- Deduplicação de requisições simultâneas ao Oráculo para evitar chamadas duplicadas quando o usuário interage repetidamente com o botão da IA
+
+### Performance
+- Pré-carregamento oportunista dos módulos de E-Mail e Oráculo após a simulação, durante janelas ociosas do navegador
+- Prewarm da análise do Oráculo em interações prováveis (`hover`, `focus` e `touchstart`) para reduzir a latência percebida no primeiro clique
+
 ## [v03.12.00] — 2026-03-22
 ### Alterado
 - Inclusão de campos na UI para edição dos limiares de MAPE (`Boa` e `Atenção`) com validação antes do envio
