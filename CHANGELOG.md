@@ -1,5 +1,11 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.00] — 2026-03-22
+### Alterado
+- Modernização da integração do Oráculo IA para endpoint `v1` da Gemini API, priorizando estabilidade de produção
+- Substituição do alias dinâmico de modelo por modelo explícito estável (`gemini-2.5-pro`), com suporte a override via variável de ambiente `GEMINI_MODEL`
+- Padronização do payload REST para formato canônico em `camelCase` (`systemInstruction`)
+
 ## [v03.23.00] — 2026-03-22
 ### Alterado
 - Implantado no admin painel de controle de rate limit para **Síntese da IA** e **Envio de E-mail**, com ativação/desativação, limites por IP e janela em minutos

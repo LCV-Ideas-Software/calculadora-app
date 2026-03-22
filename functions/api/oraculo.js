@@ -1,6 +1,6 @@
 // Módulo: itau-calculadora/functions/api/oraculo.js
-// Versão: v03.12.00
-// Descrição: API do Oráculo IA — gemini-pro-latest, v1beta, thinkingLevel HIGH, safetySettings, retry.
+// Versão: v03.24.00
+// Descrição: API do Oráculo IA — modelo estável explícito, v1, payload canônico REST, safetySettings, retry.
 
 import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
 
@@ -35,13 +35,11 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
 
-        // Documentação oficial REST usa v1beta para system_instruction e thinkingConfig
-        // Ref: https://ai.google.dev/gemini-api/docs/system-instructions
-        // Ref: https://ai.google.dev/gemini-api/docs/thinking
-        // Alias "latest" aponta automaticamente para o Pro mais recente
-        // Ref: https://ai.google.dev/gemini-api/docs/models#latest
-        const modelName = "gemini-pro-latest";
-        const generateUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+        // Produção estável: usar v1 e modelo explícito (evita hot-swap de alias "latest").
+        // Ref: https://ai.google.dev/gemini-api/docs/api-versions
+        // Ref: https://ai.google.dev/gemini-api/docs/models#stable
+        const modelName = env.GEMINI_MODEL || "gemini-2.5-pro";
+        const generateUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
         const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
@@ -57,10 +55,9 @@ Dê uma recomendação contextualizada. Considere o status do mercado (aberto ou
 Dados da simulação:
 `;
 
-        // Estrutura REST conforme documentação oficial do Google
-        // snake_case para campos REST (system_instruction, não systemInstruction)
+        // Estrutura REST canônica conforme API reference (camelCase)
         const geminiPayload = {
-            system_instruction: {
+            systemInstruction: {
                 parts: [{
                     text: `Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.`
                 }]
@@ -75,7 +72,7 @@ Dados da simulação:
                 topP: 0.8,
                 maxOutputTokens: 4096,
                 thinkingConfig: {
-                    thinkingLevel: "HIGH"  // Gemini 3+: recomendado usar thinkingLevel
+                    thinkingLevel: "HIGH"
                 }
             },
             safetySettings: [
