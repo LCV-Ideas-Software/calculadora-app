@@ -1,5 +1,24 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.03] — 2026-03-22
+### Corrigido
+- Substituição de rótulos em inglês visíveis ao usuário final no fluxo do Oráculo por equivalentes em português do Brasil (histórico e telemetria)
+- Mensagens de erro retornadas pela API do Oráculo para o frontend padronizadas em português, sem repassar texto técnico em inglês do upstream
+
+## [v03.24.02] — 2026-03-22
+### Alterado
+- Inclusão de cooldown visual com contagem regressiva nos botões do Oráculo quando ocorrer `429` (rate limit)
+- UI do Oráculo passa a respeitar metadados de retry (`retryAfterSeconds`) vindos do módulo de integração
+
+### Corrigido
+- Evita reativação prematura dos botões da IA enquanto o cooldown de rate limit está ativo
+
+## [v03.24.01] — 2026-03-22
+### Corrigido
+- Tratamento robusto da resposta do endpoint `/api/oraculo` no frontend para evitar quebra com `Unexpected token '<'` quando a resposta não vier em JSON
+- Mensagens de erro do Oráculo mais claras para usuário final em cenários de `429` (rate limit) e falhas HTTP não-JSON
+- Endpoint `functions/api/oraculo.js` passa a preservar status upstream relevantes da Gemini API (incluindo `429`) em vez de normalizar tudo para `502`
+
 ## [v03.24.00] — 2026-03-22
 ### Alterado
 - Modernização da integração do Oráculo IA para endpoint `v1` da Gemini API, priorizando estabilidade de produção

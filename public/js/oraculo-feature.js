@@ -159,6 +159,59 @@ export function formatarAnaliseIA(textoBruto) {
     }).join('');
 }
 
+function sanitizarTrechoErro(texto) {
+    return String(texto || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 180);
+}
+
+async function lerRespostaOraculo(response) {
+    const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+    const rawBody = await response.text();
+
+    let payload = null;
+    if (contentType.includes('application/json')) {
+        try {
+            payload = rawBody ? JSON.parse(rawBody) : {};
+        } catch {
+            payload = null;
+        }
+    }
+
+    if (!response.ok) {
+        const retryAfterHeader = Number.parseInt(String(response.headers.get('retry-after') || ''), 10);
+        const retryAfterPayload = Number(payload?.retry_after_seconds);
+        const retryAfter = Number.isFinite(retryAfterPayload) && retryAfterPayload > 0
+            ? retryAfterPayload
+            : (Number.isFinite(retryAfterHeader) && retryAfterHeader > 0 ? retryAfterHeader : null);
+
+        if (response.status === 429) {
+            const err = new Error(retryAfter
+                ? `Limite temporário do Oráculo atingido. Tente novamente em ${retryAfter}s.`
+                : 'Limite temporário do Oráculo atingido. Tente novamente em instantes.');
+            err.code = String(payload?.code || 'RATE_LIMITED');
+            err.retryAfterSeconds = retryAfter;
+            throw err;
+        }
+
+        const erroApi = payload?.erro || payload?.error;
+        if (erroApi) throw new Error(String(erroApi));
+
+        const trecho = sanitizarTrechoErro(rawBody);
+        throw new Error(trecho
+            ? `Falha ao consultar o Oráculo (HTTP ${response.status}): ${trecho}`
+            : `Falha ao consultar o Oráculo (HTTP ${response.status}).`);
+    }
+
+    if (!contentType.includes('application/json') || !payload || typeof payload !== 'object') {
+        throw new Error('Resposta inválida do Oráculo (formato inesperado).');
+    }
+
+    return payload;
+}
+
 async function fetchAnaliseOraculo(payloadGlobalParaIA, cacheKey) {
     const response = await fetch('/api/oraculo', {
         method: 'POST',
@@ -166,9 +219,10 @@ async function fetchAnaliseOraculo(payloadGlobalParaIA, cacheKey) {
         body: JSON.stringify(payloadGlobalParaIA)
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-        throw new Error(data.erro || 'Falha ao consultar o Oráculo.');
+    const data = await lerRespostaOraculo(response);
+
+    if (typeof data.analise !== 'string') {
+        throw new Error('Resposta inválida do Oráculo: campo de análise ausente.');
     }
 
     const html = formatarAnaliseIA(data.analise);

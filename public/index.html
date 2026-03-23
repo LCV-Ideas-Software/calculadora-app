@@ -480,7 +480,7 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
-            <span id="app-version-text">APP v03.24.00</span></span>
+            <span id="app-version-text">APP v03.24.03</span></span>
         </div>
 
     </div>
@@ -558,6 +558,8 @@
     let oraculoFeatureModulePromise = null;
     let oraculoPrewarmPromise = null;
     let opportunisticPreloadHandle = null;
+    let aiCooldownInterval = null;
+    let aiCooldownUntil = 0;
     let simulationGeneration = 0;
     const AI_HISTORY_STORAGE_KEY = 'itau-calculadora:ai-history:v1';
     const AI_TELEMETRY_STORAGE_KEY = 'itau-calculadora:ai-telemetry:v1';
@@ -644,6 +646,65 @@
         document.getElementById('ai-result').classList.add('hidden');
         document.getElementById('ai-result').innerHTML = '';
         setAiCacheStatus(null);
+    }
+
+    function isAiCooldownActive() {
+        return Date.now() < aiCooldownUntil;
+    }
+
+    function clearAiCooldown() {
+        if (aiCooldownInterval) {
+            clearInterval(aiCooldownInterval);
+            aiCooldownInterval = null;
+        }
+
+        aiCooldownUntil = 0;
+
+        const primaryBtn = document.getElementById('btn-generate-ai');
+        const refreshBtn = document.getElementById('btn-refresh-ai');
+
+        if (primaryBtn) {
+            primaryBtn.disabled = false;
+            primaryBtn.innerHTML = primaryBtn.dataset.originalLabel || '✨ Analisar Cenário com IA';
+        }
+
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = refreshBtn.dataset.originalLabel || '🔄 Atualizar análise sem usar cache';
+        }
+    }
+
+    function iniciarAiCooldown(seconds) {
+        const cooldownSeconds = Math.max(1, Math.min(300, Math.ceil(Number(seconds) || 0)));
+        aiCooldownUntil = Date.now() + (cooldownSeconds * 1000);
+
+        if (aiCooldownInterval) {
+            clearInterval(aiCooldownInterval);
+            aiCooldownInterval = null;
+        }
+
+        const tick = () => {
+            const remaining = Math.max(0, Math.ceil((aiCooldownUntil - Date.now()) / 1000));
+            const primaryBtn = document.getElementById('btn-generate-ai');
+            const refreshBtn = document.getElementById('btn-refresh-ai');
+
+            if (primaryBtn) {
+                primaryBtn.disabled = true;
+                primaryBtn.innerHTML = `⏳ Aguarde ${remaining}s`;
+            }
+
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = `⏳ Aguarde ${remaining}s`;
+            }
+
+            if (remaining <= 0) {
+                clearAiCooldown();
+            }
+        };
+
+        tick();
+        aiCooldownInterval = setInterval(tick, 1000);
     }
 
     function setRefreshAiButtonVisible(visible) {
@@ -737,12 +798,12 @@
 
         content.innerHTML = history.slice(0, 6).map((item) => {
             const dt = new Date(item.createdAt);
-            const when = Number.isFinite(dt.getTime()) ? dt.toLocaleString('pt-BR', { hour12: false }) : 'N/A';
+            const when = Number.isFinite(dt.getTime()) ? dt.toLocaleString('pt-BR', { hour12: false }) : 'N/D';
             const sourceBadge = item.fromCache
-                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">cache</span>'
-                : '<span class="inline-flex px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-bold">live</span>';
+                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">em cache</span>'
+                : '<span class="inline-flex px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-bold">atualizado</span>';
             const refreshBadge = item.forceRefresh
-                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">refresh</span>'
+                ? '<span class="inline-flex px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">forçado</span>'
                 : '';
             return `
                 <div class="border border-slate-200/80 rounded-lg p-2.5 mb-2 bg-white/70">
@@ -833,7 +894,7 @@
         content.innerHTML = `
             <ul class="list-disc ml-5 space-y-1">
                 <li><strong>Consultas locais:</strong> ${telemetry.total}</li>
-                <li><strong>Cache hit rate:</strong> ${ratioCache}%</li>
+                <li><strong>Taxa de acerto do cache:</strong> ${ratioCache}%</li>
                 <li><strong>Tempo médio:</strong> ${Number.isFinite(telemetry.avgMs) ? telemetry.avgMs : 0}ms</li>
                 <li><strong>Última resposta:</strong> ${Number.isFinite(telemetry.lastMs) ? telemetry.lastMs : 0}ms</li>
                 <li><strong>Falhas:</strong> ${telemetry.errors || 0}</li>
@@ -901,6 +962,15 @@
         } catch (e) {
             const durationMs = performance.now() - startedAt;
             resDiv.innerHTML = `<span class="text-red-600 font-bold">Falha no Oráculo: ${e.message}</span>`;
+
+            const retryAfterSeconds = Number(e?.retryAfterSeconds);
+            const isRateLimited = String(e?.code || '').toUpperCase().includes('RATE_LIMITED')
+                || String(e?.message || '').toLowerCase().includes('limite temporário');
+
+            if (isRateLimited) {
+                iniciarAiCooldown(Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : 15);
+            }
+
             registrarEventoOraculo({
                 status: 'error',
                 fromCache: false,
@@ -911,10 +981,18 @@
                 errorMessage: String(e?.message || 'Falha no Oráculo').slice(0, 240)
             });
         } finally {
-            btn.innerHTML = textoOriginal;
-            btn.disabled = false;
-            if (primaryBtn) primaryBtn.disabled = false;
-            if (refreshBtn) refreshBtn.disabled = false;
+            if (!isAiCooldownActive()) {
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+                if (primaryBtn) {
+                    primaryBtn.disabled = false;
+                    if (primaryBtn !== btn) primaryBtn.innerHTML = primaryBtn.dataset.originalLabel || primaryBtn.innerHTML;
+                }
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    if (refreshBtn !== btn) refreshBtn.innerHTML = refreshBtn.dataset.originalLabel || refreshBtn.innerHTML;
+                }
+            }
         }
     }
 
@@ -1045,7 +1123,7 @@
     </script>
 
     <script>
-        const APP_VERSION = 'APP v03.24.00';
+        const APP_VERSION = 'APP v03.24.03';
         document.getElementById('app-version-text').innerText = APP_VERSION;
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
@@ -1157,6 +1235,11 @@
             carregarParametrosCustomizados();
             conectarPreloadsOportunistas();
             setRefreshAiButtonVisible(false);
+
+            const btnGenerateAi = document.getElementById('btn-generate-ai');
+            const btnRefreshAi = document.getElementById('btn-refresh-ai');
+            if (btnGenerateAi) btnGenerateAi.dataset.originalLabel = btnGenerateAi.innerHTML;
+            if (btnRefreshAi) btnRefreshAi.dataset.originalLabel = btnRefreshAi.innerHTML;
         });
 
         document.getElementById('moeda').addEventListener('change', atualizarContextoMoeda);

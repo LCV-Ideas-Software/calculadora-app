@@ -1,5 +1,5 @@
 // Módulo: itau-calculadora/functions/api/oraculo.js
-// Versão: v03.24.00
+// Versão: v03.24.03
 // Descrição: API do Oráculo IA — modelo estável explícito, v1, payload canônico REST, safetySettings, retry.
 
 import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
@@ -101,7 +101,41 @@ Dados da simulação:
         if (!response.ok) {
             const errText = await response.text();
             console.error('Gemini API error após retry:', response.status, errText);
-            return new Response(JSON.stringify({ erro: `Falha na IA do Google (${response.status}).` }), { status: 502, headers: { "Content-Type": "application/json" } });
+
+            let upstreamMessage = '';
+            try {
+                const parsed = JSON.parse(errText);
+                upstreamMessage = String(parsed?.error?.message || '').trim();
+            } catch {
+                upstreamMessage = '';
+            }
+
+            const mappedStatus = [400, 401, 403, 404, 408, 409, 413, 415, 422, 429, 500, 502, 503, 504].includes(response.status)
+                ? response.status
+                : 502;
+
+            const retryAfterFromHeader = Number.parseInt(String(response.headers.get('retry-after') || ''), 10);
+            const retryAfterSeconds = Number.isFinite(retryAfterFromHeader) && retryAfterFromHeader > 0
+                ? retryAfterFromHeader
+                : 60;
+
+            const body = {
+                erro: mappedStatus === 429
+                    ? `Limite temporário da IA do Google atingido (${response.status}).`
+                    : `Falha na IA do Google (${response.status}).`
+            };
+
+            if (mappedStatus === 429) {
+                body.code = 'RATE_LIMITED_UPSTREAM';
+                body.retry_after_seconds = retryAfterSeconds;
+            }
+
+            const headers = { "Content-Type": "application/json" };
+            if (mappedStatus === 429) {
+                headers['Retry-After'] = String(retryAfterSeconds);
+            }
+
+            return new Response(JSON.stringify(body), { status: mappedStatus, headers });
         }
 
         const data = await response.json();
