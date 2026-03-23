@@ -1,4 +1,8 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.24.11] — 2026-03-22
+### Corrigido
+- `public/app.js`: remoção de `return` prematuros na função `renderOverview()` que impediam renderização dos painéis de Telemetria e Histórico do Oráculo IA
+- Painéis agora renderizam corretamente mesmo com dados vazios em outras seções
 
 ## [v03.24.10] — 2026-03-22
 ### Alterado

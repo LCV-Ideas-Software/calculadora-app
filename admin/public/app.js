@@ -256,10 +256,8 @@ function renderOverview(data) {
   const items = data?.backtest?.ultimas_observacoes || [];
   if (!items.length) {
     list.innerHTML = '<li>Sem observações recentes.</li>';
-    return;
-  }
-
-  list.innerHTML = items
+  } else {
+    list.innerHTML = items
     .map((item) => {
       const dt = new Date(Number(item.created_at));
       const when = Number.isFinite(dt.getTime())
@@ -268,16 +266,15 @@ function renderOverview(data) {
       const erroPct = Number(item.erro_percentual) * 100;
       return `<li>${when} · ${item.moeda} · erro ${fmtNumber(erroPct, 4)}%</li>`;
     })
-    .join('');
+      .join('');
+  }
 
   const auditList = document.getElementById('auditoria-parametros');
   const changes = data?.auditoria_parametros?.ultimas_alteracoes || [];
   if (!changes.length) {
     auditList.innerHTML = '<li>Sem alterações auditadas até o momento.</li>';
-    return;
-  }
-
-  auditList.innerHTML = changes
+  } else {
+    auditList.innerHTML = changes
     .map((item) => {
       const dt = new Date(Number(item.created_at));
       const when = Number.isFinite(dt.getTime())
@@ -289,7 +286,8 @@ function renderOverview(data) {
 
       return `<li>${when} · <strong>${item.chave}</strong>: ${before} → ${after} · ${item.admin_email}</li>`;
     })
-    .join('');
+      .join('');
+  }
 
   const telemetriaList = document.getElementById('ai-telemetria-admin');
   const telemetria = data?.oraculo_telemetria || {};
