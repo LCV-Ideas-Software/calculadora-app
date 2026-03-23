@@ -108,8 +108,8 @@ function renderRateLimitPanels() {
     return `
       <article class="rate-panel" data-route-key="${policy.route_key}">
         <div class="rate-panel-head">
-          <label class="rate-title">
-            <input id="rate_enabled_${routeSafe}" name="rate_enabled_${routeSafe}" type="checkbox" data-field="enabled" autocomplete="off" ${enabled ? 'checked' : ''}>
+          <label class="rate-title" for="rate_enabled_${routeSafe}">
+            <input id="rate_enabled_${routeSafe}" name="rate_enabled_${routeSafe}" type="checkbox" data-field="enabled" aria-label="Habilitar escudo de rate limit para ${getRateRouteLabel(policy.route_key)}" autocomplete="off" ${enabled ? 'checked' : ''}>
             Habilitar Escudo (${getRateRouteLabel(policy.route_key)})
           </label>
           <button type="button" class="btn warn" data-action="restore">Restaurar padrão</button>
@@ -121,11 +121,11 @@ function renderRateLimitPanels() {
         </div>
 
         <div class="rate-inputs">
-          <label>MÁX. REQUISIÇÕES POR IP
-            <input id="rate_max_requests_${routeSafe}" name="rate_max_requests_${routeSafe}" type="number" min="1" step="1" data-field="max_requests" value="${policy.max_requests}" autocomplete="off">
+          <label for="rate_max_requests_${routeSafe}">MÁX. REQUISIÇÕES POR IP
+            <input id="rate_max_requests_${routeSafe}" name="rate_max_requests_${routeSafe}" type="number" min="1" step="1" data-field="max_requests" value="${policy.max_requests}" aria-label="Máximo de requisições por IP para ${getRateRouteLabel(policy.route_key)}" autocomplete="off">
           </label>
-          <label>JANELA (MINUTOS)
-            <input id="rate_window_minutes_${routeSafe}" name="rate_window_minutes_${routeSafe}" type="number" min="1" step="1" data-field="window_minutes" value="${policy.window_minutes}" autocomplete="off">
+          <label for="rate_window_minutes_${routeSafe}">JANELA (MINUTOS)
+            <input id="rate_window_minutes_${routeSafe}" name="rate_window_minutes_${routeSafe}" type="number" min="1" step="1" data-field="window_minutes" value="${policy.window_minutes}" aria-label="Janela em minutos para ${getRateRouteLabel(policy.route_key)}" autocomplete="off">
           </label>
         </div>
 

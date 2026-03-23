@@ -1,4 +1,9 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.24.13] — 2026-03-22
+### Corrigido
+- `public/index.html`: formulário de parâmetros com associação explícita `label for` e `aria-label` nos inputs, mantendo `id/name` únicos para conformidade de autofill
+- `public/app.js`: campos dinâmicos do painel de rate limit com `label for` e `aria-label`, além de `id/name` únicos por rota para eliminar alertas de form field no console
+
 ## [v03.24.12] — 2026-03-22
 ### Corrigido
 - `public/index.html`: adicionados atributos `name` e `autocomplete` nos campos do formulário de parâmetros para adequação de autofill e conformidade de form fields
