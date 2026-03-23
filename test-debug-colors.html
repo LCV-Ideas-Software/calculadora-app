@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Debug - Cores e Classes</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+            background: #fafafa;
+        }
+
+        h1 {
+            color: #1f2937;
+        }
+
+        .debug-box {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .result-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9fafb;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* Copiado do index.html para contexto */
+        .markdown-ia .ai-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            margin-bottom: 0.45rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .markdown-ia .ai-tag--resumo {
+            background: rgba(234, 88, 12, 0.12);
+            color: #9a3412;
+        }
+
+        .markdown-ia .ai-tag--cenarios {
+            background: rgba(168, 85, 247, 0.14);
+            color: #7e22ce;
+        }
+
+        .markdown-ia .ai-tag--matematica {
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+        }
+
+        .markdown-ia .ai-tag--tecnica {
+            background: rgba(71, 85, 105, 0.14);
+            color: #334155;
+        }
+
+        .markdown-ia .ai-tag--recomendacao {
+            background: rgba(34, 197, 94, 0.12);
+            color: #166534;
+        }
+
+        pre {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug: Teste de Classes de Cores</h1>
+
+    <div class="debug-box">
+        <h2>HTML Gerado (Simulado)</h2>
+        <p>Abaixo está uma estrutura HTML simulada como seria gerada pela função <code>formatarAnaliseIA()</code>:</p>
+        <pre id="html-output"></pre>
+
+        <h2>Teste Visual de Cores</h2>
+        <div class="markdown-ia" style="margin: 20px 0;">
+            <span class="ai-tag ai-tag--resumo">Resumo</span>
+            <span class="ai-tag ai-tag--cenarios">Cenários</span>
+            <span class="ai-tag ai-tag--matematica">Matematica</span>
+            <span class="ai-tag ai-tag--tecnica">Tecnica</span>
+            <span class="ai-tag ai-tag--recomendacao">Recomendacao</span>
+        </div>
+
+        <h2>Análise Computada de Estilos</h2>
+        <div id="analysis"></div>
+    </div>
+
+    <script>
+        // Simular HTML gerado
+        const htmlOutput = `<div class="ai-bloco">
+    <span class="ai-tag ai-tag--resumo" data-tooltip='Visão geral e conclusões principais'>Resumo Executivo</span>
+    <p class="ai-paragrafo">Conteúdo do parágrafo aqui...</p>
+</div>
+<div class="ai-bloco">
+    <span class="ai-tag ai-tag--cenarios" data-tooltip='Variações, riscos e impactos'>Cenários e Sensibilidades</span>
+    <p class="ai-paragrafo">Outro parágrafo...</p>
+</div>`;
+
+        document.getElementById('html-output').textContent = htmlOutput;
+
+        // Analisar estilos computados
+        const tags = document.querySelectorAll('.markdown-ia .ai-tag');
+        const analysis = document.getElementById('analysis');
+
+        if (tags.length === 0) {
+            analysis.innerHTML = '<div class="result-item" style="border-left-color: #ef4444;">❌ Nenhuma tag encontrada!</div>';
+        } else {
+            let html = '';
+            tags.forEach((tag, idx) => {
+                const computed = window.getComputedStyle(tag);
+                const classList = tag.className;
+                const bgColor = computed.backgroundColor;
+                const textColor = computed.color;
+                
+                html += `
+                    <div class="result-item">
+                        <strong>Tag ${idx + 1}:</strong><br>
+                        Classes: <code>${classList}</code><br>
+                        Background: <code>${bgColor}</code><br>
+                        Color: <code>${textColor}</code><br>
+                        <div style="display: inline-block; background: ${bgColor}; color: ${textColor}; padding: 4px 8px; border-radius: 4px; margin-top: 8px;">Preview</div>
+                    </div>
+                `;
+            });
+            analysis.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

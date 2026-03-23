@@ -1,5 +1,11 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.11] — 2026-03-22
+### Corrigido
+- `public/js/oraculo-feature.js`: remoção de chamada a função indefinida `escaparAtributoHtml()` que impedia renderização correta dos tooltips
+- CSS `::after` tooltip agora renderiza texto corretamente ao passar o mouse nos labels
+- Remoção de conflito entre atributo `title` nativo HTML e tooltip customizado em CSS
+
 ## [v03.24.10] — 2026-03-22
 ### Alterado
 - `public/js/oraculo-feature.js`: adição de campo `tooltip` em cada rótulo de bloco da IA com descrição contextual
