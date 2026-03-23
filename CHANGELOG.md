@@ -1,5 +1,11 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.07] — 2026-03-23
+### Corrigido
+- Endpoint `functions/api/oraculo.js` reforçado com fallback progressivo de payload para a Gemini API quando houver `400/422` de validação do provedor
+- Fluxo do Oráculo passa a tentar variações de compatibilidade antes de falhar, reduzindo indisponibilidade por mudanças de schema upstream
+- Mensagem de erro para `400` no frontend agora indica rejeição do provedor de IA de forma mais clara em português
+
 ## [v03.24.06] — 2026-03-22
 ### Alterado
 - `itau-calculadora-admin`: ícones das notificações em tela migrados de emoji para SVG inline, alinhando o visual ao padrão do `mainsite`

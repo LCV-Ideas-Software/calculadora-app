@@ -1,6 +1,6 @@
 // Módulo: itau-calculadora/functions/api/oraculo.js
-// Versão: v03.24.03
-// Descrição: API do Oráculo IA — modelo estável explícito, v1, payload canônico REST, safetySettings, retry.
+// Versão: v03.24.07
+// Descrição: API do Oráculo IA — robustez com fallback de compatibilidade para erros 400 do provedor Gemini.
 
 import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
 
@@ -55,8 +55,8 @@ Dê uma recomendação contextualizada. Considere o status do mercado (aberto ou
 Dados da simulação:
 `;
 
-        // Estrutura REST canônica conforme API reference (camelCase)
-        const geminiPayload = {
+        // Payload principal (com recursos avançados)
+        const geminiPayloadAdvanced = {
             systemInstruction: {
                 parts: [{
                     text: `Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.`
@@ -83,24 +83,95 @@ Dados da simulação:
             ]
         };
 
-        // Retry: 1 tentativa extra em caso de falha transitória
-        let response;
-        for (let tentativa = 0; tentativa < 2; tentativa++) {
-            response = await fetch(generateUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(geminiPayload)
-            });
-            if (response.ok) break;
-            if (tentativa === 0) {
-                console.warn(`Gemini tentativa 1 falhou (${response.status}), retrying...`);
-                await new Promise(r => setTimeout(r, 800));
+        // Fallback 1: remove thinkingConfig (ponto comum de incompatibilidade em algumas combinações de modelo/versão)
+        const geminiPayloadCompat = {
+            ...geminiPayloadAdvanced,
+            generationConfig: {
+                temperature: 0.3,
+                topP: 0.8,
+                maxOutputTokens: 4096
+            }
+        };
+
+        // Fallback 2: payload mínimo (sem campos opcionais mais sensíveis)
+        const geminiPayloadMinimal = {
+            contents: [{
+                parts: [{
+                    text: `Contexto de atuação:\nVocê é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité. Comunicação clara, direta e acessível. Use negrito para valores-chave. Português do Brasil. Não invente dados — use exclusivamente os números fornecidos.\n\n${instrucao}${JSON.stringify(promptData, null, 2)}`
+                }]
+            }],
+            generationConfig: {
+                temperature: 0.3,
+                topP: 0.8,
+                maxOutputTokens: 3072
+            }
+        };
+
+        async function callGeminiWithRetry(payload, label) {
+            let lastStatus = 502;
+            let lastErrorText = '';
+            let lastHeaders = new Headers({ 'Content-Type': 'application/json' });
+
+            for (let tentativa = 0; tentativa < 2; tentativa++) {
+                const currentResponse = await fetch(generateUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (currentResponse.ok) {
+                    return { ok: true, response: currentResponse };
+                }
+
+                lastStatus = currentResponse.status;
+                lastHeaders = currentResponse.headers;
+                lastErrorText = await currentResponse.text().catch(() => '');
+
+                if (tentativa === 0) {
+                    console.warn(`Gemini tentativa 1 falhou (${currentResponse.status}) em ${label}, retrying...`);
+                    await new Promise((r) => setTimeout(r, 800));
+                }
+            }
+
+            return {
+                ok: false,
+                status: lastStatus,
+                errorText: lastErrorText,
+                headers: lastHeaders
+            };
+        }
+
+        const payloadCandidates = [
+            { label: 'advanced', payload: geminiPayloadAdvanced },
+            { label: 'compat', payload: geminiPayloadCompat },
+            { label: 'minimal', payload: geminiPayloadMinimal }
+        ];
+
+        let successfulResponse = null;
+        let lastFailure = null;
+
+        for (const candidate of payloadCandidates) {
+            const result = await callGeminiWithRetry(candidate.payload, candidate.label);
+
+            if (result.ok) {
+                successfulResponse = result.response;
+                break;
+            }
+
+            lastFailure = result;
+            console.error(`Gemini falhou no payload ${candidate.label}:`, result.status, result.errorText);
+
+            // Fallback somente para erros de formato/validação do payload
+            if (![400, 422].includes(result.status)) {
+                break;
             }
         }
 
-        if (!response.ok) {
-            const errText = await response.text();
-            console.error('Gemini API error após retry:', response.status, errText);
+        if (!successfulResponse) {
+            const failureStatus = Number(lastFailure?.status || 502);
+            const errText = String(lastFailure?.errorText || '');
+            const failureHeaders = lastFailure?.headers || new Headers({ 'Content-Type': 'application/json' });
+            console.error('Gemini API error após fallback:', failureStatus, errText);
 
             let upstreamMessage = '';
             try {
@@ -110,19 +181,21 @@ Dados da simulação:
                 upstreamMessage = '';
             }
 
-            const mappedStatus = [400, 401, 403, 404, 408, 409, 413, 415, 422, 429, 500, 502, 503, 504].includes(response.status)
-                ? response.status
+            const mappedStatus = [400, 401, 403, 404, 408, 409, 413, 415, 422, 429, 500, 502, 503, 504].includes(failureStatus)
+                ? failureStatus
                 : 502;
 
-            const retryAfterFromHeader = Number.parseInt(String(response.headers.get('retry-after') || ''), 10);
+            const retryAfterFromHeader = Number.parseInt(String(failureHeaders.get('retry-after') || ''), 10);
             const retryAfterSeconds = Number.isFinite(retryAfterFromHeader) && retryAfterFromHeader > 0
                 ? retryAfterFromHeader
                 : 60;
 
             const body = {
                 erro: mappedStatus === 429
-                    ? `Limite temporário da IA do Google atingido (${response.status}).`
-                    : `Falha na IA do Google (${response.status}).`
+                    ? `Limite temporário da IA do Google atingido (${failureStatus}).`
+                    : mappedStatus === 400
+                        ? `Falha na IA do Google (${failureStatus}): requisição rejeitada pelo provedor. Tente novamente em instantes.`
+                        : `Falha na IA do Google (${failureStatus}).`
             };
 
             if (mappedStatus === 429) {
@@ -138,7 +211,7 @@ Dados da simulação:
             return new Response(JSON.stringify(body), { status: mappedStatus, headers });
         }
 
-        const data = await response.json();
+        const data = await successfulResponse.json();
 
         // Modelos thinking retornam thoughts + text em parts separados
         // Filtrar apenas partes com texto visível (ignorar thoughts)
