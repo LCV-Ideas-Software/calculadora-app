@@ -1,4 +1,9 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.24.12] — 2026-03-22
+### Corrigido
+- `public/index.html`: adicionados atributos `name` e `autocomplete` nos campos do formulário de parâmetros para adequação de autofill e conformidade de form fields
+- `public/app.js`: campos dinâmicos do painel de rate limit agora são renderizados com `id` e `name` únicos por rota (`enabled`, `max_requests`, `window_minutes`), eliminando alertas do console sobre inputs sem identificação
+
 ## [v03.24.11] — 2026-03-22
 ### Corrigido
 - `public/app.js`: remoção de `return` prematuros na função `renderOverview()` que impediam renderização dos painéis de Telemetria e Histórico do Oráculo IA

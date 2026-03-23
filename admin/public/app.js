@@ -104,11 +104,12 @@ function renderRateLimitPanels() {
     const enabled = Boolean(policy.enabled);
     const statusText = enabled ? 'ATIVO' : 'INATIVO';
     const dotClass = enabled ? 'rate-dot' : 'rate-dot off';
+    const routeSafe = String(policy.route_key || 'rota').replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
     return `
       <article class="rate-panel" data-route-key="${policy.route_key}">
         <div class="rate-panel-head">
           <label class="rate-title">
-            <input type="checkbox" data-field="enabled" ${enabled ? 'checked' : ''}>
+            <input id="rate_enabled_${routeSafe}" name="rate_enabled_${routeSafe}" type="checkbox" data-field="enabled" autocomplete="off" ${enabled ? 'checked' : ''}>
             Habilitar Escudo (${getRateRouteLabel(policy.route_key)})
           </label>
           <button type="button" class="btn warn" data-action="restore">Restaurar padrão</button>
@@ -121,10 +122,10 @@ function renderRateLimitPanels() {
 
         <div class="rate-inputs">
           <label>MÁX. REQUISIÇÕES POR IP
-            <input type="number" min="1" step="1" data-field="max_requests" value="${policy.max_requests}">
+            <input id="rate_max_requests_${routeSafe}" name="rate_max_requests_${routeSafe}" type="number" min="1" step="1" data-field="max_requests" value="${policy.max_requests}" autocomplete="off">
           </label>
           <label>JANELA (MINUTOS)
-            <input type="number" min="1" step="1" data-field="window_minutes" value="${policy.window_minutes}">
+            <input id="rate_window_minutes_${routeSafe}" name="rate_window_minutes_${routeSafe}" type="number" min="1" step="1" data-field="window_minutes" value="${policy.window_minutes}" autocomplete="off">
           </label>
         </div>
 
