@@ -285,6 +285,61 @@
             padding: 0.8rem 0.9rem;
             margin-bottom: 0.9rem;
         }
+
+        .floating-scroll-controls {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            z-index: 9999;
+        }
+
+        .floating-scroll-btn {
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            color: #0f172a;
+            width: 60px;
+            height: 60px;
+            border-radius: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(12px) scale(0.92);
+            pointer-events: none;
+        }
+
+        .floating-scroll-btn.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .floating-scroll-btn:hover {
+            transform: translateY(-4px);
+            border-color: #0f172a;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+        }
+
+        @media (max-width: 768px) {
+            .floating-scroll-controls {
+                right: 20px;
+                bottom: 20px;
+            }
+
+            .floating-scroll-btn {
+                width: 54px;
+                height: 54px;
+            }
+        }
     </style>
 </head>
 
@@ -554,9 +609,35 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
-            <span id="app-version-text">APP v03.24.11</span></span>
+            <span id="app-version-text">APP v03.24.12</span></span>
         </div>
 
+    </div>
+
+    <div class="floating-scroll-controls" aria-label="Controles de rolagem">
+        <button
+            type="button"
+            id="btn-scroll-top"
+            class="floating-scroll-btn"
+            title="Voltar ao Topo"
+            aria-label="Voltar ao Topo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <button
+            type="button"
+            id="btn-scroll-bottom"
+            class="floating-scroll-btn"
+            title="Ir para o Final"
+            aria-label="Ir para o Final">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19 12L12 19L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
     </div>
 
     <script>
@@ -1197,8 +1278,46 @@
     </script>
 
     <script>
-        const APP_VERSION = 'APP v03.24.11';
+        const APP_VERSION = 'APP v03.24.12';
         document.getElementById('app-version-text').innerText = APP_VERSION;
+
+        function updateFloatingScrollControls() {
+            const btnTop = document.getElementById('btn-scroll-top');
+            const btnBottom = document.getElementById('btn-scroll-bottom');
+            if (!btnTop || !btnBottom) return;
+
+            const scrollTop = window.scrollY;
+            const viewportHeight = window.innerHeight;
+            const pageHeight = document.documentElement.scrollHeight;
+            const scrollableDistance = Math.max(0, pageHeight - viewportHeight);
+            const remainingToBottom = pageHeight - (scrollTop + viewportHeight);
+            const hasMeaningfulScroll = scrollableDistance > 650;
+
+            const showBackToTop = hasMeaningfulScroll && scrollTop > 420;
+            const showScrollToBottom = hasMeaningfulScroll && scrollTop > 120 && remainingToBottom > 420;
+
+            btnTop.classList.toggle('is-visible', showBackToTop);
+            btnBottom.classList.toggle('is-visible', showScrollToBottom);
+        }
+
+        const btnScrollTop = document.getElementById('btn-scroll-top');
+        const btnScrollBottom = document.getElementById('btn-scroll-bottom');
+
+        if (btnScrollTop) {
+            btnScrollTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        if (btnScrollBottom) {
+            btnScrollBottom.addEventListener('click', () => {
+                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+            });
+        }
+
+        updateFloatingScrollControls();
+        window.addEventListener('scroll', updateFloatingScrollControls, { passive: true });
+        window.addEventListener('resize', updateFloatingScrollControls);
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
         const dataISOHoje = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;

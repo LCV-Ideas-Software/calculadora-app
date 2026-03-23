@@ -1,5 +1,10 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.12] — 2026-03-22
+### Alterado
+- `public/index.html`: adição de botões flutuantes de rolagem **Voltar ao Topo** e **Ir para o Final** no frontend da calculadora
+- Lógica de visibilidade e thresholds de scroll alinhados ao padrão do `mainsite/mainsite-frontend` (com rolagem suave em ambos os controles)
+
 ## [v03.24.11] — 2026-03-22
 ### Corrigido
 - `public/js/oraculo-feature.js`: remoção de chamada a função indefinida `escaparAtributoHtml()` que impedia renderização correta dos tooltips
