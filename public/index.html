@@ -480,7 +480,7 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
-            <span id="app-version-text">APP v03.24.03</span></span>
+            <span id="app-version-text">APP v03.24.04</span></span>
         </div>
 
     </div>
@@ -1123,7 +1123,7 @@
     </script>
 
     <script>
-        const APP_VERSION = 'APP v03.24.03';
+        const APP_VERSION = 'APP v03.24.04';
         document.getElementById('app-version-text').innerText = APP_VERSION;
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
@@ -1395,7 +1395,7 @@
                         : '1,18%';
                     const mercadoStatus = data.global?.suportada
                         ? (data.global.is_plantao ? 'Fechado/Plantão' : 'Aberto')
-                        : 'N/A';
+                        : 'N/D';
 
                     parametrosVigentesConteudo.innerHTML = `
                         <ul class="list-disc ml-5 space-y-1">
@@ -1449,7 +1449,7 @@
 
                         const erroAtualPct = Number.isFinite(bt.erro_percentual_atual)
                             ? (bt.erro_percentual_atual * 100).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 }) + '%'
-                            : 'N/A';
+                            : 'N/D';
 
                         const faixaBoa = Number.isFinite(bt?.faixas_percent?.boa)
                             ? bt.faixas_percent.boa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

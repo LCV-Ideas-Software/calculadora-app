@@ -1,5 +1,10 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.04] — 2026-03-22
+### Corrigido
+- Substituição dos rótulos residuais `N/A` por `N/D` em blocos visíveis ao usuário no frontend
+- Consolidação final do fluxo do Oráculo sem textos em inglês para usuário final
+
 ## [v03.24.03] — 2026-03-22
 ### Corrigido
 - Substituição de rótulos em inglês visíveis ao usuário final no fluxo do Oráculo por equivalentes em português do Brasil (histórico e telemetria)
