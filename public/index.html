@@ -163,28 +163,29 @@
         .markdown-ia .ai-tag::after {
             content: attr(data-tooltip);
             position: absolute;
-            bottom: 100%;
+            bottom: calc(100% + 8px);
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: #fff;
-            padding: 0.5rem 0.75rem;
+            background: rgba(0, 0, 0, 0.92);
+            color: #ffffff;
+            padding: 0.6rem 0.9rem;
             border-radius: 0.5rem;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
-            z-index: 1000;
+            z-index: 1100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
-            margin-bottom: 6px;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            visibility: hidden;
             letter-spacing: 0;
             text-transform: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .markdown-ia .ai-tag:hover::after {
             opacity: 1;
+            visibility: visible;
         }
 
         .markdown-ia .ai-tag--resumo {

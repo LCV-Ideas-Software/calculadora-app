@@ -190,10 +190,12 @@ export function formatarAnaliseIA(textoBruto) {
     return paragrafos.map((paragrafo, indice) => {
         const htmlParagrafo = markdownBasico(paragrafo).replace(/\n/g, '<br>');
         const tag = inferirTagAI(paragrafo, indice, paragrafos.length);
+        const tooltipEscapado = escaparAtributoHtml(tag.tooltip);
+        const labelEscapado = escaparAtributoHtml(tag.label);
 
         return `
             <div class="ai-bloco">
-                <span class="ai-tag ${tag.classe}" data-tooltip="${tag.tooltip}" title="${tag.tooltip}">${tag.label}</span>
+                <span class="ai-tag ${tag.classe}" data-tooltip='${tag.tooltip}' title='${tag.tooltip}'>${labelEscapado}</span>
                 <p class="ai-paragrafo">${htmlParagrafo}</p>
             </div>
         `;
