@@ -117,6 +117,66 @@ input {
   font-weight: 600;
 }
 
+.toast {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%, -28px);
+  opacity: 0;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10050;
+}
+
+.toast.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+.toast.success {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+}
+
+.toast.info {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+}
+
+.toast.error {
+  background: #d32f2f;
+  color: #fff;
+  border-color: rgba(211, 47, 47, 0.8);
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.toast-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
 .list {
   margin: 0;
   padding-left: 18px;

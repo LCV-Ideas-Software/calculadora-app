@@ -1,4 +1,64 @@
 const statusEl = document.getElementById('status');
+const toastEl = document.getElementById('toast');
+const toastMessageEl = document.getElementById('toast-message');
+const toastIconEl = document.getElementById('toast-icon');
+
+let toastTimeout = null;
+let lastPointerY = null;
+
+function getToastIconSvg(type) {
+  if (type === 'error') {
+    return `
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="13"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    `;
+  }
+
+  if (type === 'success') {
+    return `
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 6L9 17l-5-5"></path>
+      </svg>
+    `;
+  }
+
+  return `
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="11" x2="12" y2="16"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+  `;
+}
+
+window.addEventListener('pointerdown', (event) => {
+  if (typeof event?.clientY === 'number') lastPointerY = event.clientY;
+}, { passive: true });
+
+function showNotification(message, type = 'info') {
+  if (!toastEl || !toastMessageEl || !toastIconEl) return;
+
+  const viewportH = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const baseY = lastPointerY != null ? lastPointerY : (viewportH * 0.5);
+  const nextTop = Math.max(16, Math.min(baseY - 36, Math.max(16, viewportH - 90)));
+
+  toastEl.style.top = `${nextTop}px`;
+  toastEl.classList.remove('show', 'info', 'success', 'error');
+  toastEl.classList.add(type);
+
+  toastIconEl.innerHTML = getToastIconSvg(type);
+  toastMessageEl.textContent = String(message || '');
+
+  requestAnimationFrame(() => toastEl.classList.add('show'));
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toastEl.classList.remove('show');
+  }, 4000);
+}
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message || '';
@@ -88,6 +148,7 @@ function renderRateLimitPanels() {
       const windowMinutes = Number(panel.querySelector('[data-field="window_minutes"]').value);
 
       setStatus('Salvando política de rate limit...');
+      showNotification('Aplicando política de rate limit...', 'info');
 
       try {
         const payload = {
@@ -107,8 +168,10 @@ function renderRateLimitPanels() {
         rateLimitPolicies = response.policies || [];
         renderRateLimitPanels();
         setStatus('Política atualizada com sucesso.');
+        showNotification('Política aplicada e salva com sucesso.', 'success');
       } catch (error) {
         setStatus(error.message, true);
+        showNotification(error.message, 'error');
       }
     });
   });
@@ -120,6 +183,7 @@ function renderRateLimitPanels() {
       if (!routeKey) return;
 
       setStatus('Restaurando política padrão...');
+      showNotification('Restaurando política padrão...', 'info');
 
       try {
         const response = await fetchJson('/api/admin/rate-limit', {
@@ -131,8 +195,10 @@ function renderRateLimitPanels() {
         rateLimitPolicies = response.policies || [];
         renderRateLimitPanels();
         setStatus('Política restaurada para o padrão.');
+        showNotification('Política restaurada e aplicada com sucesso.', 'success');
       } catch (error) {
         setStatus(error.message, true);
+        showNotification(error.message, 'error');
       }
     });
   });
@@ -265,7 +331,8 @@ function renderOverview(data) {
   }).join('');
 }
 
-async function loadOverviewAndParams() {
+async function loadOverviewAndParams(options = {}) {
+  const { notifySuccess = false } = options;
   setStatus('Atualizando painel...');
 
   const [overview, parametros] = await Promise.all([
@@ -277,6 +344,10 @@ async function loadOverviewAndParams() {
   fillParamForm(parametros?.parametros_form || {});
   await loadRateLimitPanel();
   setStatus('Painel atualizado.');
+
+  if (notifySuccess) {
+    showNotification('Parâmetros aplicados no painel com sucesso.', 'success');
+  }
 }
 
 async function saveParams(event) {
@@ -286,6 +357,7 @@ async function saveParams(event) {
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
   setStatus('Salvando parâmetros...');
+  showNotification('Aplicando e salvando parâmetros...', 'info');
 
   try {
     await fetchJson('/api/admin/parametros', {
@@ -295,9 +367,10 @@ async function saveParams(event) {
     });
 
     setStatus('Parâmetros salvos com sucesso.');
-    await loadOverviewAndParams();
+    await loadOverviewAndParams({ notifySuccess: true });
   } catch (error) {
     setStatus(error.message, true);
+    showNotification(error.message, 'error');
   } finally {
     btn.disabled = false;
   }
@@ -305,13 +378,25 @@ async function saveParams(event) {
 
 document.getElementById('param-form').addEventListener('submit', saveParams);
 document.getElementById('btn-refresh').addEventListener('click', () => {
-  loadOverviewAndParams().catch((error) => setStatus(error.message, true));
+  loadOverviewAndParams({ notifySuccess: true }).catch((error) => {
+    setStatus(error.message, true);
+    showNotification(error.message, 'error');
+  });
 });
 
 document.getElementById('btn-refresh-rate-limit').addEventListener('click', () => {
   loadRateLimitPanel()
-    .then(() => setStatus('Painel de rate limit atualizado.'))
-    .catch((error) => setStatus(error.message, true));
+    .then(() => {
+      setStatus('Painel de rate limit atualizado.');
+      showNotification('Painel de rate limit aplicado e atualizado.', 'success');
+    })
+    .catch((error) => {
+      setStatus(error.message, true);
+      showNotification(error.message, 'error');
+    });
 });
 
-loadOverviewAndParams().catch((error) => setStatus(error.message, true));
+loadOverviewAndParams().catch((error) => {
+  setStatus(error.message, true);
+  showNotification(error.message, 'error');
+});

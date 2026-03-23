@@ -1,5 +1,18 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.06] — 2026-03-22
+### Alterado
+- `itau-calculadora-admin`: ícones das notificações em tela migrados de emoji para SVG inline, alinhando o visual ao padrão do `mainsite`
+- `itau-calculadora-admin`: refinamento visual do container de ícone do toast para consistência em sucesso, informação e erro
+
+## [v03.24.05] — 2026-03-22
+### Alterado
+- `itau-calculadora-admin`: inclusão de notificações em tela (toast glassmorphism) para confirmar aplicação e salvamento de parâmetros
+- `itau-calculadora-admin`: toasts com lógica de posicionamento inteligente por interação no viewport, seguindo o mesmo padrão de UX do `mainsite`
+
+### Corrigido
+- `itau-calculadora-admin`: feedback de erro/sucesso padronizado para ações de parâmetros e políticas de rate limit
+
 ## [v03.24.04] — 2026-03-22
 ### Corrigido
 - Substituição dos rótulos residuais `N/A` por `N/D` em blocos visíveis ao usuário no frontend
