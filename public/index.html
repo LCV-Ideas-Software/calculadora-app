@@ -149,6 +149,42 @@
             border-radius: 999px;
             padding: 0.2rem 0.55rem;
             margin-bottom: 0.45rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .markdown-ia .ai-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .markdown-ia .ai-tag::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            margin-bottom: 6px;
+            letter-spacing: 0;
+            text-transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .markdown-ia .ai-tag:hover::after {
+            opacity: 1;
         }
 
         .markdown-ia .ai-tag--resumo {
@@ -156,14 +192,51 @@
             color: #9a3412;
         }
 
+        .markdown-ia .ai-tag--resumo:hover {
+            background: rgba(234, 88, 12, 0.24);
+            border-color: #9a3412;
+        }
+
+        .markdown-ia .ai-tag--cenarios {
+            background: rgba(168, 85, 247, 0.14);
+            color: #7e22ce;
+        }
+
+        .markdown-ia .ai-tag--cenarios:hover {
+            background: rgba(168, 85, 247, 0.28);
+            border-color: #7e22ce;
+        }
+
+        .markdown-ia .ai-tag--matematica,
         .markdown-ia .ai-tag--base {
             background: rgba(37, 99, 235, 0.12);
             color: #1d4ed8;
         }
 
+        .markdown-ia .ai-tag--matematica:hover,
+        .markdown-ia .ai-tag--base:hover {
+            background: rgba(37, 99, 235, 0.24);
+            border-color: #1d4ed8;
+        }
+
+        .markdown-ia .ai-tag--tecnica {
+            background: rgba(71, 85, 105, 0.14);
+            color: #334155;
+        }
+
+        .markdown-ia .ai-tag--tecnica:hover {
+            background: rgba(71, 85, 105, 0.28);
+            border-color: #334155;
+        }
+
         .markdown-ia .ai-tag--recomendacao {
             background: rgba(22, 163, 74, 0.12);
             color: #15803d;
+        }
+
+        .markdown-ia .ai-tag--recomendacao:hover {
+            background: rgba(22, 163, 74, 0.24);
+            border-color: #15803d;
         }
 
         .markdown-ia .ai-paragrafo {
@@ -480,7 +553,7 @@
         <div class="mt-8 mb-4 text-center relative z-10">
             <span
                 class="text-[11px] font-mono text-gray-500/80 font-bold tracking-[0.2em] uppercase bg-white/40 px-4 py-2 rounded-full backdrop-blur-md border border-white/50 shadow-sm">
-            <span id="app-version-text">APP v03.24.07</span></span>
+            <span id="app-version-text">APP v03.24.10</span></span>
         </div>
 
     </div>
@@ -1123,7 +1196,7 @@
     </script>
 
     <script>
-        const APP_VERSION = 'APP v03.24.07';
+        const APP_VERSION = 'APP v03.24.10';
         document.getElementById('app-version-text').innerText = APP_VERSION;
 
         const d = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));

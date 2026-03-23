@@ -13,12 +13,53 @@ function markdownBasico(texto) {
         .replace(/\*(.*?)\*/g, '<em>$1</em>');
 }
 
-function detectarClasseTagAI(texto) {
-    const normalizado = texto.toLowerCase();
-    if (normalizado.startsWith('resumo executivo:')) return 'ai-tag--resumo';
-    if (normalizado.startsWith('base matemática:') || normalizado.startsWith('base matematica:')) return 'ai-tag--base';
-    if (normalizado.startsWith('recomendação prática:') || normalizado.startsWith('recomendacao pratica:')) return 'ai-tag--recomendacao';
-    return 'ai-tag--base';
+function inferirTagAI(texto, indice, total) {
+    const normalizado = String(texto || '').toLowerCase().trim();
+
+    // 1) Respeita cabeçalhos explícitos quando o modelo os fornece.
+    if (normalizado.startsWith('resumo executivo:')) {
+        return { classe: 'ai-tag--resumo', label: 'Resumo Executivo', tooltip: 'Visão geral e conclusões principais da análise' };
+    }
+
+    if (normalizado.startsWith('base matemática:') || normalizado.startsWith('base matematica:')) {
+        return { classe: 'ai-tag--matematica', label: 'Base Matemática', tooltip: 'Cálculos, fórmulas e dados técnicos utilizados' };
+    }
+
+    if (normalizado.startsWith('recomendação prática:') || normalizado.startsWith('recomendacao pratica:')) {
+        return { classe: 'ai-tag--recomendacao', label: 'Recomendação Prática', tooltip: 'Sugestões e melhor caminho para a decisão' };
+    }
+
+    // 2) Inferência por conteúdo para tornar os blocos mais informativos.
+    const temResumo = /(resumo|vis[aã]o geral|em s[íi]ntese|conclus[aã]o geral|panorama)/.test(normalizado);
+    if (temResumo) {
+        return { classe: 'ai-tag--resumo', label: 'Resumo Executivo', tooltip: 'Visão geral e conclusões principais da análise' };
+    }
+
+    const temRecomendacao = /(recomend|suger|indicaç|estrat[ée]gia|melhor op[cç][aã]o|decis[aã]o|vale a pena|deve)/.test(normalizado);
+    if (temRecomendacao) {
+        return { classe: 'ai-tag--recomendacao', label: 'Recomendação Prática', tooltip: 'Sugestões e melhor caminho para a decisão' };
+    }
+
+    const temRiscoCenario = /(risco|aten[cç][aã]o|volatil|incerteza|cen[aá]rio|sensibilidade|varia[cç][aã]o)/.test(normalizado);
+    if (temRiscoCenario) {
+        return { classe: 'ai-tag--cenarios', label: 'Cenários e Sensibilidades', tooltip: 'Variações, riscos e impactos em diferentes contextos' };
+    }
+
+    const temBaseTecnica = /(iof|spread|vet|c[aâ]mbio|taxa|custo|percentual|f[oó]rmula|matem[aá]tica|c[aá]lculo|diferen[cç]a|economia)/.test(normalizado);
+    if (temBaseTecnica) {
+        return { classe: 'ai-tag--matematica', label: 'Base Matemática', tooltip: 'Cálculos, fórmulas e dados técnicos utilizados' };
+    }
+
+    // 3) Fallback por posição para evitar repetição cega de rótulos.
+    if (indice === 0) {
+        return { classe: 'ai-tag--resumo', label: 'Resumo Executivo', tooltip: 'Visão geral e conclusões principais da análise' };
+    }
+
+    if (indice === total - 1) {
+        return { classe: 'ai-tag--recomendacao', label: 'Recomendação Prática', tooltip: 'Sugestões e melhor caminho para a decisão' };
+    }
+
+    return { classe: 'ai-tag--tecnica', label: 'Análise Técnica', tooltip: 'Aprofundamento técnico e análise detalhada dos números' };
 }
 
 const ORACULO_CACHE_TTL_MS = 10 * 60 * 1000;
@@ -146,13 +187,13 @@ export function formatarAnaliseIA(textoBruto) {
         return '<div class="ai-bloco"><p class="ai-paragrafo">Análise concluída sem retorno de texto.</p></div>';
     }
 
-    return paragrafos.map((paragrafo) => {
+    return paragrafos.map((paragrafo, indice) => {
         const htmlParagrafo = markdownBasico(paragrafo).replace(/\n/g, '<br>');
-        const classeTag = detectarClasseTagAI(paragrafo);
+        const tag = inferirTagAI(paragrafo, indice, paragrafos.length);
 
         return `
             <div class="ai-bloco">
-                <span class="ai-tag ${classeTag}">${classeTag === 'ai-tag--resumo' ? 'Resumo Executivo' : classeTag === 'ai-tag--recomendacao' ? 'Recomendação Prática' : 'Base Matemática'}</span>
+                <span class="ai-tag ${tag.classe}" data-tooltip="${tag.tooltip}" title="${tag.tooltip}">${tag.label}</span>
                 <p class="ai-paragrafo">${htmlParagrafo}</p>
             </div>
         `;

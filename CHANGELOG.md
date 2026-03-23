@@ -1,5 +1,21 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.10] — 2026-03-22
+### Alterado
+- `public/js/oraculo-feature.js`: adição de campo `tooltip` em cada rótulo de bloco da IA com descrição contextual
+- `public/index.html`: implementação de tooltip flutuante em hover nos labels do Oráculo usando CSS `::after`
+- Sinalização visual de interatividade: cursor pointer, efeito de elevação (transform) e mudança de intensidade de cor no hover
+
+## [v03.24.09] — 2026-03-22
+### Alterado
+- `public/js/oraculo-feature.js`: cada tipo de rótulo da análise IA passa a usar classe visual dedicada (`resumo`, `cenários`, `base matemática`, `análise técnica`, `recomendação`)
+- `public/index.html`: aplicação de paleta distinta por label no bloco do Oráculo para melhorar leitura rápida e diferenciação semântica
+
+## [v03.24.08] — 2026-03-22
+### Alterado
+- `public/js/oraculo-feature.js`: classificação dos blocos da análise de IA aprimorada para usar rótulos contextuais por conteúdo (ex.: resumo, cenários, análise técnica, recomendação)
+- Rótulos deixam de cair sempre no padrão `Base Matemática` quando o texto não vem com cabeçalhos explícitos do modelo
+
 ## [v03.24.07] — 2026-03-23
 ### Corrigido
 - Endpoint `functions/api/oraculo.js` reforçado com fallback progressivo de payload para a Gemini API quando houver `400/422` de validação do provedor
