@@ -1,4 +1,4 @@
-const DEFAULT_POLICIES = {
+﻿const DEFAULT_POLICIES = {
   oraculo_ia: {
     route_key: 'oraculo_ia',
     label: 'Síntese da IA',
@@ -29,8 +29,8 @@ export function getAllDefaultPolicies() {
 }
 
 export async function ensureRateLimitTables(env) {
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS rate_limit_policies (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_rate_limit_policies (
       route_key TEXT PRIMARY KEY,
       enabled INTEGER NOT NULL,
       max_requests INTEGER NOT NULL,
@@ -40,8 +40,8 @@ export async function ensureRateLimitTables(env) {
     )
   `).run();
 
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS rate_limit_hits (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_rate_limit_hits (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       route_key TEXT NOT NULL,
       ip TEXT NOT NULL,
@@ -54,8 +54,8 @@ export async function ensureDefaultPolicies(env) {
   await ensureRateLimitTables(env);
 
   for (const policy of getAllDefaultPolicies()) {
-    await env.DB.prepare(`
-      INSERT OR IGNORE INTO rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
+    await env.BIGDATA_DB.prepare(`
+      INSERT OR IGNORE INTO itau_rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
       VALUES (?, ?, ?, ?, ?, ?)
     `)
       .bind(
@@ -73,9 +73,9 @@ export async function ensureDefaultPolicies(env) {
 export async function getRateLimitPolicy(env, routeKey) {
   await ensureDefaultPolicies(env);
 
-  const row = await env.DB.prepare(`
+  const row = await env.BIGDATA_DB.prepare(`
     SELECT route_key, enabled, max_requests, window_minutes, updated_at, updated_by
-    FROM rate_limit_policies
+    FROM itau_rate_limit_policies
     WHERE route_key = ?
     LIMIT 1
   `).bind(routeKey).first();
@@ -104,8 +104,8 @@ export async function getRateLimitPolicy(env, routeKey) {
 export async function upsertRateLimitPolicy(env, { routeKey, enabled, maxRequests, windowMinutes, updatedBy }) {
   await ensureDefaultPolicies(env);
 
-  await env.DB.prepare(`
-    INSERT INTO rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
+  await env.BIGDATA_DB.prepare(`
+    INSERT INTO itau_rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(route_key) DO UPDATE SET
       enabled = excluded.enabled,
@@ -150,13 +150,13 @@ export async function checkAndTrackRateLimit({ env, request, routeKey }) {
   const windowMs = Math.max(1, policy.window_minutes) * 60 * 1000;
   const cutoff = now - windowMs;
 
-  await env.DB.prepare('DELETE FROM rate_limit_hits WHERE route_key = ? AND created_at < ?')
+  await env.BIGDATA_DB.prepare('DELETE FROM itau_rate_limit_hits WHERE route_key = ? AND created_at < ?')
     .bind(routeKey, cutoff)
     .run();
 
-  const countRow = await env.DB.prepare(`
+  const countRow = await env.BIGDATA_DB.prepare(`
     SELECT COUNT(1) AS total
-    FROM rate_limit_hits
+    FROM itau_rate_limit_hits
     WHERE route_key = ? AND ip = ? AND created_at >= ?
   `)
     .bind(routeKey, ip, cutoff)
@@ -165,9 +165,9 @@ export async function checkAndTrackRateLimit({ env, request, routeKey }) {
   const total = toInt(countRow?.total, 0);
 
   if (total >= policy.max_requests) {
-    const oldest = await env.DB.prepare(`
+    const oldest = await env.BIGDATA_DB.prepare(`
       SELECT created_at
-      FROM rate_limit_hits
+      FROM itau_rate_limit_hits
       WHERE route_key = ? AND ip = ? AND created_at >= ?
       ORDER BY created_at ASC
       LIMIT 1
@@ -187,7 +187,7 @@ export async function checkAndTrackRateLimit({ env, request, routeKey }) {
     };
   }
 
-  await env.DB.prepare('INSERT INTO rate_limit_hits (route_key, ip, created_at) VALUES (?, ?, ?)')
+  await env.BIGDATA_DB.prepare('INSERT INTO itau_rate_limit_hits (route_key, ip, created_at) VALUES (?, ?, ?)')
     .bind(routeKey, ip, now)
     .run();
 
@@ -204,9 +204,9 @@ export async function getRateLimitWindowStats(env, routeKey, windowMinutes) {
   const windowMs = Math.max(1, toInt(windowMinutes, 10)) * 60 * 1000;
   const cutoff = now - windowMs;
 
-  const row = await env.DB.prepare(`
+  const row = await env.BIGDATA_DB.prepare(`
     SELECT COUNT(1) AS total, COUNT(DISTINCT ip) AS ips
-    FROM rate_limit_hits
+    FROM itau_rate_limit_hits
     WHERE route_key = ? AND created_at >= ?
   `)
     .bind(routeKey, cutoff)
