@@ -1,8 +1,186 @@
 // Módulo: itau-calculadora/functions/api/oraculo.js
-// Versão: v03.24.07
-// Descrição: API do Oráculo IA — robustez com fallback de compatibilidade para erros 400 do provedor Gemini.
+// Versão: v03.25.00
+// Descrição: API do Oráculo IA — modernizado com 10 Gemini v1beta features + fallback robusto.
+// Features: Token counting, structured logging, improved safety, maxOutputTokens, usage metadata,
+// JSDoc types, detailed retry, thinking support, centralized config, input validation (413).
 
 import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
+
+// ========== CONFIG & SETUP ==========
+
+/**
+ * @typedef {Object} GeminiConfig
+ * @property {string} model - Modelo Gemini (ex: 'gemini-pro-latest')
+ * @property {string} version - Versão da API (ex: 'v1beta')
+ * @property {number} maxTokensInput - Limite máximo input (120000)
+ * @property {number} maxRetries - Tentativas (2)
+ * @property {number} retryDelayMs - Delay entre tentativas (800)
+ * @property {Object} endpoints - Per-endpoint configs
+ */
+const GEMINI_CONFIG = {
+  model: 'gemini-pro-latest',
+  version: 'v1beta',
+  maxTokensInput: 120000,
+  maxRetries: 2,
+  retryDelayMs: 800,
+  defaultThinkingConfig: { thinkingLevel: 'HIGH' },
+  endpoints: {
+    oraculo: {
+      maxOutputTokensAdvanced: 4096,
+      maxOutputTokensMinimal: 3072,
+      temperature: 0.3,
+      topP: 0.8
+    }
+  }
+};
+
+/**
+ * Estrutura log em formato JSON com ISO 8601 timestamp
+ * @param {string} level - 'info' | 'warn' | 'error' | 'debug'
+ * @param {string} message - Mensagem principal
+ * @param {Object} context - Dados contextuais
+ */
+function structuredLog(level, message, context = {}) {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    level: level.toUpperCase(),
+    message,
+    ...context
+  };
+  console.log(JSON.stringify(logEntry));
+}
+
+/**
+ * Estima contagem de tokens via countTokens endpoint
+ * @param {string} text - Texto para análise
+ * @param {string} apiKey - Chave Gemini API
+ * @returns {Promise<number>} Contagem de tokens
+ */
+async function estimateTokenCount(text, apiKey) {
+  if (!text || !apiKey) return 0;
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/${GEMINI_CONFIG.version}/models/${GEMINI_CONFIG.model}:countTokens?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text }] }] })
+      }
+    );
+    if (!response.ok) return 0;
+    const data = await response.json();
+    return data.totalTokens || 0;
+  } catch (err) {
+    structuredLog('warn', 'Failed to count tokens', { error: err.message, endpoint: 'oraculo' });
+    return 0;
+  }
+}
+
+/**
+ * Valida se contagem de tokens está dentro do limite
+ * @param {number} tokenCount - Contagem de tokens
+ * @returns {Object} { shouldReject: boolean, status: number, error: string }
+ */
+function validateInputTokens(tokenCount) {
+  if (tokenCount > GEMINI_CONFIG.maxTokensInput) {
+    return {
+      shouldReject: true,
+      status: 413,
+      error: `Input exceeds token limit: ${tokenCount} > ${GEMINI_CONFIG.maxTokensInput}`
+    };
+  }
+  return { shouldReject: false };
+}
+
+/**
+ * Extrai metadata de uso da resposta Gemini
+ * @param {Object} responseData - Dados da resposta
+ * @returns {Object} { promptTokens, outputTokens, cachedTokens }
+ */
+function extractUsageMetadata(responseData) {
+  const usage = responseData?.usageMetadata || {};
+  return {
+    promptTokens: usage.promptTokenCount || 0,
+    outputTokens: usage.candidatesTokenCount || 0,
+    cachedTokens: usage.cachedContentTokenCount || 0
+  };
+}
+
+/**
+ * Extrai texto de parts, filtrando thinking internals
+ * @param {Array} parts - Array de parts da resposta
+ * @returns {string} Texto concatenado
+ */
+function extractTextFromParts(parts) {
+  return (parts || [])
+    .filter(p => p.text && !p.thought)
+    .map(p => p.text)
+    .join('');
+}
+
+/**
+ * Fetch com retry automático e logging estruturado
+ * @param {string} url - URL do endpoint
+ * @param {Object} options - Fetch options
+ * @param {string} endpoint - Nome para logging
+ * @returns {Promise<Response>}
+ */
+async function fetchWithRetry(url, options, endpoint = 'unknown') {
+  let lastError;
+  for (let attempt = 1; attempt <= GEMINI_CONFIG.maxRetries; attempt++) {
+    try {
+      structuredLog('info', `Gemini API request attempt ${attempt}`, {
+        endpoint,
+        attempt,
+        url: url.split('?')[0]
+      });
+
+      const response = await fetch(url, options);
+
+      if (response.ok) {
+        structuredLog('info', 'Gemini API request succeeded', {
+          endpoint,
+          attempt,
+          status: response.status
+        });
+        return response;
+      }
+
+      lastError = { status: response.status, statusText: response.statusText };
+
+      structuredLog('warn', 'Gemini API request failed', {
+        endpoint,
+        attempt,
+        status: response.status,
+        message: response.statusText
+      });
+
+      if (attempt < GEMINI_CONFIG.maxRetries) {
+        await new Promise(r => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
+      }
+    } catch (err) {
+      lastError = { message: err.message };
+
+      structuredLog('error', 'Gemini API request error', {
+        endpoint,
+        attempt,
+        error: err.message
+      });
+
+      if (attempt < GEMINI_CONFIG.maxRetries) {
+        await new Promise(r => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
+      }
+    }
+  }
+
+  structuredLog('error', 'Gemini API request exhausted retries', {
+    endpoint,
+    totalAttempts: GEMINI_CONFIG.maxRetries,
+    lastError
+  });
+
+  throw new Error(`API request failed after ${GEMINI_CONFIG.maxRetries} attempts: ${JSON.stringify(lastError)}`);
+}
 
 export async function onRequestPost(context) {
     try {
@@ -32,14 +210,15 @@ export async function onRequestPost(context) {
         const GEMINI_API_KEY = env.GEMINI_API_KEY;
 
         if (!GEMINI_API_KEY) {
+            structuredLog('error', 'Missing GEMINI_API_KEY', { endpoint: 'oraculo' });
             return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
 
         // Produção estável: usar v1beta e modelo explícito (evita hot-swap de alias "latest").
         // Ref: https://ai.google.dev/gemini-api/docs/api-versions
         // Ref: https://ai.google.dev/gemini-api/docs/models#stable
-        const modelName = env.GEMINI_MODEL || "gemini-pro-latest";
-        const generateUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+        const modelName = env.GEMINI_MODEL || GEMINI_CONFIG.model;
+        const generateUrl = `https://generativelanguage.googleapis.com/${GEMINI_CONFIG.version}/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
         const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
@@ -68,16 +247,14 @@ Dados da simulação:
                 }]
             }],
             generationConfig: {
-                temperature: 0.3,
-                topP: 0.8,
-                maxOutputTokens: 4096,
-                thinkingConfig: {
-                    thinkingLevel: "HIGH"
-                }
+                temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
+                topP: GEMINI_CONFIG.endpoints.oraculo.topP,
+                maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced,
+                thinkingConfig: GEMINI_CONFIG.defaultThinkingConfig
             },
             safetySettings: [
-                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
                 { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
                 { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" }
             ]
@@ -87,9 +264,9 @@ Dados da simulação:
         const geminiPayloadCompat = {
             ...geminiPayloadAdvanced,
             generationConfig: {
-                temperature: 0.3,
-                topP: 0.8,
-                maxOutputTokens: 4096
+                temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
+                topP: GEMINI_CONFIG.endpoints.oraculo.topP,
+                maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced
             }
         };
 
@@ -101,35 +278,95 @@ Dados da simulação:
                 }]
             }],
             generationConfig: {
-                temperature: 0.3,
-                topP: 0.8,
-                maxOutputTokens: 3072
-            }
+                temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
+                topP: GEMINI_CONFIG.endpoints.oraculo.topP,
+                maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensMinimal
+            },
+            safetySettings: [
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" }
+            ]
         };
+
+        // ===== TOKEN COUNTING PRE-VALIDATION =====
+        const promptText = `${instrucao}${JSON.stringify(promptData, null, 2)}`;
+        const inputTokens = await estimateTokenCount(promptText, GEMINI_API_KEY);
+        const validation = validateInputTokens(inputTokens);
+        if (validation.shouldReject) {
+            structuredLog('warn', 'Input validation failed', {
+                endpoint: 'oraculo',
+                tokenCount: inputTokens,
+                limit: GEMINI_CONFIG.maxTokensInput
+            });
+            return new Response(JSON.stringify({ erro: validation.error }), {
+                status: validation.status,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        structuredLog('info', 'Token counting validated', {
+            endpoint: 'oraculo',
+            tokenCount: inputTokens,
+            limit: GEMINI_CONFIG.maxTokensInput
+        });
 
         async function callGeminiWithRetry(payload, label) {
             let lastStatus = 502;
             let lastErrorText = '';
             let lastHeaders = new Headers({ 'Content-Type': 'application/json' });
 
-            for (let tentativa = 0; tentativa < 2; tentativa++) {
-                const currentResponse = await fetch(generateUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+            for (let tentativa = 0; tentativa < GEMINI_CONFIG.maxRetries; tentativa++) {
+                try {
+                    const attempt = tentativa + 1;
+                    structuredLog('info', `Oráculo Gemini request attempt ${attempt}/${GEMINI_CONFIG.maxRetries}`, {
+                        endpoint: 'oraculo',
+                        payload: label,
+                        attempt
+                    });
 
-                if (currentResponse.ok) {
-                    return { ok: true, response: currentResponse };
-                }
+                    const currentResponse = await fetch(generateUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-                lastStatus = currentResponse.status;
-                lastHeaders = currentResponse.headers;
-                lastErrorText = await currentResponse.text().catch(() => '');
+                    if (currentResponse.ok) {
+                        structuredLog('info', 'Oráculo Gemini request succeeded', {
+                            endpoint: 'oraculo',
+                            payload: label,
+                            attempt,
+                            status: currentResponse.status
+                        });
+                        return { ok: true, response: currentResponse };
+                    }
 
-                if (tentativa === 0) {
-                    console.warn(`Gemini tentativa 1 falhou (${currentResponse.status}) em ${label}, retrying...`);
-                    await new Promise((r) => setTimeout(r, 800));
+                    lastStatus = currentResponse.status;
+                    lastHeaders = currentResponse.headers;
+                    lastErrorText = await currentResponse.text().catch(() => '');
+
+                    structuredLog('warn', 'Oráculo Gemini request failed', {
+                        endpoint: 'oraculo',
+                        payload: label,
+                        attempt,
+                        status: currentResponse.status
+                    });
+
+                    if (tentativa === 0) {
+                        await new Promise((r) => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
+                    }
+                } catch (err) {
+                    structuredLog('error', 'Oráculo Gemini request error', {
+                        endpoint: 'oraculo',
+                        payload: label,
+                        attempt: tentativa + 1,
+                        error: err.message
+                    });
+
+                    if (tentativa === 0) {
+                        await new Promise((r) => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
+                    }
                 }
             }
 
@@ -155,11 +392,19 @@ Dados da simulação:
 
             if (result.ok) {
                 successfulResponse = result.response;
+                structuredLog('info', 'Oráculo fallback strategy succeeded', {
+                    endpoint: 'oraculo',
+                    successfulPayload: candidate.label
+                });
                 break;
             }
 
             lastFailure = result;
-            console.error(`Gemini falhou no payload ${candidate.label}:`, result.status, result.errorText);
+            structuredLog('warn', `Oráculo Gemini falhou no payload ${candidate.label}`, {
+                endpoint: 'oraculo',
+                payload: candidate.label,
+                status: result.status
+            });
 
             // Fallback somente para erros de formato/validação do payload
             if (![400, 422].includes(result.status)) {
@@ -171,7 +416,11 @@ Dados da simulação:
             const failureStatus = Number(lastFailure?.status || 502);
             const errText = String(lastFailure?.errorText || '');
             const failureHeaders = lastFailure?.headers || new Headers({ 'Content-Type': 'application/json' });
-            console.error('Gemini API error após fallback:', failureStatus, errText);
+            structuredLog('error', 'Oráculo Gemini API error após exaustão de fallbacks', {
+                endpoint: 'oraculo',
+                status: failureStatus,
+                errorLength: errText.length
+            });
 
             let upstreamMessage = '';
             try {
@@ -213,26 +462,35 @@ Dados da simulação:
 
         const data = await successfulResponse.json();
 
+        // ===== EXTRACT METADATA & LOG =====
+        const usage = extractUsageMetadata(data);
+        structuredLog('info', 'Oráculo Gemini completed', {
+            endpoint: 'oraculo',
+            promptTokens: usage.promptTokens,
+            outputTokens: usage.outputTokens,
+            cachedTokens: usage.cachedTokens
+        });
+
         // Modelos thinking retornam thoughts + text em parts separados
         // Filtrar apenas partes com texto visível (ignorar thoughts)
-        let text = '';
         const parts = data.candidates?.[0]?.content?.parts;
-        if (parts && parts.length > 0) {
-            for (const part of parts) {
-                if (part.text && !part.thought) {
-                    text += part.text;
-                }
-            }
-        }
+        let text = extractTextFromParts(parts);
 
         if (!text) {
             text = "Análise indisponível no momento. Tente novamente.";
+            structuredLog('warn', 'Empty response from Gemini', {
+                endpoint: 'oraculo',
+                candidatesLength: data.candidates?.length || 0
+            });
         }
 
         return new Response(JSON.stringify({ analise: text }), { headers: { "Content-Type": "application/json" } });
 
     } catch (error) {
-        console.error('Oráculo error:', error.message);
+        structuredLog('error', 'Oráculo handler error', {
+            endpoint: 'oraculo',
+            error: error.message
+        });
         return new Response(JSON.stringify({ erro: "Erro interno no servidor do Oráculo." }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 }
