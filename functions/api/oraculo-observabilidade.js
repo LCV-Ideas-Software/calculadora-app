@@ -1,4 +1,4 @@
-function json(data, status = 200) {
+﻿function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { 'Content-Type': 'application/json' }
@@ -6,8 +6,8 @@ function json(data, status = 200) {
 }
 
 async function ensureTable(env) {
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS oraculo_observabilidade (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_oraculo_observabilidade (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at INTEGER NOT NULL,
       status TEXT NOT NULL,
@@ -40,8 +40,8 @@ export async function onRequestPost(context) {
     const errorMessage = typeof body?.errorMessage === 'string' ? body.errorMessage.slice(0, 300) : null;
     const appVersion = typeof body?.appVersion === 'string' ? body.appVersion.slice(0, 24) : null;
 
-    await env.DB.prepare(`
-      INSERT INTO oraculo_observabilidade (
+    await env.BIGDATA_DB.prepare(`
+      INSERT INTO itau_oraculo_observabilidade (
         created_at, status, from_cache, force_refresh, duration_ms,
         moeda, valor_original, preview, error_message, app_version
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

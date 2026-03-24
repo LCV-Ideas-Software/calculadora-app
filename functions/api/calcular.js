@@ -1,4 +1,4 @@
-import { getOperationalContext } from './contexto-operacional.mjs';
+﻿import { getOperationalContext } from './contexto-operacional.mjs';
 import { calcularBandasSensibilidade } from './sensibilidade.mjs';
 import { calcularErroPercentual, calcularMape, classificarMapePercent } from './backtest.mjs';
 
@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
         const origem = {};
 
         try {
-            const rows = await env.DB.prepare("SELECT chave, valor FROM parametros_customizados ORDER BY id DESC").all();
+            const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM itau_parametros_customizados ORDER BY id DESC").all();
             if (rows.results && rows.results.length > 0) {
                 for (const row of rows.results) {
                     const val = parseFloat(row.valor);
@@ -54,7 +54,7 @@ export async function onRequestPost(context) {
         } catch (e) {
             // Tabela pode não existir ainda
             try {
-                await env.DB.prepare("CREATE TABLE IF NOT EXISTS parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)").run();
+                await env.BIGDATA_DB.prepare("CREATE TABLE IF NOT EXISTS itau_parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)").run();
             } catch (e2) { }
         }
 
@@ -112,7 +112,7 @@ export async function onRequestPost(context) {
             try {
                 for (const [chave, valor] of Object.entries(paramsSalvar)) {
                     const d1Chave = chave.replace('taxa_', '');
-                    await env.DB.prepare("INSERT OR REPLACE INTO parametros_customizados (chave, valor) VALUES (?, ?)").bind(d1Chave, String(valor)).run();
+                    await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_parametros_customizados (chave, valor) VALUES (?, ?)").bind(d1Chave, String(valor)).run();
                     parametrosCustomizadosChaves.push(chave);
                     origem[chave] = 'd1';
                 }
@@ -143,7 +143,7 @@ export async function onRequestPost(context) {
                 const dataCsv = `${yyyy}${mm}${dd}`;
 
                 try {
-                    const cache = await env.DB.prepare("SELECT valor_ptax FROM ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(dataISO, moeda).first();
+                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(dataISO, moeda).first();
                     if (cache) { taxa_cartao = cache.valor_ptax; data_ptax = dataISO; break; }
                 } catch (e) { }
 
@@ -179,7 +179,7 @@ export async function onRequestPost(context) {
 
                 if (taxa_cartao) {
                     data_ptax = dataISO;
-                    try { await env.DB.prepare("INSERT OR REPLACE INTO ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(dataISO, moeda, taxa_cartao).run(); } catch (e) { }
+                    try { await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(dataISO, moeda, taxa_cartao).run(); } catch (e) { }
                     break;
                 }
                 dataAtual.setUTCDate(dataAtual.getUTCDate() - 1);
@@ -222,7 +222,7 @@ export async function onRequestPost(context) {
                 let usou_contingencia = false;
 
                 try {
-                    const cache = await env.DB.prepare("SELECT valor_ptax FROM ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(cacheMinuto, moeda).first();
+                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(cacheMinuto, moeda).first();
                     if (cache) { taxa_global = cache.valor_ptax; fonte_global = 'Spot Calibrado'; }
                 } catch (e) { }
 
@@ -254,15 +254,15 @@ export async function onRequestPost(context) {
 
                     if (taxa_global) {
                         try {
-                            await env.DB.prepare("INSERT OR REPLACE INTO ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(cacheMinuto, moeda, taxa_global).run();
-                            await env.DB.prepare("INSERT OR REPLACE INTO ptax_cache (data_cotacao, moeda, valor_ptax) VALUES ('LATEST_SPOT', ?, ?)").bind(moeda, taxa_global).run();
+                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(cacheMinuto, moeda, taxa_global).run();
+                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES ('LATEST_SPOT', ?, ?)").bind(moeda, taxa_global).run();
                         } catch (e) { }
                     }
                 }
 
                 if (!taxa_global) {
                     try {
-                        const cache = await env.DB.prepare("SELECT valor_ptax FROM ptax_cache WHERE data_cotacao = 'LATEST_SPOT' AND moeda = ?").bind(moeda).first();
+                        const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = 'LATEST_SPOT' AND moeda = ?").bind(moeda).first();
                         if (cache) { taxa_global = cache.valor_ptax; fonte_global = 'Último Spot Salvo'; }
                     } catch (e) { }
                 }
@@ -378,8 +378,8 @@ export async function onRequestPost(context) {
 
             if (Number.isFinite(erroPercentual)) {
                 try {
-                    await env.DB.prepare(`
-                        CREATE TABLE IF NOT EXISTS backtest_spot_vs_ptax (
+                    await env.BIGDATA_DB.prepare(`
+                        CREATE TABLE IF NOT EXISTS itau_backtest_spot_vs_ptax (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             created_at INTEGER NOT NULL,
                             moeda TEXT NOT NULL,
@@ -390,8 +390,8 @@ export async function onRequestPost(context) {
                         )
                     `).run();
 
-                    await env.DB.prepare(`
-                        INSERT INTO backtest_spot_vs_ptax (created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual)
+                    await env.BIGDATA_DB.prepare(`
+                        INSERT INTO itau_backtest_spot_vs_ptax (created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual)
                         VALUES (?, ?, ?, ?, ?, ?)
                     `).bind(
                         Date.now(),
@@ -403,9 +403,9 @@ export async function onRequestPost(context) {
                     ).run();
 
                     const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
-                    const rows = await env.DB.prepare(`
+                    const rows = await env.BIGDATA_DB.prepare(`
                         SELECT erro_percentual
-                        FROM backtest_spot_vs_ptax
+                        FROM itau_backtest_spot_vs_ptax
                         WHERE created_at >= ?
                         ORDER BY created_at DESC
                         LIMIT 200
@@ -439,9 +439,9 @@ export async function onRequestPost(context) {
         }
 
         if (parametrosCustomizadosSalvos) {
-            responseBody.parametros_customizados_salvos = true;
-            responseBody.parametros_customizados_chaves = parametrosCustomizadosChaves;
-            responseBody.parametros_customizados_em = parametrosCustomizadosEm;
+            responseBody.itau_parametros_customizados_salvos = true;
+            responseBody.itau_parametros_customizados_chaves = parametrosCustomizadosChaves;
+            responseBody.itau_parametros_customizados_em = parametrosCustomizadosEm;
         }
 
         return new Response(JSON.stringify(responseBody), { headers: defaultHeaders });

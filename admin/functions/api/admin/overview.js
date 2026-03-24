@@ -1,4 +1,4 @@
-import { requireCloudflareAccess } from '../_lib/access.mjs';
+﻿import { requireCloudflareAccess } from '../_lib/access.mjs';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -19,12 +19,12 @@ const DEFAULTS = {
 };
 
 async function ensureTables(env) {
-  await env.DB.prepare(
-    'CREATE TABLE IF NOT EXISTS parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)'
+  await env.BIGDATA_DB.prepare(
+    'CREATE TABLE IF NOT EXISTS itau_parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)'
   ).run();
 
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS backtest_spot_vs_ptax (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_backtest_spot_vs_ptax (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at INTEGER NOT NULL,
       moeda TEXT NOT NULL,
@@ -35,8 +35,8 @@ async function ensureTables(env) {
     )
   `).run();
 
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS parametros_auditoria (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_parametros_auditoria (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at INTEGER NOT NULL,
       admin_email TEXT NOT NULL,
@@ -47,8 +47,8 @@ async function ensureTables(env) {
     )
   `).run();
 
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS oraculo_observabilidade (
+  await env.BIGDATA_DB.prepare(`
+    CREATE TABLE IF NOT EXISTS itau_oraculo_observabilidade (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at INTEGER NOT NULL,
       status TEXT NOT NULL,
@@ -65,7 +65,7 @@ async function ensureTables(env) {
 }
 
 async function readParams(env) {
-  const rows = await env.DB.prepare('SELECT chave, valor FROM parametros_customizados ORDER BY id DESC').all();
+  const rows = await env.BIGDATA_DB.prepare('SELECT chave, valor FROM itau_parametros_customizados ORDER BY id DESC').all();
   const merged = { ...DEFAULTS };
 
   for (const row of rows.results || []) {
@@ -103,35 +103,35 @@ export async function onRequestGet(context) {
 
     const params = await readParams(env);
 
-    const totalRow = await env.DB.prepare('SELECT COUNT(1) AS total FROM backtest_spot_vs_ptax').first();
+    const totalRow = await env.BIGDATA_DB.prepare('SELECT COUNT(1) AS total FROM itau_backtest_spot_vs_ptax').first();
     const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
     const janelaRow = await env.DB
-      .prepare('SELECT COUNT(1) AS total_7d, AVG(erro_percentual) AS mape_7d FROM backtest_spot_vs_ptax WHERE created_at >= ?')
+      .prepare('SELECT COUNT(1) AS total_7d, AVG(erro_percentual) AS mape_7d FROM itau_backtest_spot_vs_ptax WHERE created_at >= ?')
       .bind(cutoff)
       .first();
 
     const ultimasRows = await env.DB
-      .prepare('SELECT created_at, moeda, erro_percentual FROM backtest_spot_vs_ptax ORDER BY created_at DESC LIMIT 10')
+      .prepare('SELECT created_at, moeda, erro_percentual FROM itau_backtest_spot_vs_ptax ORDER BY created_at DESC LIMIT 10')
       .all();
 
     const auditoriaRows = await env.DB
-      .prepare('SELECT created_at, admin_email, chave, valor_anterior, valor_novo, origem FROM parametros_auditoria ORDER BY created_at DESC LIMIT 20')
+      .prepare('SELECT created_at, admin_email, chave, valor_anterior, valor_novo, origem FROM itau_parametros_auditoria ORDER BY created_at DESC LIMIT 20')
       .all();
 
-    const telemetryRow = await env.DB.prepare(`
+    const telemetryRow = await env.BIGDATA_DB.prepare(`
       SELECT
         COUNT(1) AS total,
         SUM(CASE WHEN from_cache = 1 THEN 1 ELSE 0 END) AS cache_hits,
         AVG(duration_ms) AS avg_duration,
         MAX(duration_ms) AS last_duration,
         SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) AS errors
-      FROM oraculo_observabilidade
+      FROM itau_oraculo_observabilidade
     `).first();
 
     const historicoRows = await env.DB
       .prepare(`
         SELECT created_at, status, from_cache, force_refresh, moeda, valor_original, preview, error_message
-        FROM oraculo_observabilidade
+        FROM itau_oraculo_observabilidade
         ORDER BY created_at DESC
         LIMIT 20
       `)
