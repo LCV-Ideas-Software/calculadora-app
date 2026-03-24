@@ -105,16 +105,16 @@ export async function onRequestGet(context) {
 
     const totalRow = await env.BIGDATA_DB.prepare('SELECT COUNT(1) AS total FROM itau_backtest_spot_vs_ptax').first();
     const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
-    const janelaRow = await env.DB
+    const janelaRow = await env.BIGDATA_DB
       .prepare('SELECT COUNT(1) AS total_7d, AVG(erro_percentual) AS mape_7d FROM itau_backtest_spot_vs_ptax WHERE created_at >= ?')
       .bind(cutoff)
       .first();
 
-    const ultimasRows = await env.DB
+    const ultimasRows = await env.BIGDATA_DB
       .prepare('SELECT created_at, moeda, erro_percentual FROM itau_backtest_spot_vs_ptax ORDER BY created_at DESC LIMIT 10')
       .all();
 
-    const auditoriaRows = await env.DB
+    const auditoriaRows = await env.BIGDATA_DB
       .prepare('SELECT created_at, admin_email, chave, valor_anterior, valor_novo, origem FROM itau_parametros_auditoria ORDER BY created_at DESC LIMIT 20')
       .all();
 
@@ -128,7 +128,7 @@ export async function onRequestGet(context) {
       FROM itau_oraculo_observabilidade
     `).first();
 
-    const historicoRows = await env.DB
+    const historicoRows = await env.BIGDATA_DB
       .prepare(`
         SELECT created_at, status, from_cache, force_refresh, moeda, valor_original, preview, error_message
         FROM itau_oraculo_observabilidade
