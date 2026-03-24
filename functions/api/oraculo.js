@@ -35,11 +35,11 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
         }
 
-        // Produção estável: usar v1 e modelo explícito (evita hot-swap de alias "latest").
+        // Produção estável: usar v1beta e modelo explícito (evita hot-swap de alias "latest").
         // Ref: https://ai.google.dev/gemini-api/docs/api-versions
         // Ref: https://ai.google.dev/gemini-api/docs/models#stable
-        const modelName = env.GEMINI_MODEL || "gemini-2.5-pro";
-        const generateUrl = `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
+        const modelName = env.GEMINI_MODEL || "gemini-pro-latest";
+        const generateUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`;
 
         const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
