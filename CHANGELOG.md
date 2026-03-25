@@ -1,5 +1,9 @@
 # Changelog — Itaú Calculadora
 
+## [v03.24.13] — 2026-03-24
+### Adicionado
+- `public/index.html`: inclusão de aviso de compliance no rodapé do frontend, replicando o mesmo texto já presente no template de e-mail (`email-feature.js`). Posicionado no final do container principal com separador visual sutil.
+
 ## [v03.24.12] — 2026-03-22
 ### Alterado
 - `public/index.html`: adição de botões flutuantes de rolagem **Voltar ao Topo** e **Ir para o Final** no frontend da calculadora
