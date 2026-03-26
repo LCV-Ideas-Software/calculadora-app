@@ -1,4 +1,26 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.25.00] — 2026-03-26
+### Alterado
+- **UI/UX Redesign (tiptap.dev, Google Blue)**: design completo reescrito seguindo design language do tiptap.dev
+- Background: warm gray `#f5f4f4`. Cards: sólido `#ffffff`, shadow `0 1px 3px`, border-radius `30px`
+- Botões: pill preto (`border-radius: 100px`) com hover Google Blue `#1a73e8`
+- Inputs: `border-radius: 10px`, focus ring Google Blue
+- Tipografia Inter via Google Fonts
+- Orbs decorativos sutis (`opacity: 0.20, blur: 120px`)
+- Toast: dark pill, bottom-right fixo (removido cursor-following)
+- Listas: estilo tiptap com monospace, hover subtle
+- Rate limit panels: cards arredondados com status pills
+
+### Adicionado
+- Favicon: SVG admin customizado (gear + monitor) em Google Blue `#1a73e8`
+- WCAG/eMAG: `focus-visible` outlines `#1a73e8`, `prefers-reduced-motion`, skip-link
+- `<meta name="description">`, `<meta name="robots">`, `<meta name="theme-color">`
+
+### Removido
+- Cursor-following toast positioning (substituído por bottom-right fixo)
+- Gradiente radial de background
+- Cores orange como primária (substituída por preto + Google Blue)
+
 ## [v03.24.13] — 2026-03-22
 ### Corrigido
 - `public/index.html`: formulário de parâmetros com associação explícita `label for` e `aria-label` nos inputs, mantendo `id/name` únicos para conformidade de autofill
