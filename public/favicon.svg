@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Itaú Personnalité Favicon: Iconic rhombus/diamond -->
+  <!-- Outer diamond -->
+  <polygon points="16,2 30,16 16,30 2,16" fill="#003366"/>
+  <!-- Inner diamond (Personnalité accent) -->
+  <polygon points="16,7 25,16 16,25 7,16" fill="#EC7000"/>
+  <!-- Small white diamond at center -->
+  <polygon points="16,12 20,16 16,20 12,16" fill="#ffffff"/>
+</svg>
