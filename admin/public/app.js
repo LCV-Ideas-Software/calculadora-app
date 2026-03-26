@@ -389,3 +389,37 @@ loadOverviewAndParams().catch((error) => {
   setStatus(error.message, true);
   showNotification(error.message, 'error');
 });
+
+/* ─── Floating scroll buttons (paridade admin-app) ─── */
+(function initScrollFabs() {
+  const fabContainer = document.getElementById('scroll-fabs');
+  const fabTop = document.getElementById('fab-top');
+  const fabBottom = document.getElementById('fab-bottom');
+  if (!fabContainer || !fabTop || !fabBottom) return;
+
+  const THRESHOLD = 200;
+
+  function updateFabs() {
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    const showTop = scrollTop > THRESHOLD;
+    const showBottom = scrollHeight - scrollTop - clientHeight > THRESHOLD;
+
+    if (showTop || showBottom) {
+      fabContainer.removeAttribute('hidden');
+      fabTop.style.display = showTop ? 'flex' : 'none';
+      fabBottom.style.display = showBottom ? 'flex' : 'none';
+    } else {
+      fabContainer.setAttribute('hidden', '');
+    }
+  }
+
+  window.addEventListener('scroll', updateFabs, { passive: true });
+  updateFabs();
+
+  fabTop.addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  );
+  fabBottom.addEventListener('click', () =>
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' })
+  );
+})();
