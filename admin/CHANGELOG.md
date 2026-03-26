@@ -1,4 +1,8 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.26.00] — 2026-03-26
+### Adicionado
+- **Botões flutuantes de rolagem**: FABs (Voltar ao topo / Ir para o final) com SVG arrows inline. Aparecem dinamicamente conforme posição de scroll (threshold 200px). Design tiptap.dev (branco, circular, hover Google Blue). Paridade com admin-app e mainsite-frontend.
+
 ## [v03.25.00] — 2026-03-26
 ### Alterado
 - **UI/UX Redesign (tiptap.dev, Google Blue)**: design completo reescrito seguindo design language do tiptap.dev
