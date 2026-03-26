@@ -4,7 +4,6 @@ const toastMessageEl = document.getElementById('toast-message');
 const toastIconEl = document.getElementById('toast-icon');
 
 let toastTimeout = null;
-let lastPointerY = null;
 
 function getToastIconSvg(type) {
   if (type === 'error') {
@@ -34,18 +33,9 @@ function getToastIconSvg(type) {
   `;
 }
 
-window.addEventListener('pointerdown', (event) => {
-  if (typeof event?.clientY === 'number') lastPointerY = event.clientY;
-}, { passive: true });
-
 function showNotification(message, type = 'info') {
   if (!toastEl || !toastMessageEl || !toastIconEl) return;
 
-  const viewportH = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const baseY = lastPointerY != null ? lastPointerY : (viewportH * 0.5);
-  const nextTop = Math.max(16, Math.min(baseY - 36, Math.max(16, viewportH - 90)));
-
-  toastEl.style.top = `${nextTop}px`;
   toastEl.classList.remove('show', 'info', 'success', 'error');
   toastEl.classList.add(type);
 
