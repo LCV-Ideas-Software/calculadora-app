@@ -44,7 +44,7 @@ export interface ParametrosVigentes {
   spread_global_fechado: number;
   backtest_mape_boa_percent?: number;
   backtest_mape_atencao_percent?: number;
-  origem?: string;
+  origem?: Record<string, string> | string;
 }
 
 /** Banda de sensibilidade (otimista/base/pessimista) */
