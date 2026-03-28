@@ -2,7 +2,7 @@
    SimulationForm — 10 campos de input com masking + validation
    ==================================================================== */
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import type { SimulationFormState } from '../hooks/useSimulation.ts';
 
 interface Props {
@@ -48,6 +48,24 @@ function useCurrencyList(): { code: string; label: string }[] {
   }, []);
 }
 
+/**
+ * Máscara monetária pt-BR para o campo "Valor".
+ * Reproduz o comportamento original do monolítico:
+ *   - remove tudo que não é dígito
+ *   - interpreta como centavos (int / 100)
+ *   - formata com `toLocaleString('pt-BR')` → "1.000,00"
+ *   - armazena o valor raw no state como string formatada
+ */
+function applyCurrencyMask(rawInput: string): string {
+  const digitsOnly = rawInput.replace(/\D/g, '');
+  if (!digitsOnly) return '';
+  const floatValue = parseInt(digitsOnly, 10) / 100;
+  return floatValue.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export default function SimulationForm({ form, setField, onSubmit, loading, error }: Props) {
   const currencies = useCurrencyList();
   const isExotic = !['USD', 'EUR', 'GBP'].includes(form.moeda);
@@ -55,6 +73,11 @@ export default function SimulationForm({ form, setField, onSubmit, loading, erro
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') onSubmit();
   };
+
+  /** Handler de máscara monetária — aplica a formatação em cada keystroke */
+  const handleValorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setField('valorOriginal', applyCurrencyMask(e.target.value));
+  }, [setField]);
 
   return (
     <div className="space-y-3" onKeyDown={handleKeyDown}>
@@ -103,7 +126,7 @@ export default function SimulationForm({ form, setField, onSubmit, loading, erro
             placeholder="1.000,00"
             className="glass-input w-full rounded-lg px-3 py-2 text-sm text-slate-800"
             value={form.valorOriginal}
-            onChange={e => setField('valorOriginal', e.target.value)}
+            onChange={handleValorChange}
           />
         </div>
 

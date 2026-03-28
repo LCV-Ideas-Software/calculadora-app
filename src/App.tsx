@@ -92,9 +92,14 @@ export default function App() {
             </section>
           )}
 
-          {/* Footer */}
-          <footer className="text-center py-4 px-6">
-            <p className="text-[10px] text-slate-400">
+          {/* Footer — Compliance */}
+          <footer className="px-6 pb-6 pt-4">
+            <div className="mt-6 border-t border-gray-300/40 pt-6">
+              <p className="text-[11px] text-gray-400 text-justify leading-relaxed">
+                <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e não possui vínculo, homologação ou integração sistêmica com o Banco Itaú Unibanco S.A. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não substituem as informações emitidas pela instituição financeira. Para propostas reais e contratações, consulte exclusivamente os canais oficiais do banco.
+              </p>
+            </div>
+            <p className="text-center text-[10px] text-slate-400 mt-4">
               {APP_VERSION} · Dados de mercado sujeitos a variação
             </p>
           </footer>

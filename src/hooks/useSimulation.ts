@@ -141,7 +141,11 @@ export function useSimulation(): UseSimulationReturn {
             spread_cartao: res.parametros_vigentes?.spread_cartao,
             spread_global_aberto: res.parametros_vigentes?.spread_global_aberto,
             spread_global_fechado: res.parametros_vigentes?.spread_global_fechado,
-            origem_parametros: res.parametros_vigentes?.origem ?? null,
+            origem_parametros: typeof res.parametros_vigentes?.origem === 'string'
+              ? res.parametros_vigentes.origem
+              : res.parametros_vigentes?.origem
+                ? JSON.stringify(res.parametros_vigentes.origem)
+                : null,
           },
           contexto_operacional: res.contexto_operacional ?? {},
           cenarios: {
