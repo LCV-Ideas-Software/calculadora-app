@@ -23,7 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
-      - run: npx wrangler@${WRANGLER_VERSION} pages deploy public --project-name=itau-calculadora --branch=production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npx wrangler@${WRANGLER_VERSION} pages deploy dist --project-name=calculadora-app --branch=production --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
