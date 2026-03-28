@@ -15,12 +15,14 @@ import ResultPanel from './components/ResultPanel.tsx';
 import ActionButtons from './components/ActionButtons.tsx';
 import OracleSection from './components/OracleSection.tsx';
 import EmailModal from './components/EmailModal.tsx';
+import ContactModal from './components/ContactModal.tsx';
 import ScrollControls from './components/ScrollControls.tsx';
 
 export default function App() {
   const simulation = useSimulation();
   const oracle = useOraculo();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   return (
     <>
@@ -94,6 +96,14 @@ export default function App() {
 
           {/* Footer — Compliance */}
           <footer className="px-6 pb-6 pt-4">
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setContactModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-slate-200 bg-white/80 hover:bg-slate-50 text-xs font-bold text-slate-600 uppercase tracking-wider transition-all hover:shadow-md"
+              >
+                📩 Contato
+              </button>
+            </div>
             <div className="mt-6 border-t border-gray-300/40 pt-6">
               <p className="text-[11px] text-gray-400 text-justify leading-relaxed">
                 <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e não possui vínculo, homologação ou integração sistêmica com o Banco Itaú Unibanco S.A. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não substituem as informações emitidas pela instituição financeira. Para propostas reais e contratações, consulte exclusivamente os canais oficiais do banco.
@@ -113,8 +123,15 @@ export default function App() {
           onClose={() => setEmailModalOpen(false)}
           result={simulation.result}
           melhorOpcao={simulation.melhorOpcao}
+          oracleHtml={oracle.html}
         />
       )}
+
+      {/* Contact modal */}
+      <ContactModal
+        isOpen={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+      />
 
       {/* Scroll controls */}
       <ScrollControls />

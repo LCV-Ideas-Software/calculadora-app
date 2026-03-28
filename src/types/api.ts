@@ -156,6 +156,8 @@ export interface EmailSimulationData {
   cartao: ChannelResult;
   global: ChannelResult | null;
   saldo_existente: ChannelResult | null;
+  /** HTML renderizado da análise IA (Oráculo), quando disponível */
+  oracleHtml?: string | null;
 }
 
 /** Histórico e telemetria de IA */

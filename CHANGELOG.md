@@ -1,5 +1,16 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.00] — 2026-03-28
+### Adicionado
+- **Formulário de Contato**: novo endpoint `functions/api/contato.js` com envio via Resend e rate limiting configurável (`contato` route, 5 req / 30 min). Componente `ContactModal.tsx` com máscara de telefone brasileiro e feedback via toast. Botão "📩 Contato" adicionado ao footer.
+- **Análise IA no E-mail**: o email de relatório agora inclui a seção da Análise Inteligente (Oráculo) quando disponível, dentro de card estilizado com gradiente roxo.
+
+### Alterado
+- **Email Builder — Redesign Premium**: template HTML do email completamente reconstruído para espelhar a estética da nova frontend — cards por canal com gradientes individuais (azul/roxo/verde), badge ⭐ MELHOR no winner, hero total 18px, badges de Plantão/Contingência, summary pills com separadores, compliance footer e fundo com gradiente sutil.
+
+### Corrigido
+- **Email 400 Error**: campo `destinatario` corrigido para `emailDestino` (nome esperado pelo backend). Campo `relatorioTexto` restaurado. Parsing de resposta corrigido de `erro`/`mensagem` para `error`/`message`.
+
 ## [v04.00.00] — 2026-03-28
 ### Alterado (MAJOR — Migração Arquitetural Completa)
 - **Renomeação**: projeto renomeado de `itau-calculadora` para `calculadora-app` em `package.json`, `wrangler.json` e `deploy.yml`. Cloudflare Pages e GitHub também atualizados.

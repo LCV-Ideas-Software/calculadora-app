@@ -12,9 +12,10 @@ interface Props {
   onClose: () => void;
   result: SimulationResponse;
   melhorOpcao: string | null;
+  oracleHtml?: string | null;
 }
 
-export default function EmailModal({ isOpen, onClose, result, melhorOpcao }: Props) {
+export default function EmailModal({ isOpen, onClose, result, melhorOpcao, oracleHtml }: Props) {
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -34,6 +35,7 @@ export default function EmailModal({ isOpen, onClose, result, melhorOpcao }: Pro
       cartao: result.cartao,
       global: result.global ?? null,
       saldo_existente: result.global_saldo_existente ?? null,
+      oracleHtml: oracleHtml ?? null,
     };
 
     setSending(true);

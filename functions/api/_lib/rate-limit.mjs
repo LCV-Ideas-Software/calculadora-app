@@ -1,4 +1,4 @@
-﻿const DEFAULT_POLICIES = {
+const DEFAULT_POLICIES = {
   oraculo_ia: {
     route_key: 'oraculo_ia',
     label: 'Síntese da IA',
@@ -12,6 +12,13 @@
     enabled: 1,
     max_requests: 2,
     window_minutes: 10
+  },
+  contato: {
+    route_key: 'contato',
+    label: 'Formulário de Contato',
+    enabled: 1,
+    max_requests: 5,
+    window_minutes: 30
   }
 };
 
