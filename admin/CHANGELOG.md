@@ -1,4 +1,8 @@
 # Changelog — Itaú Calculadora Admin
+## [v03.26.01] — 28/03/2026
+### Removido
+- **Painel Desativado**: As rotinas automáticas de deploy (GitHub Actions) e o escaneamento de dependências (Dependabot) foram encerrados permanentemente. O projeto central `admin-app` assumiu 100% de paridade das funções. Este repositório encontra-se isolado e com entregas congeladas.
+
 ## [v03.26.00] — 2026-03-26
 ### Adicionado
 - **Botões flutuantes de rolagem**: FABs (Voltar ao topo / Ir para o final) com SVG arrows inline. Aparecem dinamicamente conforme posição de scroll (threshold 200px). Design tiptap.dev (branco, circular, hover Google Blue). Paridade com admin-app e mainsite-frontend.
