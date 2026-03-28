@@ -15,3 +15,6 @@ build/
 .wrangler/
 .DS_Store
 Thumbs.db
+
+# TypeScript build info
+*.tsbuildinfo

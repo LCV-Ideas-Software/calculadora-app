@@ -1,0 +1,305 @@
+/* ====================================================================
+   Calculadora App — Custom CSS (portado do index.html inline <style>)
+   ==================================================================== */
+
+/* 🎨 Motor Gráfico HTML Canvas */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+/* 🪟 Glassmorphism & Material Design 3 */
+.glass-container {
+  background: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 4px 12px -10px rgba(15, 23, 42, 0.55);
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #f97316;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+  outline: none;
+}
+
+/* Field Box (card-style input wrapper) */
+.field-box {
+  position: relative;
+  padding: 0.75rem 0.85rem 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.56), rgba(241, 245, 249, 0.5));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 12px 24px -22px rgba(15, 23, 42, 0.9);
+  overflow: hidden;
+}
+
+.field-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 14px 14px;
+  opacity: 0.3;
+}
+
+.field-box > label,
+.field-box > p,
+.field-box > input,
+.field-box > select {
+  position: relative;
+  z-index: 1;
+}
+
+.field-box > label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+@media (min-width: 640px) {
+  .field-box > label {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+}
+
+/* Frame responsivo */
+.transicao-panoramica {
+  transition: max-width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.frame-fluid {
+  width: 50vw;
+}
+
+@media (max-width: 1024px) {
+  .frame-fluid {
+    width: 92vw;
+    max-width: none;
+  }
+}
+
+/* Markdown IA — Resultado do Oráculo */
+.markdown-ia {
+  text-align: justify;
+}
+
+.markdown-ia p {
+  margin-bottom: 0.75rem;
+  text-align: justify;
+  text-indent: 1.5em;
+}
+
+.markdown-ia strong {
+  color: #1e3a8a;
+}
+
+.markdown-ia ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-ia .ai-bloco {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+/* AI Semantic Tags */
+.markdown-ia .ai-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  margin-bottom: 0.45rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.markdown-ia .ai-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.markdown-ia .ai-tag::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.92);
+  color: #ffffff;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 1100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  visibility: hidden;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.markdown-ia .ai-tag:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.markdown-ia .ai-tag--resumo { background: rgba(234, 88, 12, 0.12); color: #9a3412; }
+.markdown-ia .ai-tag--resumo:hover { background: rgba(234, 88, 12, 0.24); border-color: #9a3412; }
+
+.markdown-ia .ai-tag--cenarios { background: rgba(168, 85, 247, 0.14); color: #7e22ce; }
+.markdown-ia .ai-tag--cenarios:hover { background: rgba(168, 85, 247, 0.28); border-color: #7e22ce; }
+
+.markdown-ia .ai-tag--matematica,
+.markdown-ia .ai-tag--base { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
+.markdown-ia .ai-tag--matematica:hover,
+.markdown-ia .ai-tag--base:hover { background: rgba(37, 99, 235, 0.24); border-color: #1d4ed8; }
+
+.markdown-ia .ai-tag--tecnica { background: rgba(71, 85, 105, 0.14); color: #334155; }
+.markdown-ia .ai-tag--tecnica:hover { background: rgba(71, 85, 105, 0.28); border-color: #334155; }
+
+.markdown-ia .ai-tag--recomendacao { background: rgba(22, 163, 74, 0.12); color: #15803d; }
+.markdown-ia .ai-tag--recomendacao:hover { background: rgba(22, 163, 74, 0.24); border-color: #15803d; }
+
+.markdown-ia .ai-paragrafo {
+  margin: 0;
+  text-align: justify;
+  text-indent: 1.5em;
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+/* Save Badge */
+.save-badge {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  background: rgba(240, 253, 244, 0.95);
+  color: #166534;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+/* AI Skeleton Shimmer */
+@keyframes aiShimmer {
+  0% { background-position: -220px 0; }
+  100% { background-position: calc(220px + 100%) 0; }
+}
+
+.ai-skeleton-line {
+  height: 11px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.7) 25%, rgba(203, 213, 225, 0.95) 50%, rgba(226, 232, 240, 0.7) 75%);
+  background-size: 220px 100%;
+  animation: aiShimmer 1.6s infinite linear;
+}
+
+.ai-skeleton-block {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
+/* Floating Scroll Controls */
+.floating-scroll-controls {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 9999;
+}
+
+.floating-scroll-btn {
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  color: #0f172a;
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  pointer-events: none;
+}
+
+.floating-scroll-btn.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.floating-scroll-btn:hover {
+  transform: translateY(-4px);
+  border-color: #0f172a;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+  .floating-scroll-controls { right: 20px; bottom: 20px; }
+  .floating-scroll-btn { width: 54px; height: 54px; }
+}
+
+/* Email Modal Animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.email-modal-overlay {
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.email-modal-content {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
