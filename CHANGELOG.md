@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.01] — 2026-03-29
+### Alterado
+- **CI/CD branch standardization**: workflow de deploy padronizado para publicar no branch `main` na Cloudflare Pages, com trigger GitHub em `main` e `concurrency.group` atualizado para `deploy-main`.
+
+### Controle de versão
+- `calculadora-app`: APP v04.01.00 → APP v04.01.01
+
 ## [v04.01.00] — 2026-03-28
 ### Adicionado
 - **Formulário de Contato**: novo endpoint `functions/api/contato.js` com envio via Resend e rate limiting configurável (`contato` route, 5 req / 30 min). Componente `ContactModal.tsx` com máscara de telefone brasileiro e feedback via toast. Botão "📩 Contato" adicionado ao footer.
