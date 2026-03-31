@@ -1,5 +1,14 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.02] — 2026-03-31
+### Alterado
+- **Fluxo indireto `preview` padronizado**: branch operacional `preview` adotado no repositório para promoções consistentes para `main`.
+- **Automação de promoção**: workflow `.github/workflows/preview-auto-pr.yml` adicionado/atualizado para abrir/reusar PR `preview -> main`, habilitar auto-merge e tentar merge imediato quando elegível.
+- **Permissões do GitHub Actions**: ajuste para permitir criação/aprovação de PR por workflow, eliminando falhas 403 operacionais.
+
+### Controle de versão
+- `calculadora-app`: APP v04.01.01 → APP v04.01.02
+
 ## [v04.01.01] — 2026-03-29
 ### Alterado
 - **CI/CD branch standardization**: workflow de deploy padronizado para publicar no branch `main` na Cloudflare Pages, com trigger GitHub em `main` e `concurrency.group` atualizado para `deploy-main`.
