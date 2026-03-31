@@ -21,12 +21,15 @@ import OracleSection from './components/OracleSection.tsx';
 import EmailModal from './components/EmailModal.tsx';
 import ContactModal from './components/ContactModal.tsx';
 import ScrollControls from './components/ScrollControls.tsx';
+import { ComplianceBanner } from './components/ComplianceBanner';
+import { LicencasModule } from './modules/compliance/LicencasModule';
 
 export default function App() {
   const simulation = useSimulation();
   const oracle = useOraculo();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [showLicenses, setShowLicenses] = useState(false);
 
   return (
     <>
@@ -34,6 +37,7 @@ export default function App() {
       <Toast />
 
       {/* Main container — glassmorphism frame */}
+      {!showLicenses ? (
       <main className="relative z-10 min-h-screen flex items-start justify-center py-8 px-4">
         <div
           className="glass-container rounded-3xl w-full transicao-panoramica frame-fluid"
@@ -119,6 +123,21 @@ export default function App() {
           </footer>
         </div>
       </main>
+      ) : (
+      <main className="relative z-10 min-h-screen flex items-start justify-center py-8 px-4">
+        <div className="glass-container rounded-3xl w-full transicao-panoramica frame-fluid p-6 lg:p-8" style={{ maxWidth: 1000, background: 'rgba(255,255,255,0.95)' }}>
+          <LicencasModule />
+          <div className="flex justify-center mt-8 mb-4">
+            <button
+              onClick={() => setShowLicenses(false)}
+              className="px-6 py-3 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-all shadow-sm"
+            >
+              Voltar à Calculadora
+            </button>
+          </div>
+        </div>
+      </main>
+      )}
 
       {/* Email modal */}
       {simulation.result && (
@@ -139,6 +158,7 @@ export default function App() {
 
       {/* Scroll controls */}
       <ScrollControls />
+      <ComplianceBanner onViewLicenses={() => setShowLicenses(true)} />
     </>
   );
 }
