@@ -149,9 +149,12 @@ export async function onRequestPost(context) {
 
                 if (!taxa_cartao) {
                     if (moedasOlinda.includes(moeda)) {
-                        let url = (moeda === 'USD')
-                            ? `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${dataBacen}'&$top=1&$format=json`
-                            : `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${moeda}'&@dataCotacao='${dataBacen}'&$format=json`;
+                        let url = '';
+                        if (moeda === 'USD') {
+                            url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${dataBacen}'&$top=1&$format=json`;
+                        } else {
+                            url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${moeda}'&@dataCotacao='${dataBacen}'&$format=json`;
+                        }
                         try {
                             const response = await fetch(url);
                             if (response.ok) {
@@ -269,7 +272,11 @@ export async function onRequestPost(context) {
 
                 if (!taxa_global) {
                     usou_contingencia = true;
-                    taxa_global = cartaoResult && cartaoResult.suportada ? cartaoResult.taxa_utilizada : null;
+                    if (cartaoResult && cartaoResult.suportada) {
+                        taxa_global = cartaoResult.taxa_utilizada;
+                    } else {
+                        taxa_global = null;
+                    }
                     fonte_global = 'PTAX Contingência';
                 }
 
