@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Leonardo Cardozo Vargas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 /* ====================================================================
    Calculadora App — useOraculo Hook
    AI analysis state, cooldown, cache status
