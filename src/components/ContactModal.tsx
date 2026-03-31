@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Leonardo Cardozo Vargas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 /* ====================================================================
    ContactModal — Formulário de Contato modal overlay
    Paridade com Astrólogo e Oráculo Financeiro

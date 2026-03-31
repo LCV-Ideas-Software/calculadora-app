@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Leonardo Cardozo Vargas
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 /* ====================================================================
    Calculadora App — Email Service
    Extração de public/js/email-feature.js
