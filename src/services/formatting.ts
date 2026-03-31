@@ -3,7 +3,7 @@
    Funções de formatação numérica e moeda
    ==================================================================== */
 
-const APP_VERSION = 'APP v04.01.01';
+const APP_VERSION = 'APP v04.01.02';
 export { APP_VERSION };
 
 const brlFormatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
