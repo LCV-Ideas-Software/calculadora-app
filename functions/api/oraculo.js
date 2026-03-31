@@ -118,70 +118,6 @@ function extractTextFromParts(parts) {
     .join('');
 }
 
-/**
- * Fetch com retry automático e logging estruturado
- * @param {string} url - URL do endpoint
- * @param {Object} options - Fetch options
- * @param {string} endpoint - Nome para logging
- * @returns {Promise<Response>}
- */
-async function fetchWithRetry(url, options, endpoint = 'unknown') {
-  let lastError;
-  for (let attempt = 1; attempt <= GEMINI_CONFIG.maxRetries; attempt++) {
-    try {
-      structuredLog('info', `Gemini API request attempt ${attempt}`, {
-        endpoint,
-        attempt,
-        url: url.split('?')[0]
-      });
-
-      const response = await fetch(url, options);
-
-      if (response.ok) {
-        structuredLog('info', 'Gemini API request succeeded', {
-          endpoint,
-          attempt,
-          status: response.status
-        });
-        return response;
-      }
-
-      lastError = { status: response.status, statusText: response.statusText };
-
-      structuredLog('warn', 'Gemini API request failed', {
-        endpoint,
-        attempt,
-        status: response.status,
-        message: response.statusText
-      });
-
-      if (attempt < GEMINI_CONFIG.maxRetries) {
-        await new Promise(r => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
-      }
-    } catch (err) {
-      lastError = { message: err.message };
-
-      structuredLog('error', 'Gemini API request error', {
-        endpoint,
-        attempt,
-        error: err.message
-      });
-
-      if (attempt < GEMINI_CONFIG.maxRetries) {
-        await new Promise(r => setTimeout(r, GEMINI_CONFIG.retryDelayMs));
-      }
-    }
-  }
-
-  structuredLog('error', 'Gemini API request exhausted retries', {
-    endpoint,
-    totalAttempts: GEMINI_CONFIG.maxRetries,
-    lastError
-  });
-
-  throw new Error(`API request failed after ${GEMINI_CONFIG.maxRetries} attempts: ${JSON.stringify(lastError)}`);
-}
-
 export async function onRequestPost(context) {
     try {
         const { request, env } = context;
@@ -421,14 +357,6 @@ Dados da simulação:
                 status: failureStatus,
                 errorLength: errText.length
             });
-
-            let upstreamMessage = '';
-            try {
-                const parsed = JSON.parse(errText);
-                upstreamMessage = String(parsed?.error?.message || '').trim();
-            } catch {
-                upstreamMessage = '';
-            }
 
             const mappedStatus = [400, 401, 403, 404, 408, 409, 413, 415, 422, 429, 500, 502, 503, 504].includes(failureStatus)
                 ? failureStatus
