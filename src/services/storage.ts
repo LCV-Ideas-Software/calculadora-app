@@ -9,24 +9,20 @@
 
 import type { AiHistoryEntry, AiTelemetry } from '../types/api.ts';
 
-const PREFIX = 'calculadora-app:';
-const HISTORY_KEY = `${PREFIX}ai-history`;
-const TELEMETRY_KEY = `${PREFIX}ai-telemetry`;
 const MAX_HISTORY = 50;
 
 /* ------- AI History ------- */
 
+// Em compliance com as diretivas do projeto: "NADA EM LOCALSTORAGE"
+// Em breve este sistema será consumido diretamente do D1 ou API externa via Worker nativo.
+let memoryHistory: AiHistoryEntry[] = [];
+
 export function getAiHistory(): AiHistoryEntry[] {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
+  return [...memoryHistory];
 }
 
 export function saveAiHistory(entries: AiHistoryEntry[]): void {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, MAX_HISTORY)));
+  memoryHistory = entries.slice(0, MAX_HISTORY);
 }
 
 export function addAiHistoryEntry(entry: AiHistoryEntry): void {
@@ -47,17 +43,14 @@ const EMPTY_TELEMETRY: AiTelemetry = {
   updatedAt: null,
 };
 
+let memoryTelemetry: AiTelemetry = { ...EMPTY_TELEMETRY };
+
 export function getAiTelemetry(): AiTelemetry {
-  try {
-    const raw = localStorage.getItem(TELEMETRY_KEY);
-    return raw ? { ...EMPTY_TELEMETRY, ...JSON.parse(raw) } : { ...EMPTY_TELEMETRY };
-  } catch {
-    return { ...EMPTY_TELEMETRY };
-  }
+  return { ...memoryTelemetry };
 }
 
 export function saveAiTelemetry(t: AiTelemetry): void {
-  localStorage.setItem(TELEMETRY_KEY, JSON.stringify(t));
+  memoryTelemetry = { ...t };
 }
 
 export function updateAiTelemetry(durationMs: number, fromCache: boolean, isError: boolean): void {
