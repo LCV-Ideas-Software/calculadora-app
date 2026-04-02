@@ -1,5 +1,3 @@
-import { checkAndTrackRateLimit } from './_lib/rate-limit.mjs';
-
 export async function onRequestPost(context) {
     const { request, env } = context;
     const headers = { "Content-Type": "application/json" };
@@ -21,28 +19,6 @@ export async function onRequestPost(context) {
         const RESEND_API_KEY = env.RESEND_API_KEY;
         if (!RESEND_API_KEY) {
             return new Response(JSON.stringify({ success: false, error: "Chave do Resend não configurada." }), { status: 500, headers });
-        }
-
-        // Rate-limit configurável via D1 (por IP)
-        const rate = await checkAndTrackRateLimit({ env, request, routeKey: 'enviar_email' });
-        if (!rate.allowed) {
-            return new Response(JSON.stringify({
-                success: false,
-                error: `Limite de envios atingido. Tente novamente em ${rate.retry_after_seconds}s.`,
-                code: 'RATE_LIMITED',
-                retry_after_seconds: rate.retry_after_seconds,
-                policy: {
-                    enabled: rate.policy?.enabled === 1,
-                    max_requests: rate.policy?.max_requests,
-                    window_minutes: rate.policy?.window_minutes
-                }
-            }), {
-                status: 429,
-                headers: {
-                    ...headers,
-                    "Retry-After": String(rate.retry_after_seconds)
-                }
-            });
         }
 
         const res = await fetch('https://api.resend.com/emails', {

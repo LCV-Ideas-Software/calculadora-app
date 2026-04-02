@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.05] - 2026-04-02
+### Alterado
+- **Controle de Rate Limit**: erradicada toda lógica manual de rate-limit via banco de dados e headers HTTP dentro dos endpoints (como `oraculo.ts`, `contato.js`, `enviar-email.js`). O módulo local de checagem também foi deletado, transferindo integralmente a governança para a camada WAF de borda da Cloudflare, simplificando o código e reduzindo latência.
+
+### Controle de versão
+- `calculadora-app`: APP v04.01.04 → APP v04.01.05
+
 ## [v04.01.04] - 2026-03-31
 ### Corrigido
 - **Compliance - docs legais locais em runtime**: o `LicencasModule` passou a carregar `LICENSE`, `NOTICE` e `THIRDPARTY` a partir de `public/legal/*` via `BASE_URL`, eliminando dependência de `raw.githubusercontent.com` no browser e removendo os 404 recorrentes em produção.
