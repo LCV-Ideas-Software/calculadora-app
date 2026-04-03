@@ -57,7 +57,7 @@ export async function onRequestPost(context: any) {
     }
 
     const modelName = env.GEMINI_MODEL || GEMINI_CONFIG.model;
-    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ baseUrl: 'https://gateway.ai.cloudflare.com/v1/d65b76a0e64c3791e932edd9163b1c71/workspace-gateway/google-ai-studio', apiKey: GEMINI_API_KEY });
 
     const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
