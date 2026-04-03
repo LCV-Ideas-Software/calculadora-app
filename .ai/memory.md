@@ -53,3 +53,16 @@
 - `npm run build` ✅ astrologo-admin (659ms)
 - **Hotfix v02.15.01**: `Notification.css` tinha class names errados — corrigido.
 - **v02.16.00 + v03.26.00**: Botões flutuantes de rolagem (Voltar ao topo / Ir para o final) adicionados a ambos apps. Design tiptap.dev (branco, circular, hover Google Blue). Threshold 200px. Paridade com admin-app e mainsite-frontend.
+
+## 2026-04-03 — Enforcing Canonical Domain Security & TypeScript Audit
+### Escopo
+Implementação de bloqueio em Edge para impedir a exposição pública de roteamentos sob o domínio interno `*.pages.dev`. Aplicado redirect mandatório (301) para os domínios canônicos definidos (`lcv.app.br` e suas ramificações) em todos os apps com exceção dos puramente internos, protegendo infraestrutura e performance SEO. Também foram resolvidos erros de compilação (`Unexpected any`) e typings TypeScript do motor do editor Post no `admin-app` referentes a integração Word Mammoth, bem como a injeção Cloudflare `PagesFunction` em `mainsite-frontend`.
+
+### Controle de versão
+- `admin-app`: APP v01.77.31 → APP v01.77.32
+- `oraculo-financeiro`: APP v01.08.00 → APP v01.08.01
+- `astrologo-app`: APP v02.17.02 → APP v02.17.03
+- `mainsite-frontend`: APP v03.04.14 → APP v03.04.15
+- `calculadora-app`: middleware deployment, versioning handled internally
+- `apphub`: middleware deployment, versioning handled internally
+- `adminapps`: middleware deployment, versioning handled internally
