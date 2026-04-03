@@ -10,10 +10,11 @@ import { GoogleGenAI } from '@google/genai';
 interface Env {
   GEMINI_API_KEY: string;
   GEMINI_MODEL?: string;
+  CF_AI_GATEWAY: string;
 }
 
 const GEMINI_CONFIG = {
-  model: 'gemini-2.5-flash',
+  model: '',
   maxTokensInput: 120000,
   maxRetries: 2,
   retryDelayMs: 800,
@@ -57,7 +58,12 @@ export async function onRequestPost(context: any) {
     }
 
     const modelName = env.GEMINI_MODEL || GEMINI_CONFIG.model;
-    const ai = new GoogleGenAI({ baseUrl: 'https://gateway.ai.cloudflare.com/v1/d65b76a0e64c3791e932edd9163b1c71/workspace-gateway/google-ai-studio', apiKey: GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ 
+      apiKey: GEMINI_API_KEY,
+      httpOptions: {
+        baseUrl: env.CF_AI_GATEWAY || 'https://gateway.ai.cloudflare.com/v1/d65b76a0e64c3791e932edd9163b1c71/workspace-gateway/google-ai-studio', 
+      }
+    });
 
     const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
 
@@ -169,7 +175,7 @@ Dados da simulação:
     }
 
     if (!successfulResponse) {
-        return new Response(JSON.stringify({ erro: "Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes." }), { status: 502, headers: { "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ erro: "Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes." }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 
     const usage = successfulResponse.usageMetadata || {};
