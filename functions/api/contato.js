@@ -17,7 +17,7 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({ ok: false, error: "E-mail inválido." }), { status: 400, headers });
         }
 
-        const RESEND_API_KEY = env.RESEND_API_KEY;
+        const RESEND_API_KEY = env.RESEND_API_KEY || env['RESEND_APP_KEY'] || env['RESEND_APPKEY'] || env['resend-api-key'] || env['resend-appkey'] || env.RESEND_APPKEY;
         if (!RESEND_API_KEY) {
             return new Response(JSON.stringify({ ok: false, error: "Chave do Resend não configurada." }), { status: 500, headers });
         }
