@@ -7,7 +7,7 @@
    Funções de formatação numérica e moeda
    ==================================================================== */
 
-const APP_VERSION = 'APP v04.01.06';
+const APP_VERSION = 'APP v04.01.07';
 export { APP_VERSION };
 
 const brlFormatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -76,3 +76,4 @@ export const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP'];
 export function isCurrencySupported(codigo: string): boolean {
   return SUPPORTED_CURRENCIES.includes(codigo);
 }
+

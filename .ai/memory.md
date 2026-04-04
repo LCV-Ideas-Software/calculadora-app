@@ -1,4 +1,13 @@
-# AI Memory Log - calculadora-app
+# AI Memory Log - Calculadora-App
+
+## 2026-04-04 - Oráculo Token Limits Optimization
+### Scope
+Remoção do teto impeditivo de resposta para Thinking Models nativos nas inferências do \oraculo.ts\.
+### Resolved
+- **Tokens Maximizados**: Limites de output ampliados para suportar grandes cargas de tokens gastos no engine v1beta (Gemini Flash). Subiu de 3/4K para 8192 max limit.
+
+### Controle de versão
+- calculadora-app: APP v04.01.06 -> APP v04.01.07
 
 
 ## 2026-04-03 — Cloudflare Paid Scale Integration
@@ -75,3 +84,4 @@ Implementação de bloqueio em Edge para impedir a exposição pública de rotea
 - `calculadora-app`: middleware deployment, versioning handled internally
 - `apphub`: middleware deployment, versioning handled internally
 - `adminapps`: middleware deployment, versioning handled internally
+

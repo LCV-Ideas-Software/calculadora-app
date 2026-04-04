@@ -19,8 +19,8 @@ const GEMINI_CONFIG = {
   retryDelayMs: 800,
   endpoints: {
     oraculo: {
-      maxOutputTokensAdvanced: 4096,
-      maxOutputTokensMinimal: 3072,
+      maxOutputTokensAdvanced: 8192,
+      maxOutputTokensMinimal: 8192,
       temperature: 0.3,
       topP: 0.8
     }
@@ -215,3 +215,4 @@ Dados da simulação:
     return new Response(JSON.stringify({ erro: "Erro interno no servidor do Oráculo." }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
+
