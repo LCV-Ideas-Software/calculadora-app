@@ -13,7 +13,7 @@ interface Env {
 }
 
 const GEMINI_CONFIG = {
-  model: '',
+  model: 'gemini-2.5-flash',
   maxTokensInput: 120000,
   maxRetries: 2,
   retryDelayMs: 800,
@@ -102,6 +102,14 @@ Dados da simulação:
        config: any;
     };
 
+    const safetySettings = [
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_ONLY_HIGH' }
+    ];
+
     const payloadCandidates: PayloadCandidate[] = [
       {
         label: 'advanced',
@@ -110,7 +118,8 @@ Dados da simulação:
           temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
           topP: GEMINI_CONFIG.endpoints.oraculo.topP,
           maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced,
-          thinkingConfig: { thinkingBudgetTokens: 1024 }
+          thinkingConfig: { thinkingBudgetTokens: 1024 },
+          safetySettings
         }
       },
       {
@@ -119,7 +128,8 @@ Dados da simulação:
         config: {
           temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
           topP: GEMINI_CONFIG.endpoints.oraculo.topP,
-          maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced
+          maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced,
+          safetySettings
         }
       },
       {
@@ -127,7 +137,8 @@ Dados da simulação:
         config: {
           temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
           topP: GEMINI_CONFIG.endpoints.oraculo.topP,
-          maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensMinimal
+          maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensMinimal,
+          safetySettings
         }
       }
     ];

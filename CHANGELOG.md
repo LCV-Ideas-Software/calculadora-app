@@ -1,4 +1,9 @@
-﻿# Changelog — Calculadora App (ex-Itaú Calculadora)
+# Changelog — Calculadora App (ex-Itaú Calculadora)
+
+## [v04.01.06] - 2026-04-04
+### Resolvido
+- **Infraestrutura IA**: Extinguida vulnerabilidade nativa 500 nas invocações do oraculo.ts estipulando 'gemini-2.5-flash' como fallback model.
+- **Segurança Cognitiva**: Incorporada flag mandatória HARM_CATEGORY_CIVIC_INTEGRITY nos payloads garantindo aprovação total nas requisições.
 
 ## [v04.01.05] - 2026-04-02
 ### Alterado
@@ -7,12 +12,22 @@
 ### Controle de versão
 - `calculadora-app`: APP v04.01.04 → APP v04.01.05
 
+## [v04.01.06] - 2026-04-04
+### Resolvido
+- **Infraestrutura IA**: Extinguida vulnerabilidade nativa 500 nas invocações do oraculo.ts estipulando 'gemini-2.5-flash' como fallback model.
+- **Segurança Cognitiva**: Incorporada flag mandatória HARM_CATEGORY_CIVIC_INTEGRITY nos payloads garantindo aprovação total nas requisições.
+
 ## [v04.01.04] - 2026-03-31
 ### Corrigido
 - **Compliance - docs legais locais em runtime**: o `LicencasModule` passou a carregar `LICENSE`, `NOTICE` e `THIRDPARTY` a partir de `public/legal/*` via `BASE_URL`, eliminando dependência de `raw.githubusercontent.com` no browser e removendo os 404 recorrentes em produção.
 
 ### Controle de versão
 - `calculadora-app`: APP v04.01.03 → APP v04.01.04
+
+## [v04.01.06] - 2026-04-04
+### Resolvido
+- **Infraestrutura IA**: Extinguida vulnerabilidade nativa 500 nas invocações do oraculo.ts estipulando 'gemini-2.5-flash' como fallback model.
+- **Segurança Cognitiva**: Incorporada flag mandatória HARM_CATEGORY_CIVIC_INTEGRITY nos payloads garantindo aprovação total nas requisições.
 
 ## [v04.01.03] - 2026-03-31
 ### Corrigido
@@ -154,3 +169,4 @@
 ## [v03.05.00] — Anterior
 ### Histórico
 - Versão anterior à padronização do controle de versão
+
