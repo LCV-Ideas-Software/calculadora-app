@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.09] - 2026-04-07
+### Segurança
+- **Vite 8.0.3 → 8.0.7**: Correção de 3 CVEs de severidade alta/média.
+
+### Controle de versão
+- `calculadora-app`: APP v04.01.08 → APP v04.01.09
+
 ## [v04.01.08] - 2026-04-06
 ### Adicionado
 - **Cross-Service AI Telemetry**: Implementação de `logAiUsage` em `oraculo.ts` para registro de tokens, latência e status no `ai_usage_logs` (D1).
