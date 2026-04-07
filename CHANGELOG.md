@@ -1,5 +1,14 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.08] - 2026-04-06
+### Adicionado
+- **Cross-Service AI Telemetry**: Implementação de `logAiUsage` em `oraculo.ts` para registro de tokens, latência e status no `ai_usage_logs` (D1).
+### Alterado
+- **Compatibility Date**: `wrangler.json` atualizado para `2026-04-06`.
+### Controle de versão
+- `calculadora-app`: APP v04.01.07 → APP v04.01.08
+
+
 ## [v04.01.06] - 2026-04-04
 ### Resolvido
 - **Infraestrutura IA**: Extinguida vulnerabilidade nativa 500 nas invocações do oraculo.ts estipulando 'gemini-2.5-flash' como fallback model.

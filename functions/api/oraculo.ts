@@ -7,9 +7,14 @@
 
 import { GoogleGenAI } from '@google/genai';
 
+interface D1DatabaseLike {
+  prepare: (query: string) => { bind(...args: unknown[]): { run: () => Promise<unknown> }; all: () => Promise<unknown> }
+}
+
 interface Env {
   GEMINI_API_KEY: string;
   GEMINI_MODEL?: string;
+  BIGDATA_DB?: D1DatabaseLike;
 }
 
 const GEMINI_CONFIG = {
@@ -37,6 +42,37 @@ function structuredLog(level: string, message: string, context = {}) {
   console.log(JSON.stringify(logEntry));
 }
 
+// ── Telemetria: registra uso de AI no BIGDATA_DB ──
+function logAiUsage(
+  db: D1DatabaseLike | undefined,
+  entry: { module: string; model: string; input_tokens: number; output_tokens: number; latency_ms: number; status: string; error_detail?: string },
+) {
+  if (!db || typeof db.prepare !== 'function') return;
+  (async () => {
+    try {
+      await db.prepare(`
+        CREATE TABLE IF NOT EXISTS ai_usage_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+          module TEXT NOT NULL, model TEXT NOT NULL, input_tokens INTEGER DEFAULT 0,
+          output_tokens INTEGER DEFAULT 0, latency_ms INTEGER DEFAULT 0,
+          status TEXT DEFAULT 'ok', error_detail TEXT
+        )
+      `).all();
+      await db.prepare(`
+        INSERT INTO ai_usage_logs (module, model, input_tokens, output_tokens, latency_ms, status, error_detail)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        entry.module, entry.model,
+        entry.input_tokens, entry.output_tokens,
+        entry.latency_ms, entry.status,
+        entry.error_detail || null,
+      ).run();
+    } catch (err) {
+      console.warn('[telemetry] ai_usage_logs INSERT failed:', err instanceof Error ? err.message : err);
+    }
+  })();
+}
+
 function extractTextFromParts(parts: any[]): string {
   return (parts || [])
     .filter(p => typeof p.text === 'string' && !p.thought)
@@ -47,6 +83,7 @@ function extractTextFromParts(parts: any[]): string {
 export async function onRequestPost(context: any) {
   try {
     const { request, env } = context as { request: Request; env: Env };
+    const _telStart = Date.now();
     const promptData = await request.json();
 
     const { GEMINI_API_KEY } = env;
@@ -182,6 +219,7 @@ Dados da simulação:
     }
 
     if (!successfulResponse) {
+        void logAiUsage(env.BIGDATA_DB, { module: 'calculadora-oraculo', model: modelName, input_tokens: 0, output_tokens: 0, latency_ms: Date.now() - _telStart, status: 'error', error_detail: 'All fallback payloads exhausted' });
         return new Response(JSON.stringify({ erro: "Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes." }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
 
@@ -191,6 +229,14 @@ Dados da simulação:
         promptTokens: usage.promptTokenCount || 0,
         outputTokens: usage.candidatesTokenCount || 0,
         cachedTokens: usage.cachedContentTokenCount || 0
+    });
+
+    // Telemetria de sucesso
+    void logAiUsage(env.BIGDATA_DB, {
+      module: 'calculadora-oraculo', model: modelName,
+      input_tokens: usage.promptTokenCount || 0,
+      output_tokens: usage.candidatesTokenCount || 0,
+      latency_ms: Date.now() - _telStart, status: 'ok'
     });
 
     let text = "";
