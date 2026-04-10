@@ -7,7 +7,20 @@
 
 
 ## 🧠 MEMÓRIA DE CONTEXTO ISOLADO (CALCULADORA-APP)
-# AI Memory Log - calculadora-app
+# AI Memory Log - Calculadora-App
+
+## 2026-04-08 — GitHub Actions Purge & Dependabot Standardization
+### Escopo
+Auditoria completa de CI/CD para eliminação de "ghost runs" em toda a rede de repositórios do workspace, juntamente com a universalização da configuração do Dependabot ajustada às necessidades de empacotamento locais para mitigar tráfego e limites no API.
+
+## 2026-04-04 - Oráculo Token Limits Optimization
+### Scope
+Remoção do teto impeditivo de resposta para Thinking Models nativos nas inferências do \oraculo.ts\.
+### Resolved
+- **Tokens Maximizados**: Limites de output ampliados para suportar grandes cargas de tokens gastos no engine v1beta (Gemini Flash). Subiu de 3/4K para 8192 max limit.
+
+### Controle de versão
+- calculadora-app: APP v04.01.06 -> APP v04.01.07
 
 
 ## 2026-04-03 — Cloudflare Paid Scale Integration
@@ -87,13 +100,5 @@ Implementação de bloqueio em Edge para impedir a exposição pública de rotea
 
 
 
-## 🤖 Claude Code — Memória Sincronizada (2026-04-09)
-
-A memória persistente do **Claude Code** está em:
-`C:\Users\leona\.claude\projects\c--Users-leona-lcv-workspace\memory\`
-
-Arquivos: `MEMORY.md` (índice) · `project_workspace.md` · `version_control.md` · `infra_directives.md` · `app_memories_ref.md` · `ai_agents_files.md`
-
-**Diretiva:** Ao atualizar esta memória, atualizar também os arquivos correspondentes da memória do Claude Code para manter paridade entre Gemini, Copilot e Claude Code.
 
 > **DIRETIVA DE SEGURANÇA:** Ao sugerir código ou responder perguntas, leia rigorosamente o contexto e as memórias históricas acima para não divergir das decisões já tomadas pelo outro agente.
