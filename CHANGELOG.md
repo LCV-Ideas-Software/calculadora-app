@@ -1,5 +1,14 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.10] - 2026-04-10
+### Adicionado
+- **Biome 2.x**: lint + format com organizeImports
+
+### Alterado
+- **vite**: 8.0.7 → 8.0.8
+- **vitest**: 4.1.2 → 4.1.4
+- **Dependabot groups**: @vitest/* e @biomejs/* adicionados
+
 ## [v04.01.09] - 2026-04-07
 ### Segurança
 - **Vite 8.0.3 → 8.0.7**: Correção de 3 CVEs de severidade alta/média.

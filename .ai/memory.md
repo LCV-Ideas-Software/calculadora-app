@@ -1,3 +1,8 @@
+## 2026-04-10 — Biome 2.x + patches (v04.01.10)
+- Biome 2.x adicionado (lint + format com organizeImports)
+- vite 8.0.7 → 8.0.8, vitest 4.1.2 → 4.1.4
+- Dependabot groups: @vitest/* e @biomejs/* adicionados
+
 # AI Memory Log - Calculadora-App
 
 ## 2026-04-08 — GitHub Actions Purge & Dependabot Standardization
