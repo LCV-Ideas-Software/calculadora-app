@@ -25,25 +25,29 @@ export default function BackgroundCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    const safeCanvas = canvas;
+    const safeCtx = ctx;
 
     let raf: number;
     let w = 0;
     let h = 0;
 
     function resize() {
-      w = canvas!.width = window.innerWidth;
-      h = canvas!.height = window.innerHeight;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      safeCanvas.width = w;
+      safeCanvas.height = h;
     }
     resize();
     window.addEventListener('resize', resize);
 
     // Gerar orbs
     const colors = [
-      'rgba(234,88,12,0.08)',   // orange
-      'rgba(37,99,235,0.07)',   // blue
-      'rgba(168,85,247,0.06)',  // purple
-      'rgba(22,163,74,0.05)',   // green
-      'rgba(220,38,38,0.04)',   // red
+      'rgba(234,88,12,0.08)', // orange
+      'rgba(37,99,235,0.07)', // blue
+      'rgba(168,85,247,0.06)', // purple
+      'rgba(22,163,74,0.05)', // green
+      'rgba(220,38,38,0.04)', // red
     ];
 
     const orbs: Orb[] = Array.from({ length: 6 }, () => ({
@@ -56,11 +60,11 @@ export default function BackgroundCanvas() {
     }));
 
     function draw() {
-      ctx!.clearRect(0, 0, w, h);
+      safeCtx.clearRect(0, 0, w, h);
 
       // Background base
-      ctx!.fillStyle = '#f8fafc';
-      ctx!.fillRect(0, 0, w, h);
+      safeCtx.fillStyle = '#f8fafc';
+      safeCtx.fillRect(0, 0, w, h);
 
       for (const orb of orbs) {
         orb.x += orb.dx;
@@ -70,11 +74,11 @@ export default function BackgroundCanvas() {
         if (orb.y < -orb.r) orb.y = h + orb.r;
         if (orb.y > h + orb.r) orb.y = -orb.r;
 
-        const grad = ctx!.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+        const grad = safeCtx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
         grad.addColorStop(0, orb.color);
         grad.addColorStop(1, 'transparent');
-        ctx!.fillStyle = grad;
-        ctx!.fillRect(orb.x - orb.r, orb.y - orb.r, orb.r * 2, orb.r * 2);
+        safeCtx.fillStyle = grad;
+        safeCtx.fillRect(orb.x - orb.r, orb.y - orb.r, orb.r * 2, orb.r * 2);
       }
 
       raf = requestAnimationFrame(draw);
@@ -87,5 +91,5 @@ export default function BackgroundCanvas() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} id="bg-canvas" aria-hidden="true" />;
+  return <canvas ref={canvasRef} id="bg-canvas" />;
 }

@@ -7,8 +7,8 @@
    Extração de public/js/email-feature.js
    ==================================================================== */
 
-import type { EmailSimulationData, ChannelResult } from '../types/api.ts';
-import { fmt, fmt4, pct, moedaParaSimbolo, APP_VERSION } from './formatting.ts';
+import type { ChannelResult, EmailSimulationData } from '../types/api.ts';
+import { APP_VERSION, fmt, fmt4, moedaParaSimbolo, pct } from './formatting.ts';
 
 /**
  * Envia relatório de simulação por email via backend.
@@ -129,10 +129,13 @@ function buildEmailHtml(data: EmailSimulationData): string {
   const melhor = data.melhorOpcao ?? '—';
 
   // Determinar winner key
-  const winnerKey: ChannelKey | null = melhor.includes('Cartão') ? 'cartao'
-    : melhor.includes('Saldo') ? 'saldo'
-    : melhor.includes('Global') ? 'global'
-    : null;
+  const winnerKey: ChannelKey | null = melhor.includes('Cartão')
+    ? 'cartao'
+    : melhor.includes('Saldo')
+      ? 'saldo'
+      : melhor.includes('Global')
+        ? 'global'
+        : null;
 
   // Montar cards dos canais disponíveis
   let cards = buildChannelCard('cartao', data.cartao, simbolo, winnerKey === 'cartao');
@@ -202,7 +205,9 @@ function buildEmailHtml(data: EmailSimulationData): string {
           </td>
         </tr>
 
-        ${data.oracleHtml ? `
+        ${
+          data.oracleHtml
+            ? `
         <!-- Oracle AI Analysis -->
         <tr>
           <td style="padding:0 24px 24px;">
@@ -223,7 +228,9 @@ function buildEmailHtml(data: EmailSimulationData): string {
             </table>
           </td>
         </tr>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- Compliance -->
         <tr>

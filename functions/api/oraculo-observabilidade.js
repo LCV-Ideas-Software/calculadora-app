@@ -1,9 +1,4 @@
-﻿function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
+import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/security.js';
 
 async function ensureTable(env) {
   await env.BIGDATA_DB.prepare(`
@@ -26,6 +21,12 @@ async function ensureTable(env) {
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
+    const originError = requireAllowedOrigin(request);
+    if (originError) return originError;
+
+    const rateLimitError = await enforceRateLimit(request, env, 'observabilidade');
+    if (rateLimitError) return rateLimitError;
+
     const body = await request.json();
 
     await ensureTable(env);
@@ -60,8 +61,8 @@ export async function onRequestPost(context) {
       )
       .run();
 
-    return json({ ok: true });
-  } catch (error) {
-    return json({ erro: 'Falha ao registrar observabilidade do Oráculo.' }, 500);
+    return jsonResponse({ ok: true });
+  } catch {
+    return jsonResponse({ erro: 'Falha ao registrar observabilidade do Oráculo.' }, 500);
   }
 }

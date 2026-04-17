@@ -6,8 +6,8 @@
    ActionButtons — Copiar / WhatsApp / E-Mail
    ==================================================================== */
 
-import type { SimulationResponse } from '../types/api.ts';
 import { buildCopyText, shareViaWhatsApp } from '../services/whatsapp.ts';
+import type { SimulationResponse } from '../types/api.ts';
 import { showToast } from './Toast.tsx';
 
 interface Props {
@@ -40,11 +40,22 @@ export default function ActionButtons({ result, melhorOpcao, onEmailClick }: Pro
   );
 }
 
-function ActionBtn({ emoji, label, onClick, bg, color }: {
-  emoji: string; label: string; onClick: () => void; bg: string; color: string;
+function ActionBtn({
+  emoji,
+  label,
+  onClick,
+  bg,
+  color,
+}: {
+  emoji: string;
+  label: string;
+  onClick: () => void;
+  bg: string;
+  color: string;
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:scale-105"
       style={{ background: bg, color, border: `1px solid ${color}22` }}

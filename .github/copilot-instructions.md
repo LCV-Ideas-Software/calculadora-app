@@ -14,6 +14,20 @@
 
 # AI Memory Log - Calculadora-App
 
+## 2026-04-17 — Calculadora-App v04.01.11 (hardening de APIs públicas + qualidade verde)
+### Escopo
+Fechamento da auditoria defensiva de 2026-04-17 no `calculadora-app`, endurecendo as APIs públicas sensíveis, reduzindo risco de XSS/abuso e restaurando o gate completo de qualidade do projeto.
+### Alterado
+- **`functions/api/calcular.js`**: a simulação pública deixou de gravar parâmetros operacionais globais no D1 a partir de input arbitrário do visitante.
+- **`functions/api/contato.js`, `enviar-email.js`, `oraculo.ts`, `oraculo-observabilidade.js`**: validação de origem, rate limiting e sanitização/escape de HTML sensível adicionados.
+- **`src/services/oraculo.ts`**: renderização do relatório IA endurecida antes do `dangerouslySetInnerHTML`, preservando a experiência atual.
+- **`public/_headers`**: baseline explícito de CSP/headers defensivos adicionado ao app público.
+- **Qualidade**: frontend saneado o suficiente para voltar a passar `npm run lint`, `npm test` e `npm run build`.
+### Motivação
+- Responder à auditoria defensiva sem perder comportamento, visual nem ferramentas já operantes, reduzindo abuso público e retomando verificabilidade no CI local.
+### Versão
+- APP v04.01.10 → APP v04.01.11
+
 ## 2026-04-08 — GitHub Actions Purge & Dependabot Standardization
 ### Escopo
 Auditoria completa de CI/CD para eliminação de "ghost runs" em toda a rede de repositórios do workspace, juntamente com a universalização da configuração do Dependabot ajustada às necessidades de empacotamento locais para mitigar tráfego e limites no API.

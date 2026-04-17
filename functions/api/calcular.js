@@ -1,11 +1,14 @@
 ﻿import { getOperationalContext } from './contexto-operacional.mjs';
 import { calcularBandasSensibilidade } from './sensibilidade.mjs';
 import { calcularErroPercentual, calcularMape, classificarMapePercent } from './backtest.mjs';
+import { requireAllowedOrigin } from './_shared/security.js';
 
 export async function onRequestPost(context) {
     const defaultHeaders = { "Content-Type": "application/json" };
     try {
         const { request, env } = context;
+        const originError = requireAllowedOrigin(request);
+        if (originError) return originError;
         const payload = await request.json();
 
         const data_compra = payload.data_compra;
@@ -89,37 +92,6 @@ export async function onRequestPost(context) {
         if ('backtest_mape_atencao_percent' in parametrosD1) origem.backtest_mape_atencao_percent = 'd1';
 
         const SPREAD_GLOBAL = is_plantao ? SPREAD_GLOBAL_FECHADO : SPREAD_GLOBAL_ABERTO;
-
-        // ═══════════════════════════════════════════════════
-        // 📝 SALVAR PARÂMETROS CUSTOMIZADOS NO D1
-        // ═══════════════════════════════════════════════════
-        let parametrosCustomizadosSalvos = false;
-        let parametrosCustomizadosChaves = [];
-        let parametrosCustomizadosEm = null;
-
-        const paramsSalvar = {};
-        if (Number.isFinite(spreadPercentInformado)) paramsSalvar.taxa_spread_cartao = spreadPercentInformado / 100;
-        if (Number.isFinite(iofPercentInformado)) {
-            paramsSalvar.taxa_iof_cartao = iofPercentInformado / 100;
-            paramsSalvar.taxa_iof_global = iofPercentInformado / 100;
-        }
-        if (Number.isFinite(globalSpreadAbertoInformado)) paramsSalvar.taxa_spread_global_aberto = globalSpreadAbertoInformado / 100;
-        if (Number.isFinite(globalSpreadFechadoInformado)) paramsSalvar.taxa_spread_global_fechado = globalSpreadFechadoInformado / 100;
-        if (Number.isFinite(backtestMapeBoaInformado)) paramsSalvar.backtest_mape_boa_percent = backtestMapeBoaInformado;
-        if (Number.isFinite(backtestMapeAtencaoInformado)) paramsSalvar.backtest_mape_atencao_percent = backtestMapeAtencaoInformado;
-
-        if (Object.keys(paramsSalvar).length > 0) {
-            try {
-                for (const [chave, valor] of Object.entries(paramsSalvar)) {
-                    const d1Chave = chave.replace('taxa_', '');
-                    await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_parametros_customizados (chave, valor) VALUES (?, ?)").bind(d1Chave, String(valor)).run();
-                    parametrosCustomizadosChaves.push(chave);
-                    origem[chave] = 'd1';
-                }
-                parametrosCustomizadosSalvos = true;
-                parametrosCustomizadosEm = new Date().toISOString();
-            } catch (e) { }
-        }
 
         let cartaoResult = null;
         let globalResult = null;
@@ -443,12 +415,6 @@ export async function onRequestPost(context) {
 
         if (saldoExistenteResult) {
             responseBody.global_saldo_existente = saldoExistenteResult;
-        }
-
-        if (parametrosCustomizadosSalvos) {
-            responseBody.itau_parametros_customizados_salvos = true;
-            responseBody.itau_parametros_customizados_chaves = parametrosCustomizadosChaves;
-            responseBody.itau_parametros_customizados_em = parametrosCustomizadosEm;
         }
 
         return new Response(JSON.stringify(responseBody), { headers: defaultHeaders });

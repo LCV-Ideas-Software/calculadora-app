@@ -6,8 +6,8 @@
    ComparisonCard — Glassmorphism card for each channel result
    ==================================================================== */
 
+import { fmt, fmt4, moedaParaSimbolo, pct } from '../services/formatting.ts';
 import type { ChannelResult } from '../types/api.ts';
-import { fmt, fmt4, pct, moedaParaSimbolo } from '../services/formatting.ts';
 
 type Variant = 'cartao' | 'global' | 'saldo';
 
@@ -76,9 +76,7 @@ export default function ComparisonCard({ variant, channel, moeda, isWinner }: Pr
         <div className="pt-2 mt-2 border-t border-slate-200/60">
           <div className="flex justify-between items-baseline">
             <span className="font-bold text-slate-600">Total em Reais</span>
-            <span className="text-xl font-extrabold text-slate-900">
-              R$ {fmt(channel.valor_total_brl)}
-            </span>
+            <span className="text-xl font-extrabold text-slate-900">R$ {fmt(channel.valor_total_brl)}</span>
           </div>
         </div>
 
@@ -107,9 +105,7 @@ function Row({ label, value, muted }: { label: string; value: string; muted?: bo
   return (
     <div className="flex justify-between">
       <span className="text-slate-500">{label}</span>
-      <span className={muted ? 'text-slate-400 text-xs' : 'text-slate-800 font-semibold'}>
-        {value}
-      </span>
+      <span className={muted ? 'text-slate-400 text-xs' : 'text-slate-800 font-semibold'}>{value}</span>
     </div>
   );
 }

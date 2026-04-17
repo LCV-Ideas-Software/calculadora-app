@@ -6,7 +6,7 @@
    ScrollControls — Floating scroll buttons (top/bottom)
    ==================================================================== */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ScrollControls() {
   const [showTop, setShowTop] = useState(false);
@@ -33,25 +33,45 @@ export default function ScrollControls() {
   const scrollToBottom = () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
 
   return (
-    <div className="floating-scroll-controls" aria-label="Controles de rolagem">
+    <nav className="floating-scroll-controls" aria-label="Controles de rolagem">
       <button
+        type="button"
         className={`floating-scroll-btn ${showTop ? 'is-visible' : ''}`}
         onClick={scrollToTop}
         aria-label="Ir para o topo"
       >
-        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <title>Ir para o topo</title>
           <polyline points="18 15 12 9 6 15" />
         </svg>
       </button>
       <button
+        type="button"
         className={`floating-scroll-btn ${showBottom ? 'is-visible' : ''}`}
         onClick={scrollToBottom}
         aria-label="Ir para o final"
       >
-        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <title>Ir para o final</title>
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
-    </div>
+    </nav>
   );
 }

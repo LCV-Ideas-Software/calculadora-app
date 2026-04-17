@@ -56,11 +56,15 @@ export function saveAiTelemetry(t: AiTelemetry): void {
 export function updateAiTelemetry(durationMs: number, fromCache: boolean, isError: boolean): void {
   const t = getAiTelemetry();
   t.total++;
-  if (isError) { t.errors++; }
-  else if (fromCache) { t.cacheHits++; }
-  else { t.liveHits++; }
+  if (isError) {
+    t.errors++;
+  } else if (fromCache) {
+    t.cacheHits++;
+  } else {
+    t.liveHits++;
+  }
   t.lastMs = durationMs;
-  t.avgMs = Math.round(((t.avgMs * (t.total - 1)) + durationMs) / t.total);
+  t.avgMs = Math.round((t.avgMs * (t.total - 1) + durationMs) / t.total);
   t.updatedAt = Date.now();
   saveAiTelemetry(t);
 }

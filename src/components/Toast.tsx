@@ -6,7 +6,7 @@
    Toast — Global notification component
    ==================================================================== */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type ToastType = 'info' | 'success' | 'error';
 
@@ -24,9 +24,9 @@ export function showToast(message: string, type: ToastType = 'info', durationMs 
 }
 
 const COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
-  info:    { bg: 'rgba(37,99,235,0.08)',  border: 'rgba(37,99,235,0.25)',  text: '#1d4ed8' },
-  success: { bg: 'rgba(22,163,74,0.08)',  border: 'rgba(22,163,74,0.25)',  text: '#15803d' },
-  error:   { bg: 'rgba(220,38,38,0.08)',  border: 'rgba(220,38,38,0.25)', text: '#b91c1c' },
+  info: { bg: 'rgba(37,99,235,0.08)', border: 'rgba(37,99,235,0.25)', text: '#1d4ed8' },
+  success: { bg: 'rgba(22,163,74,0.08)', border: 'rgba(22,163,74,0.25)', text: '#15803d' },
+  error: { bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.25)', text: '#b91c1c' },
 };
 
 export default function Toast() {
@@ -36,12 +36,14 @@ export default function Toast() {
   const show = useCallback((message: string, type: ToastType = 'info', durationMs = 3500) => {
     if (timer.current) clearTimeout(timer.current);
     setState({ message, type, visible: true });
-    timer.current = setTimeout(() => setState(prev => ({ ...prev, visible: false })), durationMs);
+    timer.current = setTimeout(() => setState((prev) => ({ ...prev, visible: false })), durationMs);
   }, []);
 
   useEffect(() => {
     globalShowToast = show;
-    return () => { globalShowToast = null; };
+    return () => {
+      globalShowToast = null;
+    };
   }, [show]);
 
   if (!state.visible) return null;

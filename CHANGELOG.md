@@ -1,5 +1,15 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.11] - 2026-04-17
+### Alterado
+- **Persistência operacional protegida**: `functions/api/calcular.js` deixou de aceitar sobrescrita pública de parâmetros compartilhados e passou a isolar a simulação do visitante sem gravar ajustes globais no D1.
+- **Superfícies públicas endurecidas**: `contato`, `enviar-email`, `oraculo` e `oraculo-observabilidade` ganharam validação de origem, rate limiting e sanitização/escape dos payloads HTML sensíveis.
+- **Oráculo com renderização mais segura**: o pipeline de `src/services/oraculo.ts` foi ajustado para reduzir risco de XSS antes do `dangerouslySetInnerHTML`, preservando o layout e o comportamento atuais do relatório.
+- **Baseline público de headers**: `public/_headers` foi introduzido para explicitar CSP/headers defensivos do app público.
+- **Qualidade de engenharia recuperada**: `lint`, `test` e `build` voltaram a ficar verdes, incluindo conversão das suítes Node legadas para `vitest` e correções de tipagem/acessibilidade no frontend.
+### Motivação
+- **Origem da rodada**: fechamento da auditoria defensiva de 2026-04-17, com foco em impedir mutação pública de parâmetros, reduzir a superfície de abuso e restaurar o gate de qualidade do app.
+
 ## [v04.01.10] - 2026-04-10
 ### Adicionado
 - **Biome 2.x**: lint + format com organizeImports
@@ -194,5 +204,4 @@
 ## [v03.05.00] — Anterior
 ### Histórico
 - Versão anterior à padronização do controle de versão
-
 

@@ -7,9 +7,9 @@
    AI analysis state, cooldown, cache status
    ==================================================================== */
 
-import { useState, useCallback, useRef } from 'react';
-import type { OraclePayload, OracleResultMeta } from '../types/api.ts';
+import { useCallback, useRef, useState } from 'react';
 import { obterAnaliseOraculoComMeta } from '../services/oraculo.ts';
+import type { OraclePayload, OracleResultMeta } from '../types/api.ts';
 
 const COOLDOWN_MS = 30_000; // 30s entre requests live
 
@@ -47,33 +47,36 @@ export function useOraculo(): UseOraculoReturn {
     }, 500);
   }, []);
 
-  const executar = useCallback(async (payload: OraclePayload, forceRefresh = false) => {
-    // Verify cooldown for live calls
-    if (forceRefresh && cooldownRemaining > 0) {
-      setError(`Aguarde ${Math.ceil(cooldownRemaining / 1000)}s antes de solicitar nova análise.`);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const result = await obterAnaliseOraculoComMeta({ payload, forceRefresh });
-      setHtml(result.html);
-      setMeta(result);
-
-      // Start cooldown only for live calls
-      if (!result.fromCache) {
-        startCooldown();
+  const executar = useCallback(
+    async (payload: OraclePayload, forceRefresh = false) => {
+      // Verify cooldown for live calls
+      if (forceRefresh && cooldownRemaining > 0) {
+        setError(`Aguarde ${Math.ceil(cooldownRemaining / 1000)}s antes de solicitar nova análise.`);
+        return;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro na análise IA.');
-      setHtml(null);
-      setMeta(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [cooldownRemaining, startCooldown]);
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await obterAnaliseOraculoComMeta({ payload, forceRefresh });
+        setHtml(result.html);
+        setMeta(result);
+
+        // Start cooldown only for live calls
+        if (!result.fromCache) {
+          startCooldown();
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro na análise IA.');
+        setHtml(null);
+        setMeta(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [cooldownRemaining, startCooldown],
+  );
 
   return {
     html,

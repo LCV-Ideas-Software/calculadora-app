@@ -7,6 +7,7 @@
    Extração completa de public/js/oraculo-feature.js
    ==================================================================== */
 
+import DOMPurify from 'dompurify';
 import type { OraclePayload, OracleResultMeta } from '../types/api.ts';
 import { postOraculoObservabilidade } from './api.ts';
 import { addAiHistoryEntry, updateAiTelemetry } from './storage.ts';
@@ -38,7 +39,9 @@ function getCache(hash: string): CacheEntry | null {
     if (entry.payloadHash !== hash) return null;
     if (Date.now() - entry.ts > CACHE_TTL_MS) return null;
     return entry;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function setCache(html: string, hash: string): void {
@@ -51,16 +54,25 @@ function setCache(html: string, hash: string): void {
 function markdownParaHtml(md: string): string {
   // Blocos de seção: ##, ###, #### → ai-bloco com ai-tag
   let html = md
-    .replace(/####\s*(.+)/g, '<div class="ai-bloco"><span class="ai-tag ai-tag--tecnica" data-tooltip="Nota técnica do modelo">🔧 $1</span>')
-    .replace(/###\s*(.+)/g, '<div class="ai-bloco"><span class="ai-tag ai-tag--cenarios" data-tooltip="Cenário projetado pelo modelo">🎯 $1</span>')
-    .replace(/##\s*(.+)/g, '<div class="ai-bloco"><span class="ai-tag ai-tag--resumo" data-tooltip="Resumo executivo gerado por IA">📊 $1</span>');
+    .replace(
+      /####\s*(.+)/g,
+      '<div class="ai-bloco"><span class="ai-tag ai-tag--tecnica" data-tooltip="Nota técnica do modelo">🔧 $1</span>',
+    )
+    .replace(
+      /###\s*(.+)/g,
+      '<div class="ai-bloco"><span class="ai-tag ai-tag--cenarios" data-tooltip="Cenário projetado pelo modelo">🎯 $1</span>',
+    )
+    .replace(
+      /##\s*(.+)/g,
+      '<div class="ai-bloco"><span class="ai-tag ai-tag--resumo" data-tooltip="Resumo executivo gerado por IA">📊 $1</span>',
+    );
 
   // Fechar blocos antes do próximo bloco ou no final
   const parts = html.split('<div class="ai-bloco">');
   if (parts.length > 1) {
     html = parts[0];
     for (let i = 1; i < parts.length; i++) {
-      html += '<div class="ai-bloco">' + parts[i];
+      html += `<div class="ai-bloco">${parts[i]}`;
       if (i < parts.length - 1) html += '</div>';
     }
     html += '</div>';
@@ -73,18 +85,21 @@ function markdownParaHtml(md: string): string {
     .replace(/`(.+?)`/g, '<code>$1</code>');
 
   // Paragrafos (linhas que não são tags HTML)
-  html = html.split('\n').map(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return '';
-    if (trimmed.startsWith('<')) return line;
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      return `<li>${trimmed.substring(2)}</li>`;
-    }
-    return `<p class="ai-paragrafo">${trimmed}</p>`;
-  }).join('\n');
+  html = html
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('<')) return line;
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        return `<li>${trimmed.substring(2)}</li>`;
+      }
+      return `<p class="ai-paragrafo">${trimmed}</p>`;
+    })
+    .join('\n');
 
   // Agrupar <li> em <ul>
-  html = html.replace(/(<li>[\s\S]*?<\/li>\n?)+/g, match => `<ul>${match}</ul>`);
+  html = html.replace(/(<li>[\s\S]*?<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
 
   // Tags semânticas por palavras-chave
   const tagMap: [RegExp, string, string, string][] = [
@@ -94,12 +109,20 @@ function markdownParaHtml(md: string): string {
   ];
 
   for (const [regex, cls, icon, tooltip] of tagMap) {
-    html = html.replace(regex, match =>
-      `<span class="ai-tag ai-tag--${cls}" data-tooltip="${tooltip}">${icon} ${match}</span>`
+    html = html.replace(
+      regex,
+      (match) => `<span class="ai-tag ai-tag--${cls}" data-tooltip="${tooltip}">${icon} ${match}</span>`,
     );
   }
 
   return html;
+}
+
+function sanitizeOracleHtml(html: string): string {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['div', 'span', 'strong', 'em', 'code', 'p', 'ul', 'li'],
+    ALLOWED_ATTR: ['class', 'data-tooltip'],
+  });
 }
 
 /* ------- Public API ------- */
@@ -151,7 +174,7 @@ export async function obterAnaliseOraculoComMeta(opts: OraculoOptions): Promise<
 
   const data = await res.json();
   const markdown: string = data.analise || data.analysis || data.result || '';
-  const html = markdownParaHtml(markdown);
+  const html = sanitizeOracleHtml(markdownParaHtml(markdown));
   const durationMs = performance.now() - t0;
 
   // Salvar cache

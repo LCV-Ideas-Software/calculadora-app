@@ -31,7 +31,9 @@
 .glass-input {
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.55);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 4px 12px -10px rgba(15, 23, 42, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 4px 12px -10px rgba(15, 23, 42, 0.55);
   transition: all 0.3s ease;
 }
 
@@ -49,12 +51,14 @@
   border-radius: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.56), rgba(241, 245, 249, 0.5));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 12px 24px -22px rgba(15, 23, 42, 0.9);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    0 12px 24px -22px rgba(15, 23, 42, 0.9);
   overflow: hidden;
 }
 
 .field-box::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -168,7 +172,9 @@
   z-index: 1100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
   visibility: hidden;
   letter-spacing: 0;
   text-transform: none;
@@ -180,22 +186,52 @@
   visibility: visible;
 }
 
-.markdown-ia .ai-tag--resumo { background: rgba(234, 88, 12, 0.12); color: #9a3412; }
-.markdown-ia .ai-tag--resumo:hover { background: rgba(234, 88, 12, 0.24); border-color: #9a3412; }
+.markdown-ia .ai-tag--resumo {
+  background: rgba(234, 88, 12, 0.12);
+  color: #9a3412;
+}
+.markdown-ia .ai-tag--resumo:hover {
+  background: rgba(234, 88, 12, 0.24);
+  border-color: #9a3412;
+}
 
-.markdown-ia .ai-tag--cenarios { background: rgba(168, 85, 247, 0.14); color: #7e22ce; }
-.markdown-ia .ai-tag--cenarios:hover { background: rgba(168, 85, 247, 0.28); border-color: #7e22ce; }
+.markdown-ia .ai-tag--cenarios {
+  background: rgba(168, 85, 247, 0.14);
+  color: #7e22ce;
+}
+.markdown-ia .ai-tag--cenarios:hover {
+  background: rgba(168, 85, 247, 0.28);
+  border-color: #7e22ce;
+}
 
 .markdown-ia .ai-tag--matematica,
-.markdown-ia .ai-tag--base { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
+.markdown-ia .ai-tag--base {
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
 .markdown-ia .ai-tag--matematica:hover,
-.markdown-ia .ai-tag--base:hover { background: rgba(37, 99, 235, 0.24); border-color: #1d4ed8; }
+.markdown-ia .ai-tag--base:hover {
+  background: rgba(37, 99, 235, 0.24);
+  border-color: #1d4ed8;
+}
 
-.markdown-ia .ai-tag--tecnica { background: rgba(71, 85, 105, 0.14); color: #334155; }
-.markdown-ia .ai-tag--tecnica:hover { background: rgba(71, 85, 105, 0.28); border-color: #334155; }
+.markdown-ia .ai-tag--tecnica {
+  background: rgba(71, 85, 105, 0.14);
+  color: #334155;
+}
+.markdown-ia .ai-tag--tecnica:hover {
+  background: rgba(71, 85, 105, 0.28);
+  border-color: #334155;
+}
 
-.markdown-ia .ai-tag--recomendacao { background: rgba(22, 163, 74, 0.12); color: #15803d; }
-.markdown-ia .ai-tag--recomendacao:hover { background: rgba(22, 163, 74, 0.24); border-color: #15803d; }
+.markdown-ia .ai-tag--recomendacao {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+.markdown-ia .ai-tag--recomendacao:hover {
+  background: rgba(22, 163, 74, 0.24);
+  border-color: #15803d;
+}
 
 .markdown-ia .ai-paragrafo {
   margin: 0;
@@ -221,14 +257,23 @@
 
 /* AI Skeleton Shimmer */
 @keyframes aiShimmer {
-  0% { background-position: -220px 0; }
-  100% { background-position: calc(220px + 100%) 0; }
+  0% {
+    background-position: -220px 0;
+  }
+  100% {
+    background-position: calc(220px + 100%) 0;
+  }
 }
 
 .ai-skeleton-line {
   height: 11px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(226, 232, 240, 0.7) 25%, rgba(203, 213, 225, 0.95) 50%, rgba(226, 232, 240, 0.7) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.7) 25%,
+    rgba(203, 213, 225, 0.95) 50%,
+    rgba(226, 232, 240, 0.7) 75%
+  );
   background-size: 220px 100%;
   animation: aiShimmer 1.6s infinite linear;
 }
@@ -286,14 +331,26 @@
 }
 
 @media (max-width: 768px) {
-  .floating-scroll-controls { right: 20px; bottom: 20px; }
-  .floating-scroll-btn { width: 54px; height: 54px; }
+  .floating-scroll-controls {
+    right: 20px;
+    bottom: 20px;
+  }
+  .floating-scroll-btn {
+    width: 54px;
+    height: 54px;
+  }
 }
 
 /* Email Modal Animation */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .email-modal-overlay {

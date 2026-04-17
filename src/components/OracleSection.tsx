@@ -6,8 +6,8 @@
    OracleSection — AI Analysis with cache + cooldown + refresh
    ==================================================================== */
 
-import type { OraclePayload } from '../types/api.ts';
 import type { UseOraculoReturn } from '../hooks/useOraculo.ts';
+import type { OraclePayload } from '../types/api.ts';
 
 interface Props {
   oracle: UseOraculoReturn;
@@ -25,6 +25,7 @@ export default function OracleSection({ oracle, payload }: Props) {
       {/* Trigger button */}
       {!oracle.html && !oracle.loading && (
         <button
+          type="button"
           onClick={handleAnalyze}
           className="w-full py-3.5 rounded-xl font-bold text-white text-sm tracking-wide transition-all duration-300"
           style={{
@@ -50,17 +51,13 @@ export default function OracleSection({ oracle, payload }: Props) {
             <div className="ai-skeleton-line w-full mb-2" />
             <div className="ai-skeleton-line w-4/5" />
           </div>
-          <p className="text-center text-xs text-slate-400 mt-3">
-            ⏳ Analisando cenário financeiro...
-          </p>
+          <p className="text-center text-xs text-slate-400 mt-3">⏳ Analisando cenário financeiro...</p>
         </div>
       )}
 
       {/* Error */}
       {oracle.error && (
-        <div className="rounded-xl p-3 text-sm text-red-700 bg-red-50 border border-red-200 mt-4">
-          ⚠️ {oracle.error}
-        </div>
+        <div className="rounded-xl p-3 text-sm text-red-700 bg-red-50 border border-red-200 mt-4">⚠️ {oracle.error}</div>
       )}
 
       {/* Result */}
@@ -71,19 +68,16 @@ export default function OracleSection({ oracle, payload }: Props) {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-indigo-600">🤖 Análise IA</span>
               {oracle.fromCache && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-bold">
-                  📦 Cache
-                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-bold">📦 Cache</span>
               )}
               {oracle.expiresInMs != null && oracle.expiresInMs > 0 && (
-                <span className="text-[10px] text-slate-400">
-                  Expira em {Math.ceil(oracle.expiresInMs / 60000)}min
-                </span>
+                <span className="text-[10px] text-slate-400">Expira em {Math.ceil(oracle.expiresInMs / 60000)}min</span>
               )}
             </div>
 
             {oracle.showRefresh && (
               <button
+                type="button"
                 onClick={handleRefresh}
                 disabled={oracle.cooldownRemaining > 0}
                 className="text-xs font-semibold px-3 py-1 rounded-lg transition-all duration-200"
@@ -95,17 +89,14 @@ export default function OracleSection({ oracle, payload }: Props) {
               >
                 {oracle.cooldownRemaining > 0
                   ? `⏳ ${Math.ceil(oracle.cooldownRemaining / 1000)}s`
-                  : '🔄 Atualizar sem cache'
-                }
+                  : '🔄 Atualizar sem cache'}
               </button>
             )}
           </div>
 
           {/* AI content */}
-          <div
-            className="markdown-ia glass-card rounded-2xl p-5"
-            dangerouslySetInnerHTML={{ __html: oracle.html }}
-          />
+          {/* biome-ignore lint/security/noDangerouslySetInnerHtml: oracle.html is sanitized before render in src/services/oraculo.ts */}
+          <div className="markdown-ia glass-card rounded-2xl p-5" dangerouslySetInnerHTML={{ __html: oracle.html }} />
         </div>
       )}
     </div>

@@ -1,34 +1,33 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { expect, it } from 'vitest';
 import { calcularErroPercentual, calcularMape, classificarMapePercent } from '../backtest.mjs';
 
-test('calcularErroPercentual retorna erro absoluto relativo', () => {
+it('calcularErroPercentual retorna erro absoluto relativo', () => {
     const erro = calcularErroPercentual(5.1, 5.0);
-    assert.equal(erro, 0.02);
+    expect(erro).toBe(0.02);
 });
 
-test('calcularErroPercentual retorna null com observado inválido', () => {
+it('calcularErroPercentual retorna null com observado inválido', () => {
     const erro = calcularErroPercentual(5.1, 0);
-    assert.equal(erro, null);
+    expect(erro).toBeNull();
 });
 
-test('calcularMape calcula média dos erros válidos', () => {
+it('calcularMape calcula média dos erros válidos', () => {
     const mape = calcularMape([0.01, 0.03, 0.02]);
-    assert.equal(mape, 0.02);
+    expect(mape).toBe(0.02);
 });
 
-test('calcularMape ignora valores inválidos e retorna null sem base', () => {
-    assert.equal(calcularMape([null, undefined, NaN]), null);
+it('calcularMape ignora valores inválidos e retorna null sem base', () => {
+    expect(calcularMape([null, undefined, NaN])).toBeNull();
 });
 
-test('classificarMapePercent respeita faixas padrão', () => {
-    assert.equal(classificarMapePercent(0.8), 'excelente');
-    assert.equal(classificarMapePercent(1.4), 'boa');
-    assert.equal(classificarMapePercent(2.6), 'atencao');
+it('classificarMapePercent respeita faixas padrão', () => {
+    expect(classificarMapePercent(0.8)).toBe('excelente');
+    expect(classificarMapePercent(1.4)).toBe('boa');
+    expect(classificarMapePercent(2.6)).toBe('atencao');
 });
 
-test('classificarMapePercent respeita faixas customizadas', () => {
-    assert.equal(classificarMapePercent(1.4, 1.5, 2.5), 'excelente');
-    assert.equal(classificarMapePercent(2.0, 1.5, 2.5), 'boa');
-    assert.equal(classificarMapePercent(3.0, 1.5, 2.5), 'atencao');
+it('classificarMapePercent respeita faixas customizadas', () => {
+    expect(classificarMapePercent(1.4, 1.5, 2.5)).toBe('excelente');
+    expect(classificarMapePercent(2.0, 1.5, 2.5)).toBe('boa');
+    expect(classificarMapePercent(3.0, 1.5, 2.5)).toBe('atencao');
 });

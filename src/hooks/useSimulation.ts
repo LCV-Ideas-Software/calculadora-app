@@ -7,10 +7,10 @@
    Form state + validation + fetch + results
    ==================================================================== */
 
-import { useState, useCallback, useRef } from 'react';
-import type { SimulationPayload, SimulationResponse, MelhorOpcaoCandidato, OraclePayload } from '../types/api.ts';
+import { useCallback, useRef, useState } from 'react';
 import { fetchSimulation } from '../services/api.ts';
-import { parseLocalizedNumber, isCurrencySupported } from '../services/formatting.ts';
+import { isCurrencySupported, parseLocalizedNumber } from '../services/formatting.ts';
+import type { MelhorOpcaoCandidato, OraclePayload, SimulationPayload, SimulationResponse } from '../types/api.ts';
 
 export interface SimulationFormState {
   moeda: string;
@@ -62,7 +62,7 @@ export function useSimulation(): UseSimulationReturn {
   const saveBadgeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setField = useCallback((field: keyof SimulationFormState, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const resetForm = useCallback(() => {
@@ -81,7 +81,7 @@ export function useSimulation(): UseSimulationReturn {
 
     // Validação
     const valor = parseLocalizedNumber(form.valorOriginal);
-    if (isNaN(valor) || valor <= 0) {
+    if (Number.isNaN(valor) || valor <= 0) {
       setError('Informe um valor válido maior que zero.');
       return;
     }
@@ -145,42 +145,49 @@ export function useSimulation(): UseSimulationReturn {
             spread_cartao: res.parametros_vigentes?.spread_cartao,
             spread_global_aberto: res.parametros_vigentes?.spread_global_aberto,
             spread_global_fechado: res.parametros_vigentes?.spread_global_fechado,
-            origem_parametros: typeof res.parametros_vigentes?.origem === 'string'
-              ? res.parametros_vigentes.origem
-              : res.parametros_vigentes?.origem
-                ? JSON.stringify(res.parametros_vigentes.origem)
-                : null,
+            origem_parametros:
+              typeof res.parametros_vigentes?.origem === 'string'
+                ? res.parametros_vigentes.origem
+                : res.parametros_vigentes?.origem
+                  ? JSON.stringify(res.parametros_vigentes.origem)
+                  : null,
           },
           contexto_operacional: res.contexto_operacional ?? {},
           cenarios: {
-            cartao_credito: res.cartao?.suportada ? {
-              total_em_reais: res.cartao.valor_total_brl,
-              vet: res.cartao.vet,
-              taxa_spread: res.cartao.spread_aplicado,
-              taxa_iof: res.cartao.iof_aplicado,
-              taxa_base: res.cartao.base_brl,
-              taxa_executada: res.cartao.taxa_utilizada,
-              fonte_cotacao: res.cartao.fonte_cotacao,
-              mercado_fechado: res.contexto_operacional?.mercado_fechado ?? undefined,
-              usou_contingencia: res.cartao.usou_contingencia,
-            } : 'Moeda não suportada',
-            conta_global_compra_agora: res.global?.suportada ? {
-              total_em_reais: res.global.valor_total_brl,
-              vet: res.global.vet,
-              taxa_spread: res.global.spread_aplicado,
-              taxa_iof: res.global.iof_aplicado,
-              taxa_base: res.global.base_brl,
-              taxa_executada: res.global.taxa_utilizada,
-              fonte_cotacao: res.global.fonte_cotacao,
-              mercado_fechado: res.contexto_operacional?.mercado_fechado ?? undefined,
-              usou_contingencia: res.global.usou_contingencia,
-            } : 'Moeda não suportada',
-            conta_global_saldo_ja_carregado: res.global_saldo_existente?.suportada ? {
-              total_em_reais: res.global_saldo_existente.valor_total_brl,
-              vet_historico: res.global_saldo_existente.vet,
-              vet_informado: res.global_saldo_existente.vet_informado ?? 0,
-              metodologia: res.global_saldo_existente.metodologia ?? '',
-            } : 'Sem saldo informado',
+            cartao_credito: res.cartao?.suportada
+              ? {
+                  total_em_reais: res.cartao.valor_total_brl,
+                  vet: res.cartao.vet,
+                  taxa_spread: res.cartao.spread_aplicado,
+                  taxa_iof: res.cartao.iof_aplicado,
+                  taxa_base: res.cartao.base_brl,
+                  taxa_executada: res.cartao.taxa_utilizada,
+                  fonte_cotacao: res.cartao.fonte_cotacao,
+                  mercado_fechado: res.contexto_operacional?.mercado_fechado ?? undefined,
+                  usou_contingencia: res.cartao.usou_contingencia,
+                }
+              : 'Moeda não suportada',
+            conta_global_compra_agora: res.global?.suportada
+              ? {
+                  total_em_reais: res.global.valor_total_brl,
+                  vet: res.global.vet,
+                  taxa_spread: res.global.spread_aplicado,
+                  taxa_iof: res.global.iof_aplicado,
+                  taxa_base: res.global.base_brl,
+                  taxa_executada: res.global.taxa_utilizada,
+                  fonte_cotacao: res.global.fonte_cotacao,
+                  mercado_fechado: res.contexto_operacional?.mercado_fechado ?? undefined,
+                  usou_contingencia: res.global.usou_contingencia,
+                }
+              : 'Moeda não suportada',
+            conta_global_saldo_ja_carregado: res.global_saldo_existente?.suportada
+              ? {
+                  total_em_reais: res.global_saldo_existente.valor_total_brl,
+                  vet_historico: res.global_saldo_existente.vet,
+                  vet_informado: res.global_saldo_existente.vet_informado ?? 0,
+                  metodologia: res.global_saldo_existente.metodologia ?? '',
+                }
+              : 'Sem saldo informado',
           },
         };
         setOraclePayload(iaPayload);
@@ -190,7 +197,6 @@ export function useSimulation(): UseSimulationReturn {
       setSaveBadge(true);
       if (saveBadgeTimer.current) clearTimeout(saveBadgeTimer.current);
       saveBadgeTimer.current = setTimeout(() => setSaveBadge(false), 4000);
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido na simulação.');
     } finally {
@@ -199,9 +205,15 @@ export function useSimulation(): UseSimulationReturn {
   }, [form]);
 
   return {
-    form, setField, resetForm,
-    result, melhorOpcao, oraclePayload,
-    loading, error, saveBadge,
+    form,
+    setField,
+    resetForm,
+    result,
+    melhorOpcao,
+    oraclePayload,
+    loading,
+    error,
+    saveBadge,
     handleSubmit,
   };
 }

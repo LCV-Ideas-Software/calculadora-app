@@ -8,15 +8,12 @@
    ==================================================================== */
 
 import type { SimulationResponse } from '../types/api.ts';
-import { fmt, pct, moedaParaSimbolo, APP_VERSION } from './formatting.ts';
+import { APP_VERSION, fmt, moedaParaSimbolo, pct } from './formatting.ts';
 
 /**
  * Constrói mensagem WhatsApp-friendly com emojis.
  */
-export function buildWhatsAppMessage(
-  res: SimulationResponse,
-  melhorOpcao: string | null,
-): string {
+export function buildWhatsAppMessage(res: SimulationResponse, melhorOpcao: string | null): string {
   const simbolo = moedaParaSimbolo(res.moeda);
   const lines: string[] = [];
 
@@ -67,23 +64,15 @@ export function buildWhatsAppMessage(
 /**
  * Constrói texto para área de transferência (sem formatação WhatsApp).
  */
-export function buildCopyText(
-  res: SimulationResponse,
-  melhorOpcao: string | null,
-): string {
+export function buildCopyText(res: SimulationResponse, melhorOpcao: string | null): string {
   // Reutiliza mensagem removendo formatação WA (*, _)
-  return buildWhatsAppMessage(res, melhorOpcao)
-    .replace(/\*/g, '')
-    .replace(/_/g, '');
+  return buildWhatsAppMessage(res, melhorOpcao).replace(/\*/g, '').replace(/_/g, '');
 }
 
 /**
  * Abre WhatsApp com mensagem pré-formatada.
  */
-export function shareViaWhatsApp(
-  res: SimulationResponse,
-  melhorOpcao: string | null,
-): void {
+export function shareViaWhatsApp(res: SimulationResponse, melhorOpcao: string | null): void {
   const text = buildWhatsAppMessage(res, melhorOpcao);
   const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank', 'noopener');

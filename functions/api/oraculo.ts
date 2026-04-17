@@ -6,6 +6,7 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
+import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/security.js';
 
 interface D1DatabaseLike {
   prepare: (query: string) => { bind(...args: unknown[]): { run: () => Promise<unknown> }; all: () => Promise<unknown> }
@@ -83,6 +84,10 @@ function extractTextFromParts(parts: any[]): string {
 export async function onRequestPost(context: any) {
   try {
     const { request, env } = context as { request: Request; env: Env };
+    const originError = requireAllowedOrigin(request);
+    if (originError) return originError;
+    const rateLimitError = await enforceRateLimit(request, env, 'oraculo_ia');
+    if (rateLimitError) return rateLimitError;
     const _telStart = Date.now();
     const promptData = await request.json();
 
@@ -90,7 +95,7 @@ export async function onRequestPost(context: any) {
 
     if (!GEMINI_API_KEY) {
       structuredLog('error', 'Missing GEMINI_API_KEY', { endpoint: 'oraculo' });
-      return new Response(JSON.stringify({ erro: "O administrador ainda não configurou a chave de IA no servidor." }), { status: 500, headers: { "Content-Type": "application/json" } });
+      return jsonResponse({ erro: "O administrador ainda não configurou a chave de IA no servidor." }, 500);
     }
 
     const modelName = env.GEMINI_MODEL || GEMINI_CONFIG.model;
@@ -119,10 +124,7 @@ Dados da simulação:
       const countRes = await ai.models.countTokens({ model: modelName, contents: promptText });
       const inputTokens = countRes.totalTokens || 0;
       if (inputTokens > GEMINI_CONFIG.maxTokensInput) {
-        return new Response(JSON.stringify({ erro: `Input exceeds token limit: ${inputTokens} > ${GEMINI_CONFIG.maxTokensInput}` }), {
-          status: 413,
-          headers: { "Content-Type": "application/json" }
-        });
+        return jsonResponse({ erro: `Input exceeds token limit: ${inputTokens} > ${GEMINI_CONFIG.maxTokensInput}` }, 413);
       }
     } catch (countError) {
       if (countError instanceof Error) {
@@ -220,7 +222,7 @@ Dados da simulação:
 
     if (!successfulResponse) {
         void logAiUsage(env.BIGDATA_DB, { module: 'calculadora-oraculo', model: modelName, input_tokens: 0, output_tokens: 0, latency_ms: Date.now() - _telStart, status: 'error', error_detail: 'All fallback payloads exhausted' });
-        return new Response(JSON.stringify({ erro: "Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes." }), { status: 500, headers: { "Content-Type": "application/json" } });
+        return jsonResponse({ erro: "Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes." }, 500);
     }
 
     const usage = successfulResponse.usageMetadata || {};
@@ -250,7 +252,7 @@ Dados da simulação:
         text = "Análise indisponível no momento. Tente novamente.";
     }
 
-    return new Response(JSON.stringify({ analise: text }), { headers: { "Content-Type": "application/json" } });
+    return jsonResponse({ analise: text });
 
   } catch (error) {
     if (error instanceof Error) {
@@ -258,7 +260,7 @@ Dados da simulação:
     } else {
       structuredLog('error', 'Oráculo handler error unknown structure', { endpoint: 'oraculo' });
     }
-    return new Response(JSON.stringify({ erro: "Erro interno no servidor do Oráculo." }), { status: 500, headers: { "Content-Type": "application/json" } });
+    return jsonResponse({ erro: "Erro interno no servidor do Oráculo." }, 500);
   }
 }
 

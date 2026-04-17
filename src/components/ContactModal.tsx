@@ -74,22 +74,25 @@ export default function ContactModal({ isOpen, onClose }: Props) {
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
       style={{ background: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(8px)' }}
-      onClick={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onClose();
+      }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="contact-modal-title"
+      tabIndex={-1}
     >
       <div
         className="glass-container rounded-2xl p-6 w-full max-w-md mx-4"
-        onClick={e => e.stopPropagation()}
         style={{ background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(24px)' }}
       >
         <h3 id="contact-modal-title" className="text-lg font-bold text-slate-800 mb-1">
           📩 Formulário de Contato
         </h3>
-        <p className="text-sm text-slate-500 mb-4">
-          Entre em contato e responderemos o mais breve possível.
-        </p>
+        <p className="text-sm text-slate-500 mb-4">Entre em contato e responderemos o mais breve possível.</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
@@ -99,7 +102,7 @@ export default function ContactModal({ isOpen, onClose }: Props) {
             autoComplete="name"
             className="glass-input w-full rounded-xl px-4 py-3 text-sm text-slate-800"
             value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
 
           <div className="flex gap-3">
@@ -111,7 +114,7 @@ export default function ContactModal({ isOpen, onClose }: Props) {
               maxLength={16}
               className="glass-input w-full rounded-xl px-4 py-3 text-sm text-slate-800"
               value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: phoneMask(e.target.value) }))}
+              onChange={(e) => setForm((f) => ({ ...f, phone: phoneMask(e.target.value) }))}
             />
             <input
               required
@@ -120,7 +123,7 @@ export default function ContactModal({ isOpen, onClose }: Props) {
               autoComplete="email"
               className="glass-input w-full rounded-xl px-4 py-3 text-sm text-slate-800"
               value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
             />
           </div>
 
@@ -131,7 +134,7 @@ export default function ContactModal({ isOpen, onClose }: Props) {
             rows={4}
             className="glass-input w-full rounded-xl px-4 py-3 text-sm text-slate-800 resize-none"
             value={form.message}
-            onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+            onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
           />
 
           <div className="flex gap-3 mt-1">

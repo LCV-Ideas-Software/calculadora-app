@@ -1,8 +1,7 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import { expect, it } from 'vitest';
 import { calcularBandasSensibilidade } from '../sensibilidade.mjs';
 
-test('sensibilidade retorna base/otimista/pessimista com monotonicidade esperada', () => {
+it('sensibilidade retorna base/otimista/pessimista com monotonicidade esperada', () => {
     const bandas = calcularBandasSensibilidade({
         valorOriginal: 100,
         taxaCambio: 5,
@@ -10,12 +9,12 @@ test('sensibilidade retorna base/otimista/pessimista com monotonicidade esperada
         iof: 0.035
     });
 
-    assert.ok(bandas);
-    assert.ok(bandas.otimista.valor_total_brl < bandas.base.valor_total_brl);
-    assert.ok(bandas.pessimista.valor_total_brl > bandas.base.valor_total_brl);
+    expect(bandas).toBeTruthy();
+    expect(bandas.otimista.valor_total_brl).toBeLessThan(bandas.base.valor_total_brl);
+    expect(bandas.pessimista.valor_total_brl).toBeGreaterThan(bandas.base.valor_total_brl);
 });
 
-test('sensibilidade aplica piso em 0 para taxas negativas após delta', () => {
+it('sensibilidade aplica piso em 0 para taxas negativas após delta', () => {
     const bandas = calcularBandasSensibilidade({
         valorOriginal: 100,
         taxaCambio: 5,
@@ -23,7 +22,7 @@ test('sensibilidade aplica piso em 0 para taxas negativas após delta', () => {
         iof: 0.001
     });
 
-    assert.ok(bandas);
-    assert.equal(bandas.otimista.spread, 0);
-    assert.equal(bandas.otimista.iof, 0);
+    expect(bandas).toBeTruthy();
+    expect(bandas.otimista.spread).toBe(0);
+    expect(bandas.otimista.iof).toBe(0);
 });
