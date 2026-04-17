@@ -1,5 +1,11 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.13] - 2026-04-17
+### Corrigido
+- `wrangler.json` deixou de declarar `observability` por ser config de Cloudflare Pages; os logs do GitHub Actions confirmaram a incompatibilidade com `wrangler 4.83.0`.
+### Motivação
+- Restaurar o deploy da `calculadora-app` sem reintroduzir configuração inválida para Pages.
+
 ## [v04.01.12] - 2026-04-17
 ### Alterado
 - `wrangler.json` passou a declarar explicitamente `observability.logs.enabled = true`, `observability.logs.invocation_logs = true` e `observability.traces.enabled = true`.
@@ -211,4 +217,3 @@
 ## [v03.05.00] — Anterior
 ### Histórico
 - Versão anterior à padronização do controle de versão
-

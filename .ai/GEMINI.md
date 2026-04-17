@@ -14,6 +14,16 @@
 
 # AI Memory Log - Calculadora-App
 
+## 2026-04-17 — Calculadora-App v04.01.13 (Pages observability rollback after GHA failure)
+### Escopo
+Hotfix de deploy na `calculadora-app` após o GitHub Actions confirmar que `observability` não é suportado em config de Cloudflare Pages.
+### Alterado
+- `wrangler.json` deixou de declarar `observability` por ser config de Pages.
+### Motivação
+- Restaurar o deploy da `calculadora-app` sem reintroduzir configuração inválida para Pages.
+### Versão
+- APP v04.01.12 → APP v04.01.13
+
 ## 2026-04-17 — Calculadora-App v04.01.12 (wrangler observability + traces)
 ### Escopo
 Padronização do baseline de observabilidade Cloudflare na `calculadora-app`.
