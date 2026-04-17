@@ -14,6 +14,17 @@
 
 # AI Memory Log - Calculadora-App
 
+## 2026-04-17 — Calculadora-App v04.01.12 (wrangler observability + traces)
+### Escopo
+Padronização do baseline de observabilidade Cloudflare na `calculadora-app`.
+### Alterado
+- `wrangler.json` agora garante `observability.logs.enabled = true`, `observability.logs.invocation_logs = true` e `observability.traces.enabled = true`.
+### Motivação
+- Alinhar o app ao padrão operacional do workspace para logs de invocação e traces.
+### Versão
+- APP v04.01.11 → APP v04.01.12
+
+
 ## 2026-04-17 — Calculadora-App v04.01.11 (hardening de APIs públicas + qualidade verde)
 ### Escopo
 Fechamento da auditoria defensiva de 2026-04-17 no `calculadora-app`, endurecendo as APIs públicas sensíveis, reduzindo risco de XSS/abuso e restaurando o gate completo de qualidade do projeto.

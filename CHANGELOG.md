@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.12] - 2026-04-17
+### Alterado
+- `wrangler.json` passou a declarar explicitamente `observability.logs.enabled = true`, `observability.logs.invocation_logs = true` e `observability.traces.enabled = true`.
+### Motivação
+- Alinhar o baseline de telemetria Cloudflare da `calculadora-app` ao padrão operacional do workspace.
+
+
 ## [v04.01.11] - 2026-04-17
 ### Alterado
 - **Persistência operacional protegida**: `functions/api/calcular.js` deixou de aceitar sobrescrita pública de parâmetros compartilhados e passou a isolar a simulação do visitante sem gravar ajustes globais no D1.

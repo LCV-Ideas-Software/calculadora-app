@@ -1,3 +1,12 @@
+## 2026-04-17 — Calculadora-App v04.01.12 (wrangler observability + traces)
+### Escopo
+Padronização do baseline de observabilidade Cloudflare na `calculadora-app`.
+### Alterado
+- `wrangler.json` agora garante `observability.logs.enabled = true`, `observability.logs.invocation_logs = true` e `observability.traces.enabled = true`.
+### Motivação
+- Alinhar o app ao padrão operacional do workspace para logs de invocação e traces.
+### Versão
+- APP v04.01.11 → APP v04.01.12
 ## 2026-04-10 — Biome 2.x + patches (v04.01.10)
 - Biome 2.x adicionado (lint + format com organizeImports)
 - vite 8.0.7 → 8.0.8, vitest 4.1.2 → 4.1.4
