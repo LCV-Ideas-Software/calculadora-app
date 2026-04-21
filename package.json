@@ -30,6 +30,7 @@
   },
   "overrides": {
     "picomatch": "4.0.4",
+    "protobufjs": "7.5.5",
     "undici": "6.24.0",
     "vite": "$vite"
   }

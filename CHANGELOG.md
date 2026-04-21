@@ -1,5 +1,11 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [v04.01.14] - 2026-04-20
+### Corrigido
+- Vulnerabilidade crítica `CVE-2026-41242` (GHSA-xq3m-2v4x-88gg) em `protobufjs < 7.5.5` — arbitrary code execution via campos `type` manipulados em definições protobuf. Resolvida via `overrides` no `package.json` pinando `protobufjs` em `7.5.5`. Dependência transitiva puxada por `@google/genai@1.49.0`.
+### Motivação
+- Fechar alerta Dependabot #6 do repositório `lcv-leo/calculadora-app` sem aguardar bump upstream do `@google/genai`.
+
 ## [v04.01.13] - 2026-04-17
 ### Corrigido
 - `wrangler.json` deixou de declarar `observability` por ser config de Cloudflare Pages; os logs do GitHub Actions confirmaram a incompatibilidade com `wrangler 4.83.0`.

@@ -14,6 +14,17 @@
 
 # AI Memory Log - Calculadora-App
 
+## 2026-04-20 — Calculadora-App v04.01.14 (protobufjs CVE-2026-41242 fix)
+### Escopo
+Fechar alerta Dependabot crítico #6 (CVE-2026-41242 / GHSA-xq3m-2v4x-88gg) — arbitrary code execution em `protobufjs < 7.5.5`. Dependência transitiva via `@google/genai@1.49.0`.
+### Alterado
+- `package.json` ganhou override `"protobufjs": "7.5.5"` no bloco `overrides`.
+- `package-lock.json` recompilado; `npm ls protobufjs` confirma `7.5.5 overridden`.
+### Motivação
+- Aplicar o patch de segurança sem aguardar bump upstream do `@google/genai`.
+### Versão
+- APP v04.01.13 → APP v04.01.14
+
 ## 2026-04-17 — Calculadora-App v04.01.13 (Pages observability rollback after GHA failure)
 ### Escopo
 Hotfix de deploy na `calculadora-app` após o GitHub Actions confirmar que `observability` não é suportado em config de Cloudflare Pages.
