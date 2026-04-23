@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [Security Publication Hardening] - 2026-04-23
+### Segurança
+- Memórias e contexto de agentes passaram a ser locais apenas: `.ai/`, `.aiexclude`, `.copilotignore` e `.github/copilot-instructions.md` foram adicionados ao ignore e removidos do índice Git com `git rm --cached`, preservando os arquivos no disco local.
+- Regras de publicação foram endurecidas para impedir envio de `.env*`, `.dev.vars*`, `.wrangler/`, `.tmp/`, logs, bancos locais e artefatos de teste para GitHub/npm.
+### Validação
+- `git ls-files` confirmou ausência de memórias/artefatos locais rastreados; `npm pack --dry-run --json --ignore-scripts` não incluiu arquivos proibidos.
+
 ## [v04.01.14] - 2026-04-20
 ### Corrigido
 - Vulnerabilidade crítica `CVE-2026-41242` (GHSA-xq3m-2v4x-88gg) em `protobufjs < 7.5.5` — arbitrary code execution via campos `type` manipulados em definições protobuf. Resolvida via `overrides` no `package.json` pinando `protobufjs` em `7.5.5`. Dependência transitiva puxada por `@google/genai@1.49.0`.
