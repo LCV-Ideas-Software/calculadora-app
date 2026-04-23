@@ -7,18 +7,11 @@
 
 
 ## 🧠 MEMÓRIA DE CONTEXTO ISOLADO (CALCULADORA-APP)
-## 2026-04-10 — Biome 2.x + patches (v04.01.10)
-- Biome 2.x adicionado (lint + format com organizeImports)
-- vite 8.0.7 → 8.0.8, vitest 4.1.2 → 4.1.4
-- Dependabot groups: @vitest/* e @biomejs/* adicionados
-
-# AI Memory Log - Calculadora-App
-
 ## 2026-04-20 — Calculadora-App v04.01.14 (protobufjs CVE-2026-41242 fix)
 ### Escopo
 Fechar alerta Dependabot crítico #6 (CVE-2026-41242 / GHSA-xq3m-2v4x-88gg) — arbitrary code execution em `protobufjs < 7.5.5`. Dependência transitiva via `@google/genai@1.49.0`.
 ### Alterado
-- `package.json` ganhou override `"protobufjs": "7.5.5"` no bloco `overrides`.
+- `package.json` ganhou override `"protobufjs": "7.5.5"` no bloco `overrides`, ao lado de `picomatch`/`undici`/`vite`.
 - `package-lock.json` recompilado; `npm ls protobufjs` confirma `7.5.5 overridden`.
 ### Motivação
 - Aplicar o patch de segurança sem aguardar bump upstream do `@google/genai`.
@@ -44,7 +37,12 @@ Padronização do baseline de observabilidade Cloudflare na `calculadora-app`.
 - Alinhar o app ao padrão operacional do workspace para logs de invocação e traces.
 ### Versão
 - APP v04.01.11 → APP v04.01.12
+## 2026-04-10 — Biome 2.x + patches (v04.01.10)
+- Biome 2.x adicionado (lint + format com organizeImports)
+- vite 8.0.7 → 8.0.8, vitest 4.1.2 → 4.1.4
+- Dependabot groups: @vitest/* e @biomejs/* adicionados
 
+# AI Memory Log - Calculadora-App
 
 ## 2026-04-17 — Calculadora-App v04.01.11 (hardening de APIs públicas + qualidade verde)
 ### Escopo
@@ -148,8 +146,6 @@ Implementação de bloqueio em Edge para impedir a exposição pública de rotea
 - `calculadora-app`: middleware deployment, versioning handled internally
 - `apphub`: middleware deployment, versioning handled internally
 - `adminapps`: middleware deployment, versioning handled internally
-
-
 
 
 > **DIRETIVA DE SEGURANÇA:** Ao sugerir código ou responder perguntas, leia rigorosamente o contexto e as memórias históricas acima para não divergir das decisões já tomadas pelo outro agente.
