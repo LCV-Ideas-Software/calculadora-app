@@ -25,6 +25,7 @@ Thumbs.db
 .dev.vars
 .dev.vars.*
 *.local
+database_id.txt
 *.pem
 *.key
 *.p12

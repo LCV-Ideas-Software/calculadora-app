@@ -1,5 +1,12 @@
 # Changelog — Calculadora App (ex-Itaú Calculadora)
 
+## [Publication Hygiene Followup] - 2026-04-23
+### Segurança
+- `database_id.txt` removido do índice Git via `git rm --cached` e adicionado ao `.gitignore` e ao `.npmignore`. Arquivo preservado no disco local. O ID do binding D1 já vivia em `wrangler.json` (fonte única autoritativa); a cópia solta no root era redundante e entrava no `npm pack` sem agregar valor.
+### Validação
+- `git ls-files | grep database_id` não retorna entradas.
+- `npm pack --dry-run --json --ignore-scripts` não incluiu `database_id.txt`.
+
 ## [Security Publication Hardening] - 2026-04-23
 ### Segurança
 - Memórias e contexto de agentes passaram a ser locais apenas: `.ai/`, `.aiexclude`, `.copilotignore` e `.github/copilot-instructions.md` foram adicionados ao ignore e removidos do índice Git com `git rm --cached`, preservando os arquivos no disco local.
