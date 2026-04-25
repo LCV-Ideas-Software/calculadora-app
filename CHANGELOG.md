@@ -1,4 +1,28 @@
-# Changelog — Calculadora App (ex-Itaú Calculadora)
+# Changelog — Calculadora Financeira
+
+## [v4.1.14] - 2026-04-25 — first public release
+### Segurança
+- **CodeQL `js/incomplete-multi-character-sanitization` + `js/bad-tag-filter` + `js/incomplete-url-scheme-check`** (5 alertas high-severity em `functions/api/enviar-email.js`): substituída a sanitização baseada em regex por `sanitize-html` (allowlist parser-based, htmlparser2). Allowlist: tags HTML email-safe + atributos style/class + schemes http/https/mailto (img permite data:). 0 alertas abertos pós-fix.
+### Rebrand (operator directive — risco jurídico)
+- Removidas TODAS referências a "Itaú" e "Personnalité" em UI, email, system instructions Gemini, response labels, hostname canônico, file headers, asset filenames. Logo Itaú substituído por SVG genérico de calculadora financeira em `#003366` / `#EC7000` / `#ffffff` (paleta preservada per operator).
+- Hostname `calculadora-itau.lcv.app.br` → `calculadora.lcv.app.br`.
+- Disclaimer compliance reescrito sem mencionar instituição financeira específica.
+- API response label `'Spot Calibrado Itaú'` → `'Spot Calibrado (alt)'`.
+### Phase 2 hardening (workspace baseline)
+- License: AGPL-3.0-or-later. README com seção AGPL §13 source-offer.
+- `package.json`: bump 4.0.1 → 4.1.14, +metadata (description, license, author, repository, homepage, bugs, engines.node>=22), removido `private: true`.
+- `wrangler.json`: literal `database_id` redatado via placeholder + injeção jq no deploy.yml a partir de `D1_DATABASE_ID` secret.
+- Branch ruleset: `deletion` + `non_fast_forward` + `required_status_checks=deploy` + `code_scanning Any/Any`.
+- Workflow permissions: `read` default, allowed_actions `selected`, SHA pinning required.
+- README rewrite: 5-entry badges (status / version / runtime / framework / license), Fork & Deploy guide, AGPL §13 source-offer.
+- Community files: `CODE_OF_CONDUCT.md` + `CONTRIBUTING.md` + `.github/CODEOWNERS`.
+- gh-pages branch + Pages live em https://lcv-leo.github.io/calculadora-app/ + FUNDING.yml self-URL.
+- History scrub via `git-filter-repo` (literal D1 ID gone from blobs + commit messages).
+- Operator-deferred (separate step): D1 table prefix `itau_*` rename → ALTER TABLE + tightly-coupled deploy (~30s downtime).
+### Validação
+- `npm run lint` + `npm run build`: GREEN.
+- CI deploy GREEN no HEAD `4feea9b`.
+- Cross-review session `fda3ee33` aceita o playbook (Codex + Gemini READY pós-remediation).
 
 ## [Publication Hygiene Followup] - 2026-04-23
 ### Segurança
