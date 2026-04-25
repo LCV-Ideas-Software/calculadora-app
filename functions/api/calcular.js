@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
         const origem = {};
 
         try {
-            const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM calc_parametros_customizados ORDER BY id DESC").all();
+            const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM itau_parametros_customizados ORDER BY id DESC").all();
             if (rows.results && rows.results.length > 0) {
                 for (const row of rows.results) {
                     const val = parseFloat(row.valor);
@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
         } catch (e) {
             // Tabela pode não existir ainda
             try {
-                await env.BIGDATA_DB.prepare("CREATE TABLE IF NOT EXISTS calc_parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)").run();
+                await env.BIGDATA_DB.prepare("CREATE TABLE IF NOT EXISTS itau_parametros_customizados (id INTEGER PRIMARY KEY AUTOINCREMENT, chave TEXT NOT NULL, valor TEXT NOT NULL)").run();
             } catch (e2) { }
         }
 
@@ -115,7 +115,7 @@ export async function onRequestPost(context) {
                 const dataCsv = `${yyyy}${mm}${dd}`;
 
                 try {
-                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM calc_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(dataISO, moeda).first();
+                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(dataISO, moeda).first();
                     if (cache) { taxa_cartao = cache.valor_ptax; data_ptax = dataISO; break; }
                 } catch (e) { }
 
@@ -154,7 +154,7 @@ export async function onRequestPost(context) {
 
                 if (taxa_cartao) {
                     data_ptax = dataISO;
-                    try { await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO calc_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(dataISO, moeda, taxa_cartao).run(); } catch (e) { }
+                    try { await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(dataISO, moeda, taxa_cartao).run(); } catch (e) { }
                     break;
                 }
                 dataAtual.setUTCDate(dataAtual.getUTCDate() - 1);
@@ -197,7 +197,7 @@ export async function onRequestPost(context) {
                 let usou_contingencia = false;
 
                 try {
-                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM calc_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(cacheMinuto, moeda).first();
+                    const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = ? AND moeda = ?").bind(cacheMinuto, moeda).first();
                     if (cache) { taxa_global = cache.valor_ptax; fonte_global = 'Spot Calibrado'; }
                 } catch (e) { }
 
@@ -229,15 +229,15 @@ export async function onRequestPost(context) {
 
                     if (taxa_global) {
                         try {
-                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO calc_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(cacheMinuto, moeda, taxa_global).run();
-                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO calc_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES ('LATEST_SPOT', ?, ?)").bind(moeda, taxa_global).run();
+                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES (?, ?, ?)").bind(cacheMinuto, moeda, taxa_global).run();
+                            await env.BIGDATA_DB.prepare("INSERT OR REPLACE INTO itau_ptax_cache (data_cotacao, moeda, valor_ptax) VALUES ('LATEST_SPOT', ?, ?)").bind(moeda, taxa_global).run();
                         } catch (e) { }
                     }
                 }
 
                 if (!taxa_global) {
                     try {
-                        const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM calc_ptax_cache WHERE data_cotacao = 'LATEST_SPOT' AND moeda = ?").bind(moeda).first();
+                        const cache = await env.BIGDATA_DB.prepare("SELECT valor_ptax FROM itau_ptax_cache WHERE data_cotacao = 'LATEST_SPOT' AND moeda = ?").bind(moeda).first();
                         if (cache) { taxa_global = cache.valor_ptax; fonte_global = 'Último Spot Salvo'; }
                     } catch (e) { }
                 }
@@ -358,7 +358,7 @@ export async function onRequestPost(context) {
             if (Number.isFinite(erroPercentual)) {
                 try {
                     await env.BIGDATA_DB.prepare(`
-                        CREATE TABLE IF NOT EXISTS calc_backtest_spot_vs_ptax (
+                        CREATE TABLE IF NOT EXISTS itau_backtest_spot_vs_ptax (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             created_at INTEGER NOT NULL,
                             moeda TEXT NOT NULL,
@@ -370,7 +370,7 @@ export async function onRequestPost(context) {
                     `).run();
 
                     await env.BIGDATA_DB.prepare(`
-                        INSERT INTO calc_backtest_spot_vs_ptax (created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual)
+                        INSERT INTO itau_backtest_spot_vs_ptax (created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual)
                         VALUES (?, ?, ?, ?, ?, ?)
                     `).bind(
                         Date.now(),
@@ -384,7 +384,7 @@ export async function onRequestPost(context) {
                     const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
                     const rows = await env.BIGDATA_DB.prepare(`
                         SELECT erro_percentual
-                        FROM calc_backtest_spot_vs_ptax
+                        FROM itau_backtest_spot_vs_ptax
                         WHERE created_at >= ?
                         ORDER BY created_at DESC
                         LIMIT 200

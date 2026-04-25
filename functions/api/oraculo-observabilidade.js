@@ -2,7 +2,7 @@ import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/
 
 async function ensureTable(env) {
   await env.BIGDATA_DB.prepare(`
-    CREATE TABLE IF NOT EXISTS calc_oraculo_observabilidade (
+    CREATE TABLE IF NOT EXISTS itau_oraculo_observabilidade (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created_at INTEGER NOT NULL,
       status TEXT NOT NULL,
@@ -42,7 +42,7 @@ export async function onRequestPost(context) {
     const appVersion = typeof body?.appVersion === 'string' ? body.appVersion.slice(0, 24) : null;
 
     await env.BIGDATA_DB.prepare(`
-      INSERT INTO calc_oraculo_observabilidade (
+      INSERT INTO itau_oraculo_observabilidade (
         created_at, status, from_cache, force_refresh, duration_ms,
         moeda, valor_original, preview, error_message, app_version
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

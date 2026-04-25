@@ -23,7 +23,7 @@ export async function onRequestGet(context) {
 
         // Tentar carregar parâmetros customizados do D1
         try {
-            const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM calc_parametros_customizados ORDER BY id DESC").all();
+            const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM itau_parametros_customizados ORDER BY id DESC").all();
             if (rows.results && rows.results.length > 0) {
                 for (const row of rows.results) {
                     const val = parseFloat(row.valor);
