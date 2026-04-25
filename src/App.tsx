@@ -45,9 +45,9 @@ export default function App() {
             {/* Header */}
             <header className="text-center pt-8 pb-4 px-6">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <img src="/Itau_Personnalite.webp" alt="Itaú Personnalité" className="h-8 w-auto" loading="eager" />
+                <img src="/calculadora-logo.svg" alt="Calculadora Financeira" className="h-8 w-auto" loading="eager" />
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-800 tracking-tight">
-                  Calculadora Itaú Personnalité
+                  Calculadora Financeira
                 </h1>
               </div>
               <p className="text-sm text-slate-500">Simulador comparativo inteligente de câmbio internacional</p>
@@ -100,10 +100,10 @@ export default function App() {
               <div className="mt-6 border-t border-gray-300/40 pt-6">
                 <p className="text-[11px] text-gray-400 text-justify leading-relaxed">
                   <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e
-                  não possui vínculo, homologação ou integração sistêmica com o Banco Itaú Unibanco S.A. Os cálculos e
-                  avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não
-                  substituem as informações emitidas pela instituição financeira. Para propostas reais e contratações,
-                  consulte exclusivamente os canais oficiais do banco.
+                  não possui vínculo, homologação ou integração sistêmica com qualquer instituição financeira
+                  específica. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa
+                  de crédito e não substituem as informações emitidas pela instituição financeira. Para propostas reais
+                  e contratações, consulte exclusivamente os canais oficiais do banco.
                 </p>
               </div>
               <p className="text-center text-[10px] text-slate-400 mt-4">

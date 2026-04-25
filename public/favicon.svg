@@ -1,9 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <!-- Itaú Personnalité Favicon: Iconic rhombus/diamond -->
-  <!-- Outer diamond -->
-  <polygon points="16,2 30,16 16,30 2,16" fill="#003366"/>
-  <!-- Inner diamond (Personnalité accent) -->
-  <polygon points="16,7 25,16 16,25 7,16" fill="#EC7000"/>
-  <!-- Small white diamond at center -->
-  <polygon points="16,12 20,16 16,20 12,16" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Calculadora Financeira">
+  <title>Calculadora Financeira</title>
+  <rect x="5" y="2" width="22" height="28" rx="3" fill="#003366"/>
+  <rect x="7" y="4" width="18" height="7" rx="1.2" fill="#EC7000"/>
+  <rect x="7" y="13" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="12" y="13" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="17" y="13" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="22" y="13" width="3" height="4" rx="0.6" fill="#EC7000"/>
+  <rect x="7" y="18" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="12" y="18" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="17" y="18" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="22" y="18" width="3" height="4" rx="0.6" fill="#EC7000"/>
+  <rect x="7" y="23" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="12" y="23" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="17" y="23" width="4" height="4" rx="0.6" fill="#ffffff"/>
+  <rect x="22" y="23" width="3" height="4" rx="0.6" fill="#EC7000"/>
 </svg>

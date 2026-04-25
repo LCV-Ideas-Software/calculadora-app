@@ -160,7 +160,7 @@ function buildEmailHtml(data: EmailSimulationData): string {
         <!-- Header gradient -->
         <tr>
           <td style="background:linear-gradient(135deg,#1e293b 0%,#334155 100%);padding:32px 28px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.3px;">Calculadora Itaú Personnalité</h1>
+            <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.3px;">Calculadora Financeira</h1>
             <p style="margin:8px 0 0;color:rgba(255,255,255,0.65);font-size:13px;font-weight:500;">Simulador comparativo inteligente de câmbio internacional</p>
           </td>
         </tr>
@@ -236,7 +236,7 @@ function buildEmailHtml(data: EmailSimulationData): string {
         <tr>
           <td style="padding:0 24px 16px;">
             <p style="margin:0;color:#94a3b8;font-size:10px;line-height:1.5;text-align:justify;">
-              <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e não possui vínculo, homologação ou integração sistêmica com o Banco Itaú Unibanco S.A. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não substituem as informações emitidas pela instituição financeira.
+              <strong>AVISO DE COMPLIANCE:</strong> Esta calculadora é uma ferramenta de simulação independente e não possui vínculo, homologação ou integração sistêmica com qualquer instituição financeira específica. Os cálculos e avaliações aqui gerados não são oficiais, não constituem oferta ou promessa de crédito e não substituem as informações emitidas pela instituição financeira.
             </p>
           </td>
         </tr>

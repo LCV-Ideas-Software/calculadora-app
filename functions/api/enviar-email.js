@@ -44,9 +44,9 @@ export async function onRequestPost(context) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: "Calculadora Itaú <calculadora@lcv.app.br>",
+                from: "Calculadora Financeira <calculadora@lcv.app.br>",
                 to: [emailDestino],
-                subject: "💰 Simulação Itaú Personnalité — Comparativo de Câmbio",
+                subject: "💰 Simulação de Câmbio Internacional",
                 html: html,
                 text: relatorioTexto
             })

@@ -3,7 +3,7 @@ export async function onRequest(context: any) {
 
   // Bloqueio de exposição pública via URL interna .pages.dev
   if (url.hostname.endsWith('.pages.dev')) {
-    url.hostname = 'calculadora-itau.lcv.app.br';
+    url.hostname = 'calculadora.lcv.app.br';
     return Response.redirect(url.toString(), 301);
   }
 

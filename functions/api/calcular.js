@@ -208,7 +208,7 @@ export async function onRequestPost(context) {
                             const dataA = await resA.json();
                             if (dataA[`${moeda}BRL`] && dataA[`${moeda}BRL`].bid) {
                                 taxa_global = parseFloat(dataA[`${moeda}BRL`].bid) * CALIBRAGEM;
-                                fonte_global = 'Spot Calibrado Itaú';
+                                fonte_global = 'Spot Calibrado (alt)';
                             }
                         }
                     } catch (e) { }

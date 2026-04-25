@@ -47,7 +47,7 @@ export async function onRequestPost(context) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: "Calculadora Itaú <calculadora@lcv.app.br>",
+                from: "Calculadora Financeira <calculadora@lcv.app.br>",
                 to: ["calculadora@lcv.app.br"],
                 reply_to: email,
                 subject: `📬 Contato — ${name}`,

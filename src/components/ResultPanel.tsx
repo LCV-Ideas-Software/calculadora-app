@@ -45,8 +45,8 @@ export default function ResultPanel({ result, melhorOpcao }: Props) {
       {/* Exotic warning */}
       {isExotic && (
         <div className="rounded-xl p-3 text-sm text-amber-800 bg-amber-50 border border-amber-200 text-center">
-          ⚠️ Moeda <strong>{result.moeda}</strong> — apenas Cartão de Crédito disponível. Conta Global não suportada pelo
-          Itaú para esta moeda.
+          ⚠️ Moeda <strong>{result.moeda}</strong> — apenas Cartão de Crédito disponível. Conta Global não suportada para
+          esta moeda.
         </div>
       )}
 

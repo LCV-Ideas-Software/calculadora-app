@@ -1,5 +1,5 @@
 /**
- * Módulo: itau-calculadora/functions/api/oraculo.ts
+ * Módulo: calculadora-app/functions/api/oraculo.ts
  * Versão: v04.00.00
  * Descrição: API do Oráculo IA — refatorada com SDK oficial @google/genai, TypeScript,
  * e sem vazamento de linting `any`.
@@ -152,7 +152,7 @@ Dados da simulação:
     const payloadCandidates: PayloadCandidate[] = [
       {
         label: 'advanced',
-        systemInstruction: "Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.",
+        systemInstruction: "Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.",
         config: {
           temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
           topP: GEMINI_CONFIG.endpoints.oraculo.topP,
@@ -163,7 +163,7 @@ Dados da simulação:
       },
       {
         label: 'compat',
-        systemInstruction: "Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil, com foco em clientes Itaú Personnalité.",
+        systemInstruction: "Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil.",
         config: {
           temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
           topP: GEMINI_CONFIG.endpoints.oraculo.topP,
