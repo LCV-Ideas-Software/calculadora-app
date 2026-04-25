@@ -47,7 +47,7 @@ export function getClientIp(request) {
 
 async function ensureRateLimitTables(db) {
   await db.prepare(`
-    CREATE TABLE IF NOT EXISTS itau_rate_limit_policies (
+    CREATE TABLE IF NOT EXISTS calc_rate_limit_policies (
       route_key TEXT PRIMARY KEY,
       enabled INTEGER NOT NULL,
       max_requests INTEGER NOT NULL,
@@ -58,7 +58,7 @@ async function ensureRateLimitTables(db) {
   `).run();
 
   await db.prepare(`
-    CREATE TABLE IF NOT EXISTS itau_rate_limit_hits (
+    CREATE TABLE IF NOT EXISTS calc_rate_limit_hits (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       route_key TEXT NOT NULL,
       ip TEXT NOT NULL,
@@ -68,7 +68,7 @@ async function ensureRateLimitTables(db) {
 
   for (const [routeKey, policy] of Object.entries(DEFAULT_POLICIES)) {
     await db.prepare(`
-      INSERT OR IGNORE INTO itau_rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
+      INSERT OR IGNORE INTO calc_rate_limit_policies (route_key, enabled, max_requests, window_minutes, updated_at, updated_by)
       VALUES (?, ?, ?, ?, ?, ?)
     `)
       .bind(routeKey, policy.enabled, policy.max_requests, policy.window_minutes, Date.now(), 'system-default')
@@ -82,7 +82,7 @@ async function getPolicy(db, routeKey) {
   const fallback = DEFAULT_POLICIES[routeKey] ?? { enabled: 1, max_requests: 5, window_minutes: 10 };
   const row = await db.prepare(`
     SELECT enabled, max_requests, window_minutes
-    FROM itau_rate_limit_policies
+    FROM calc_rate_limit_policies
     WHERE route_key = ?
     LIMIT 1
   `)
@@ -112,7 +112,7 @@ export async function enforceRateLimit(request, env, routeKey) {
   const cutoff = now - (policy.windowMinutes * 60 * 1000);
   const row = await db.prepare(`
     SELECT COUNT(1) AS total
-    FROM itau_rate_limit_hits
+    FROM calc_rate_limit_hits
     WHERE route_key = ? AND ip = ? AND created_at >= ?
   `)
     .bind(routeKey, ip, cutoff)
@@ -128,7 +128,7 @@ export async function enforceRateLimit(request, env, routeKey) {
   }
 
   await db.prepare(`
-    INSERT INTO itau_rate_limit_hits (route_key, ip, created_at)
+    INSERT INTO calc_rate_limit_hits (route_key, ip, created_at)
     VALUES (?, ?, ?)
   `)
     .bind(routeKey, ip, now)
