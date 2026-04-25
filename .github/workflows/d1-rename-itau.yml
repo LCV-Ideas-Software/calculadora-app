@@ -1,0 +1,62 @@
+name: D1 Rename itau_* to calc_* (one-off)
+
+# One-off workflow to rename brand-prefixed D1 tables (itau_*) to generic
+# calc_* prefix as part of the workspace rebrand. Trigger manually via
+# gh workflow run or the Actions UI. Idempotent: safe to re-run (a second
+# run will fail with "no such table: itau_*" but that signals success).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ALTER TABLE rename via Cloudflare D1 API
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${D1_DATABASE_ID:-}" ] || [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "::error::Missing required secret(s): D1_DATABASE_ID, CLOUDFLARE_API_TOKEN, or CLOUDFLARE_ACCOUNT_ID"
+            exit 1
+          fi
+
+          API_BASE="https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/d1/database/${D1_DATABASE_ID}/query"
+
+          run_sql() {
+            local SQL="$1"
+            echo "::group::SQL: $SQL"
+            local RESP
+            RESP=$(curl -sS -X POST "$API_BASE" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              --data "$(jq -n --arg sql "$SQL" '{sql: $sql}')")
+            echo "$RESP" | jq -C .
+            local SUCCESS
+            SUCCESS=$(echo "$RESP" | jq -r '.success')
+            if [ "$SUCCESS" != "true" ]; then
+              echo "::error::Failed: $SQL"
+              exit 1
+            fi
+            echo "::endgroup::"
+          }
+
+          echo "=== pre-rename: list itau_* tables ==="
+          run_sql "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'itau_%' ORDER BY name"
+
+          echo "=== executing 6 renames ==="
+          run_sql "ALTER TABLE itau_rate_limit_policies RENAME TO calc_rate_limit_policies"
+          run_sql "ALTER TABLE itau_rate_limit_hits RENAME TO calc_rate_limit_hits"
+          run_sql "ALTER TABLE itau_parametros_customizados RENAME TO calc_parametros_customizados"
+          run_sql "ALTER TABLE itau_ptax_cache RENAME TO calc_ptax_cache"
+          run_sql "ALTER TABLE itau_backtest_spot_vs_ptax RENAME TO calc_backtest_spot_vs_ptax"
+          run_sql "ALTER TABLE itau_oraculo_observabilidade RENAME TO calc_oraculo_observabilidade"
+
+          echo "=== post-rename: verify (should show only calc_*) ==="
+          run_sql "SELECT name FROM sqlite_master WHERE type='table' AND (name LIKE 'itau_%' OR name LIKE 'calc_%') ORDER BY name"
