@@ -31,6 +31,22 @@ jobs:
 
       - run: npm run build
 
+      - name: Inject D1 database_id from secret
+        run: |
+          if [ -z "${D1_DATABASE_ID:-}" ]; then
+            echo "::error::D1_DATABASE_ID secret is not set" >&2
+            exit 1
+          fi
+          jq --arg id "$D1_DATABASE_ID" '.d1_databases[0].database_id = $id' wrangler.json > wrangler.json.tmp
+          mv wrangler.json.tmp wrangler.json
+          grep -q "$D1_DATABASE_ID" wrangler.json || { echo "::error::Substitution failed" >&2; exit 1; }
+          if grep -q "00000000-0000-0000-0000-000000000000" wrangler.json; then
+            echo "::error::Placeholder still present after mutation" >&2
+            exit 1
+          fi
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+
       - run: npx wrangler@${WRANGLER_VERSION} pages deploy dist --project-name=calculadora-app --branch=main --commit-dirty=true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
