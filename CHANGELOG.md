@@ -1,5 +1,12 @@
 # Changelog — Calculadora Financeira
 
+## [v4.1.15] - 2026-04-26
+### Alterado
+- **`.github/workflows/pages.yml`** — `actions/configure-pages@v6.0.0` passou a declarar `with: enablement: true` para idempotência em forks/clones que ainda não tenham GitHub Pages habilitado (corrige `Get Pages site failed... HTTP 404` em primeiro run).
+- **CI/Pages modernization** — workflows migraram de `gh-pages` legacy branch para o padrão atual (artifact deployment via `configure-pages` + `upload-pages-artifact` + `deploy-pages`, todos SHA-pinned).
+### Validação
+- Trilateral cross-review session `08bc6b9a-f3f5-434d-8276-2b21f562a843` (caller + Codex + Gemini) **READY**: paridade confirmada nos 9 repos públicos do workspace em security baseline, repo features, workflow perms, branch rulesets, Pages deployment, CodeQL Default Setup, 0 alertas abertos.
+
 ## [v4.1.14] - 2026-04-25 — first public release
 ### Segurança
 - **CodeQL `js/incomplete-multi-character-sanitization` + `js/bad-tag-filter` + `js/incomplete-url-scheme-check`** (5 alertas high-severity em `functions/api/enviar-email.js`): substituída a sanitização baseada em regex por `sanitize-html` (allowlist parser-based, htmlparser2). Allowlist: tags HTML email-safe + atributos style/class + schemes http/https/mailto (img permite data:). 0 alertas abertos pós-fix.
