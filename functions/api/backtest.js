@@ -6,7 +6,7 @@ export async function onRequestGet(context) {
 
     try {
         await env.BIGDATA_DB.prepare(`
-            CREATE TABLE IF NOT EXISTS itau_backtest_spot_vs_ptax (
+            CREATE TABLE IF NOT EXISTS calc_backtest_spot_vs_ptax (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 created_at INTEGER NOT NULL,
                 moeda TEXT NOT NULL,
@@ -23,7 +23,7 @@ export async function onRequestGet(context) {
 
         const rows = await env.BIGDATA_DB.prepare(`
             SELECT created_at, moeda, data_compra, taxa_prevista, taxa_observada, erro_percentual
-            FROM itau_backtest_spot_vs_ptax
+            FROM calc_backtest_spot_vs_ptax
             WHERE created_at >= ?
             ORDER BY created_at DESC
             LIMIT 200
