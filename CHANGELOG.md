@@ -1,5 +1,9 @@
 # Changelog — Calculadora Financeira
 
+## [v04.01.16] - 2026-04-30
+### Alterado
+- `README.md` passou a seguir o novo padrão organizacional de abertura: logo harmonizado, bloco curto de status, tabela `The version history at a glance`, links públicos de release/clone corrigidos para `LCV-Ideas-Software/calculadora-app` e manutenção explícita do GitHub Sponsors em `lcv-leo`.
+
 ## [v4.1.15] - 2026-04-26
 ### Alterado
 - **`.github/workflows/pages.yml`** — `actions/configure-pages@v6.0.0` passou a declarar `with: enablement: true` para idempotência em forks/clones que ainda não tenham GitHub Pages habilitado (corrige `Get Pages site failed... HTTP 404` em primeiro run).

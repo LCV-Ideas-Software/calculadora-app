@@ -1,16 +1,27 @@
 <p align="center">
-  <img src=".github/assets/lcv-ideas-software-logo.svg" alt="LCV Ideas &amp; Software" width="220">
+  <img src=".github/assets/lcv-ideas-software-logo.svg" alt="LCV Ideas &amp; Software" width="520" />
 </p>
 
 # calculadora-app
 
 [![status: stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](#status)
-[![version](https://img.shields.io/github/v/release/lcv-leo/calculadora-app.svg)](https://github.com/lcv-leo/calculadora-app/releases)
+[![version](https://img.shields.io/github/v/release/LCV-Ideas-Software/calculadora-app.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/releases)
 [![runtime: Cloudflare Pages](https://img.shields.io/badge/runtime-Cloudflare%20Pages-orange.svg)](https://pages.cloudflare.com/)
 [![framework: React 19 + Vite 8](https://img.shields.io/badge/framework-React%2019%20%2B%20Vite%208-61dafb.svg)](https://react.dev/)
 [![license: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
+
+**Status.** Stable. Current release: **v04.01.16**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
+
+The version history at a glance:
+
+| Release | Scope |
+|---|---|
+| **`v04.01.16`** | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `lcv-leo` by explicit beneficiary decision. |
+| **`v04.01.15`** | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks. |
+| **`v04.01.14`** | **First public release.** Completed the public flip, CodeQL remediation, rebrand cleanup, AGPL publication hygiene, and deployment hardening. |
+| **`Security Publication Hardening`** | **Publication boundary tightening.** Hardened ignore rules and package contents before public distribution. |
 
 ## What it does
 
@@ -60,7 +71,7 @@ You will need:
 ### 1. Clone + install
 
 ```bash
-git clone https://github.com/lcv-leo/calculadora-app.git
+git clone https://github.com/LCV-Ideas-Software/calculadora-app.git
 cd calculadora-app
 npm ci
 ```
