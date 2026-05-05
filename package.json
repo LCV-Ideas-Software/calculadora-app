@@ -23,8 +23,8 @@
     "test": "vitest run",
     "format": "biome format --write src",
     "lint": "biome check src",
-    "format:public": "prettier --write \"**/README.md\" \"**/index.html\"",
-    "format:public:check": "prettier --check \"**/README.md\" \"**/index.html\""
+    "format:public": "prettier --write \"**/index.html\"",
+    "format:public:check": "prettier --check \"**/index.html\""
   },
   "dependencies": {
     "@google/genai": "^1.51.0",

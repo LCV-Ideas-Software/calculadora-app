@@ -16,12 +16,12 @@
 
 The version history at a glance:
 
-| Release                              | Scope                                                                                                                                                                                                                                                                                         |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`v04.01.16`**                      | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `lcv-leo` by explicit beneficiary decision. |
-| **`v04.01.15`**                      | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks.                                                                                                                                      |
-| **`v04.01.14`**                      | **First public release.** Completed the public flip, CodeQL remediation, rebrand cleanup, AGPL publication hygiene, and deployment hardening.                                                                                                                                                 |
-| **`Security Publication Hardening`** | **Publication boundary tightening.** Hardened ignore rules and package contents before public distribution.                                                                                                                                                                                   |
+| Release | Scope |
+|---|---|
+| **`v04.01.16`** | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `lcv-leo` by explicit beneficiary decision. |
+| **`v04.01.15`** | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks. |
+| **`v04.01.14`** | **First public release.** Completed the public flip, CodeQL remediation, rebrand cleanup, AGPL publication hygiene, and deployment hardening. |
+| **`Security Publication Hardening`** | **Publication boundary tightening.** Hardened ignore rules and package contents before public distribution. |
 
 ## What it does
 
@@ -35,7 +35,6 @@ Simulador comparativo entre **Cartão de Crédito** e **Conta Global** para oper
 A análise gerada por IA (Gemini 2.5 Pro) explica o resultado em linguagem executiva, sem invenção de dados — só interpreta os números calculados pelos endpoints determinísticos.
 
 Funcionalidades adicionais:
-
 - **Backtest**: comparativo histórico Spot vs PTAX para validar precisão da calibragem.
 - **Oráculo**: análise contextual via Gemini.
 - **Parâmetros customizados**: operador pode ajustar IOF/spread/calibragem via D1.
@@ -64,7 +63,6 @@ Browser -> Cloudflare Pages (React build)
 ## Deploy your own fork
 
 You will need:
-
 - A Cloudflare account with Pages + D1 enabled.
 - The Cloudflare CLI [`wrangler`](https://developers.cloudflare.com/workers/wrangler/).
 - Node.js 22+.
@@ -98,9 +96,9 @@ Replace the placeholder `00000000-0000-0000-0000-000000000000`:
     {
       "binding": "BIGDATA_DB",
       "database_name": "bigdata_db",
-      "database_id": "<your-d1-id-from-step-2>",
-    },
-  ],
+      "database_id": "<your-d1-id-from-step-2>"
+    }
+  ]
 }
 ```
 
