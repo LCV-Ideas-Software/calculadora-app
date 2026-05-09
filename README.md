@@ -12,12 +12,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.01.17**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
+**Status.** Stable. Current release: **v04.01.18**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
 
 The version history at a glance:
 
 | Release | Scope |
 |---|---|
+| **`v04.01.18`** | **Site sponsor card iteration.** `site/index.html` GitHub Sponsors iframe (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos). |
 | **`v04.01.17`** | **Site visual identity refresh.** `site/index.html` (GitHub Pages) reskinneada para a nova identidade dark-first navy/cyan da org LCV (`#050b18`/`#38bdf8`/`#34d399`, gradientes radiais, glow shadows, gradient text no h1). Coordinated Phase 2 companion ship (calculadora, oraculo, astrologo, admin, mainsite, maestro, mtasts). Sem mudança no app runtime. |
 | **`v04.01.16`** | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `lcv-leo` by explicit beneficiary decision. |
 | **`v04.01.15`** | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks. |
