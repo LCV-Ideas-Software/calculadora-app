@@ -47,7 +47,7 @@
   },
   "overrides": {
     "picomatch": "4.0.4",
-    "protobufjs": "7.5.5",
+    "protobufjs": "7.5.8",
     "undici": "6.24.0",
     "vite": "$vite",
     "postcss": "8.5.10"
