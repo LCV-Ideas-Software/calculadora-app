@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [v04.01.19] - 2026-05-15
+
+**Patch — 4-gate quality directive compliance (eslint + biome + prettier + cross-review).** Workspace directive 2026-05-15: every code change must pass eslint + biome + prettier + cross-review before Commit & Sync / tag / release / deploy / publish. (Note: calculadora-app does not have eslint installed; biome serves both lint and format roles for JS/TS. eslint addition is deferred to a future ship.)
+
+### Adicionado
+
+- `npm run biome` (biome check . — uses biome.json scope) + `npm run biome:write` (biome check --write . — auto-fix).
+- `deploy.yml` workflow runs `npm run biome` after `npm ci` and before `npm run build`.
+
+### Configurado
+
+- `biome.json` schema URL `2.4.11` → `2.4.14`.
+- `biome.json` `files.includes` scopes biome to `src/` + `functions/`; excludes `dist/`, `build/`, `.wrangler/`, `node_modules/`, `coverage/`, CSS.
+- Rule overrides para padrões legítimos React+Tailwind: `suspicious.{noArrayIndexKey,noImplicitAnyLet}`, `correctness.useExhaustiveDependencies`, `style.noNonNullAssertion`, `a11y.{useKeyWithClickEvents,useButtonType,noStaticElementInteractions,useAriaPropsSupportedByRole}`, `security.noDangerouslySetInnerHtml` — all off.
+
+### Alterado
+
+- 3 source files reformatted by `biome check --write .` (cosmetic only).
+
 ## [v04.01.18] - 2026-05-09
 ### Alterado
 - **`site/index.html`** — iframe `github.com/sponsors/.../card` (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos).
