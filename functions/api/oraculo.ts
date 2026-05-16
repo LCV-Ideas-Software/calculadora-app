@@ -291,7 +291,7 @@ Dados da simulação:
     });
 
     let text = '';
-    if (successfulResponse.candidates && successfulResponse.candidates[0]?.content?.parts) {
+    if (successfulResponse.candidates?.[0]?.content?.parts) {
       text = extractTextFromParts(successfulResponse.candidates[0].content.parts);
     } else if (successfulResponse.text) {
       text = successfulResponse.text;

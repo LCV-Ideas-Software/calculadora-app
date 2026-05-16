@@ -95,7 +95,6 @@ export default function OracleSection({ oracle, payload }: Props) {
           </div>
 
           {/* AI content */}
-          {/* biome-ignore lint/security/noDangerouslySetInnerHtml: oracle.html is sanitized before render in src/services/oraculo.ts */}
           <div className="markdown-ia glass-card rounded-2xl p-5" dangerouslySetInnerHTML={{ __html: oracle.html }} />
         </div>
       )}
