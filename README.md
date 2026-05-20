@@ -5,19 +5,23 @@
 # calculadora-app
 
 [![status: stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](#status)
-[![version](https://img.shields.io/github/v/release/LCV-Ideas-Software/calculadora-app.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/releases)
+[![release](https://img.shields.io/github/v/release/LCV-Ideas-Software/calculadora-app?sort=semver)](https://github.com/LCV-Ideas-Software/calculadora-app/releases)
+[![Deploy](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml)
+[![Pages](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml)
+[![CodeQL](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml)
 [![runtime: Cloudflare Pages](https://img.shields.io/badge/runtime-Cloudflare%20Pages-orange.svg)](https://pages.cloudflare.com/)
 [![framework: React 19 + Vite 8](https://img.shields.io/badge/framework-React%2019%20%2B%20Vite%208-61dafb.svg)](https://react.dev/)
 [![license: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.01.18**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
+**Status.** Stable. Current release: **v04.01.19**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.01.19`**                      | **4-gate quality directive compliance.** Added Biome gate and deploy workflow coverage; eslint remains deferred because this repository does not currently install eslint, so Biome serves as the active JS/TS lint and format gate for this release.                                                                           |
 | **`v04.01.18`**                      | **Site sponsor card iteration.** `site/index.html` GitHub Sponsors iframe (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos).                                                   |
 | **`v04.01.17`**                      | **Site visual identity refresh.** `site/index.html` (GitHub Pages) reskinneada para a nova identidade dark-first navy/cyan da org LCV (`#050b18`/`#38bdf8`/`#34d399`, gradientes radiais, glow shadows, gradient text no h1). Coordinated Phase 2 companion ship (calculadora, oraculo, astrologo, admin, mainsite, maestro, mtasts). Sem mudança no app runtime. |
 | **`v04.01.16`**                      | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `example-beneficiary` by explicit beneficiary decision.                                                                     |
@@ -128,15 +132,14 @@ This repo's [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs 
 ## Repository conventions
 
 - **License**: [AGPL-3.0-or-later](./LICENSE). Network-service trigger applies: running a modified fork as a public service obligates you to publish modifications.
+- **Notices**: see [NOTICE](./NOTICE) and [THIRDPARTY](./THIRDPARTY.md).
 - **Security disclosure**: see [SECURITY.md](./SECURITY.md).
+- **Code of conduct**: see [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md).
+- **Contributing**: see [CONTRIBUTING.md](./CONTRIBUTING.md).
 - **Sponsorship**: see the repo's `Sponsor` button or [central sponsor page](https://www.lcv.dev/sponsor).
 - **Action pinning**: all GitHub Actions are pinned by full SHA per supply-chain hardening baseline.
-- **Code owners**: [.github/CODEOWNERS](./.github/CODEOWNERS).
-
-## Compliance notice
-
-This calculator is an independent simulation tool. It is NOT affiliated with, endorsed by, or integrated with any specific financial institution. The numbers generated are not official, do not constitute a credit offer or promise, and do not replace information issued by any bank. For real-world transactions and proposals, consult your bank or financial advisor exclusively through their official channels.
+- **Code owners**: [.github/CODEOWNERS](.github/CODEOWNERS).
 
 ## Links
 
