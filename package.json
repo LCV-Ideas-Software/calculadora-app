@@ -3,14 +3,14 @@
   "version": "4.1.19",
   "description": "Calculadora Financeira — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.",
   "license": "AGPL-3.0-or-later",
-  "author": "Leonardo Cardozo Vargas (lcv-leo)",
+  "author": "LCV Ideas & Software",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lcv-leo/calculadora-app.git"
+    "url": "git+https://github.com/LCV-Ideas-Software/calculadora-app.git"
   },
-  "homepage": "https://github.com/lcv-leo/calculadora-app#readme",
+  "homepage": "https://github.com/LCV-Ideas-Software/calculadora-app#readme",
   "bugs": {
-    "url": "https://github.com/lcv-leo/calculadora-app/issues"
+    "url": "https://github.com/LCV-Ideas-Software/calculadora-app/issues"
   },
   "type": "module",
   "engines": {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Leonardo Cardozo Vargas
+ * Copyright (C) 2026 LCV Ideas & Software
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import type React from 'react';
@@ -33,7 +33,7 @@ export const ComplianceBanner: React.FC<ComplianceBannerProps> = ({ onViewLicens
         WebkitBackdropFilter: 'blur(10px)',
       }}
     >
-      <span>Copyright © 2026 Leonardo Cardozo Vargas</span>
+      <span>Copyright © 2026 LCV Ideas & Software</span>
       <span aria-hidden="true">|</span>
       <a
         href="/licencas"
@@ -46,7 +46,12 @@ export const ComplianceBanner: React.FC<ComplianceBannerProps> = ({ onViewLicens
         Licenças (GNU AGPLv3 + Apache 2.0)
       </a>
       <span aria-hidden="true">|</span>
-      <a href="https://github.com/lcv-leo/calculadora-app" target="_blank" rel="noopener noreferrer" style={linkStyle}>
+      <a
+        href="https://github.com/LCV-Ideas-Software/calculadora-app"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={linkStyle}
+      >
         Código Fonte (GitHub)
       </a>
     </footer>

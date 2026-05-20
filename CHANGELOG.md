@@ -32,7 +32,7 @@
 
 ## [v04.01.16] - 2026-04-30
 ### Alterado
-- `README.md` passou a seguir o novo padrão organizacional de abertura: logo harmonizado, bloco curto de status, tabela `The version history at a glance`, links públicos de release/clone corrigidos para `LCV-Ideas-Software/calculadora-app` e manutenção explícita do GitHub Sponsors em `lcv-leo`.
+- `README.md` passou a seguir o novo padrão organizacional de abertura: logo harmonizado, bloco curto de status, tabela `The version history at a glance`, links públicos de release/clone corrigidos para `LCV-Ideas-Software/calculadora-app` e manutenção explícita do GitHub Sponsors em `example-beneficiary`.
 
 ## [v4.1.15] - 2026-04-26
 ### Alterado
@@ -57,7 +57,7 @@
 - Workflow permissions: `read` default, allowed_actions `selected`, SHA pinning required.
 - README rewrite: 5-entry badges (status / version / runtime / framework / license), Fork & Deploy guide, AGPL §13 source-offer.
 - Community files: `CODE_OF_CONDUCT.md` + `CONTRIBUTING.md` + `.github/CODEOWNERS`.
-- gh-pages branch + Pages live em https://lcv-leo.github.io/calculadora-app/ + FUNDING.yml self-URL.
+- gh-pages branch + Pages live em https://example-beneficiary.github.io/calculadora-app/ + FUNDING.yml self-URL.
 - History scrub via `git-filter-repo` (literal D1 ID gone from blobs + commit messages).
 - Operator-deferred (separate step): D1 table prefix `itau_*` rename → ALTER TABLE + tightly-coupled deploy (~30s downtime).
 ### Validação
@@ -83,7 +83,7 @@
 ### Corrigido
 - Vulnerabilidade crítica `CVE-2026-41242` (GHSA-xq3m-2v4x-88gg) em `protobufjs < 7.5.5` — arbitrary code execution via campos `type` manipulados em definições protobuf. Resolvida via `overrides` no `package.json` pinando `protobufjs` em `7.5.5`. Dependência transitiva puxada por `@google/genai@1.49.0`.
 ### Motivação
-- Fechar alerta Dependabot #6 do repositório `lcv-leo/calculadora-app` sem aguardar bump upstream do `@google/genai`.
+- Fechar alerta Dependabot #6 do repositório `example-beneficiary/calculadora-app` sem aguardar bump upstream do `@google/genai`.
 
 ## [v04.01.13] - 2026-04-17
 ### Corrigido
