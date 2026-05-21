@@ -26,7 +26,8 @@ function resolveOrigem(origem: ParametrosVigentes['origem']): string | null {
 
   // Objeto → resumir como lista de fontes únicas
   const fontes = [...new Set(Object.values(origem))];
-  if (fontes.length === 1) return fontes[0] === 'd1' ? 'Base D1' : fontes[0];
+  const unicaFonte = fontes[0];
+  if (fontes.length === 1 && unicaFonte) return unicaFonte === 'd1' ? 'Base D1' : unicaFonte;
   return fontes.map((f) => (f === 'd1' ? 'D1' : f)).join(' / ');
 }
 

@@ -210,6 +210,7 @@ Dados da simulação:
 
     for (let i = 0; i < payloadCandidates.length; i++) {
       const candidate = payloadCandidates[i];
+      if (!candidate) continue;
       let attemptSuccess = false;
 
       for (let tentativa = 0; tentativa < GEMINI_CONFIG.maxRetries; tentativa++) {

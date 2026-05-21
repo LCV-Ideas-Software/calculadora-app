@@ -56,7 +56,7 @@ export default function BackgroundCanvas() {
       r: 180 + Math.random() * 240,
       dx: (Math.random() - 0.5) * 0.35,
       dy: (Math.random() - 0.5) * 0.35,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      color: colors[Math.floor(Math.random() * colors.length)] ?? 'rgba(234,88,12,0.08)',
     }));
 
     function draw() {

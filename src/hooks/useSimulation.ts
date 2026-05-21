@@ -27,7 +27,7 @@ export interface SimulationFormState {
 
 const DEFAULT_FORM: SimulationFormState = {
   moeda: 'USD',
-  dataCompra: new Date().toISOString().split('T')[0],
+  dataCompra: new Date().toISOString().split('T')[0] ?? '',
   valorOriginal: '',
   vetSaldoExistente: '',
   spreadPercent: '',
@@ -128,7 +128,7 @@ export function useSimulation(): UseSimulationReturn {
           global: '🌐 Conta Global',
           saldo: '💰 Saldo Existente',
         };
-        setMelhorOpcao(labels[candidatos[0].chave] || null);
+        setMelhorOpcao(labels[candidatos[0]?.chave ?? ''] || null);
       }
 
       // Montar payload para IA

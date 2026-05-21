@@ -70,7 +70,7 @@ function markdownParaHtml(md: string): string {
   // Fechar blocos antes do próximo bloco ou no final
   const parts = html.split('<div class="ai-bloco">');
   if (parts.length > 1) {
-    html = parts[0];
+    html = parts[0] ?? '';
     for (let i = 1; i < parts.length; i++) {
       html += `<div class="ai-bloco">${parts[i]}`;
       if (i < parts.length - 1) html += '</div>';

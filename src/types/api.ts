@@ -23,7 +23,7 @@ export interface SimulationPayload {
 /** Resultado individual de canal (Cartão / Global) */
 export interface ChannelResult {
   suportada: boolean;
-  erro?: string;
+  erro?: string | undefined;
   taxa_utilizada: number;
   fonte_cotacao: string;
   spread_aplicado: number;
@@ -32,23 +32,23 @@ export interface ChannelResult {
   valor_iof: number;
   valor_total_brl: number;
   vet: number;
-  base_brl?: number;
-  is_plantao?: boolean;
-  usou_contingencia?: boolean;
-  metodologia?: string;
-  vet_informado?: number;
+  base_brl?: number | undefined;
+  is_plantao?: boolean | undefined;
+  usou_contingencia?: boolean | undefined;
+  metodologia?: string | undefined;
+  vet_informado?: number | undefined;
 }
 
 /** Parâmetros vigentes retornados pelo backend */
 export interface ParametrosVigentes {
   spread_cartao: number;
   iof_cartao: number;
-  iof_global?: number;
+  iof_global?: number | undefined;
   spread_global_aberto: number;
   spread_global_fechado: number;
-  backtest_mape_boa_percent?: number;
-  backtest_mape_atencao_percent?: number;
-  origem?: Record<string, string> | string;
+  backtest_mape_boa_percent?: number | undefined;
+  backtest_mape_atencao_percent?: number | undefined;
+  origem?: Record<string, string> | string | undefined;
 }
 
 /** Banda de sensibilidade (otimista/base/pessimista) */
@@ -59,22 +59,22 @@ export interface SensibilidadeBanda {
 }
 
 export interface SensibilidadeData {
-  cartao?: SensibilidadeBanda;
-  global?: SensibilidadeBanda;
+  cartao?: SensibilidadeBanda | undefined;
+  global?: SensibilidadeBanda | undefined;
 }
 
 /** Dados de backtest */
 export interface BacktestData {
   mape_7d_percent: number;
-  erro_percentual_atual?: number;
-  observacoes_7d?: number;
-  qualidade?: 'excelente' | 'boa' | 'atencao';
-  faixas_percent?: { boa: number; atencao: number };
+  erro_percentual_atual?: number | undefined;
+  observacoes_7d?: number | undefined;
+  qualidade?: 'excelente' | 'boa' | 'atencao' | undefined;
+  faixas_percent?: { boa: number; atencao: number } | undefined;
 }
 
 /** Contexto operacional (mercado aberto/fechado) */
 export interface ContextoOperacional {
-  mercado_fechado?: boolean | null;
+  mercado_fechado?: boolean | null | undefined;
 }
 
 /** Response completa do POST /api/calcular */
@@ -83,15 +83,15 @@ export interface SimulationResponse {
   data_compra: string;
   valor_original: number;
   cartao: ChannelResult;
-  global?: ChannelResult;
-  global_saldo_existente?: ChannelResult;
-  parametros_vigentes?: ParametrosVigentes;
-  parametros_customizados_salvos?: boolean;
-  parametros_customizados_em?: string;
-  sensibilidade?: SensibilidadeData;
-  backtest?: BacktestData;
-  contexto_operacional?: ContextoOperacional;
-  erro?: string;
+  global?: ChannelResult | undefined;
+  global_saldo_existente?: ChannelResult | undefined;
+  parametros_vigentes?: ParametrosVigentes | undefined;
+  parametros_customizados_salvos?: boolean | undefined;
+  parametros_customizados_em?: string | undefined;
+  sensibilidade?: SensibilidadeData | undefined;
+  backtest?: BacktestData | undefined;
+  contexto_operacional?: ContextoOperacional | undefined;
+  erro?: string | undefined;
 }
 
 /** Payload para a IA (Oráculo) */
@@ -102,12 +102,12 @@ export interface OraclePayload {
     data_compra: string;
   };
   parametros_vigentes: {
-    iof_cartao?: number;
-    iof_global?: number;
-    spread_cartao?: number;
-    spread_global_aberto?: number;
-    spread_global_fechado?: number;
-    origem_parametros?: string | null;
+    iof_cartao?: number | undefined;
+    iof_global?: number | undefined;
+    spread_cartao?: number | undefined;
+    spread_global_aberto?: number | undefined;
+    spread_global_fechado?: number | undefined;
+    origem_parametros?: string | null | undefined;
   };
   contexto_operacional: ContextoOperacional;
   cenarios: {
@@ -122,11 +122,11 @@ export interface ChannelCenario {
   vet: number;
   taxa_spread: number;
   taxa_iof: number;
-  taxa_base?: number;
-  taxa_executada?: number;
+  taxa_base?: number | undefined;
+  taxa_executada?: number | undefined;
   fonte_cotacao: string;
-  mercado_fechado?: boolean;
-  usou_contingencia?: boolean;
+  mercado_fechado?: boolean | undefined;
+  usou_contingencia?: boolean | undefined;
 }
 
 export interface SaldoCenario {
@@ -161,7 +161,7 @@ export interface EmailSimulationData {
   global: ChannelResult | null;
   saldo_existente: ChannelResult | null;
   /** HTML renderizado da análise IA (Oráculo), quando disponível */
-  oracleHtml?: string | null;
+  oracleHtml?: string | null | undefined;
 }
 
 /** Histórico e telemetria de IA */
