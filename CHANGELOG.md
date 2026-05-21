@@ -97,7 +97,6 @@
 ### Motivação
 - Alinhar o baseline de telemetria Cloudflare da `calculadora-app` ao padrão operacional do workspace.
 
-
 ## [v04.01.11] - 2026-04-17
 ### Alterado
 - **Persistência operacional protegida**: `functions/api/calcular.js` deixou de aceitar sobrescrita pública de parâmetros compartilhados e passou a isolar a simulação do visitante sem gravar ajustes globais no D1.
@@ -115,7 +114,7 @@
 ### Alterado
 - **vite**: 8.0.7 → 8.0.8
 - **vitest**: 4.1.2 → 4.1.4
-- **Dependabot groups**: @vitest/* e @biomejs/* adicionados
+- **Dependabot groups**: @vitest/*e @biomejs/* adicionados
 
 ## [v04.01.09] - 2026-04-07
 ### Segurança
@@ -131,7 +130,6 @@
 - **Compatibility Date**: `wrangler.json` atualizado para `2026-04-06`.
 ### Controle de versão
 - `calculadora-app`: APP v04.01.07 → APP v04.01.08
-
 
 ## [v04.01.06] - 2026-04-04
 ### Resolvido
