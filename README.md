@@ -15,7 +15,7 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.01.19**. See [CHANGELOG.md](./CHANGELOG.md) for the release history and validation notes.
+**Status.** Stable. Current release: **v04.01.19**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
