@@ -1,4 +1,4 @@
-const SECURITY_HEADERS = {
+export const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -6,6 +6,8 @@ const SECURITY_HEADERS = {
 };
 
 const DEFAULT_POLICIES = {
+  calcular: { enabled: 1, max_requests: 30, window_minutes: 10 },
+  backtest: { enabled: 1, max_requests: 30, window_minutes: 10 },
   oraculo_ia: { enabled: 1, max_requests: 2, window_minutes: 10 },
   enviar_email: { enabled: 1, max_requests: 2, window_minutes: 10 },
   contato: { enabled: 1, max_requests: 5, window_minutes: 30 },
@@ -133,6 +135,9 @@ export async function enforceRateLimit(request, env, routeKey) {
   `)
     .bind(routeKey, ip, now)
     .run();
+
+  // Prune: hits fora da janela nunca mais são contados; remove para não crescer.
+  await db.prepare(`DELETE FROM calc_rate_limit_hits WHERE created_at < ?`).bind(cutoff).run();
 
   return null;
 }

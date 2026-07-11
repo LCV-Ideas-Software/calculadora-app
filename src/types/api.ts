@@ -18,6 +18,33 @@ export interface SimulationPayload {
   global_spread_fechado_percent: number | null;
   backtest_mape_boa_percent: number | null;
   backtest_mape_atencao_percent: number | null;
+  /** Modo "cobrado em reais": valor_original é o preço em BRL do checkout */
+  cobrado_em_reais?: boolean;
+  /** Valor efetivamente cobrado na fatura (para diagnóstico reverso) */
+  valor_fatura_brl?: number | null;
+}
+
+/** Um cenário de compra internacional cobrada em reais */
+export interface CenarioReais {
+  total_brl: number;
+  custo_adicional_brl: number;
+  custo_adicional_percent: number;
+  descricao: string;
+}
+
+/** Análise do modo "cobrado em reais" (DCC) */
+export interface CompraEmReaisAnalise {
+  cenarios: {
+    adquirencia_local: CenarioReais;
+    dcc_pura: CenarioReais;
+    dupla_conversao: CenarioReais;
+  };
+  diagnostico: {
+    valor_fatura_brl: number;
+    markup_implicito_percent: number;
+    cenario_provavel: 'adquirencia_local' | 'dcc_pura' | 'dupla_conversao' | 'indeterminado';
+    explicacao: string;
+  } | null;
 }
 
 /** Resultado individual de canal (Cartão / Global) */
@@ -82,7 +109,7 @@ export interface SimulationResponse {
   moeda: string;
   data_compra: string;
   valor_original: number;
-  cartao: ChannelResult;
+  cartao?: ChannelResult | undefined;
   global?: ChannelResult | undefined;
   global_saldo_existente?: ChannelResult | undefined;
   parametros_vigentes?: ParametrosVigentes | undefined;
@@ -91,6 +118,8 @@ export interface SimulationResponse {
   sensibilidade?: SensibilidadeData | undefined;
   backtest?: BacktestData | undefined;
   contexto_operacional?: ContextoOperacional | undefined;
+  cobrado_em_reais?: boolean | undefined;
+  compra_em_reais?: CompraEmReaisAnalise | undefined;
   erro?: string | undefined;
 }
 

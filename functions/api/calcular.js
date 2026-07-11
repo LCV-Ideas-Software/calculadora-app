@@ -1,20 +1,27 @@
 ﻿import { getOperationalContext } from './contexto-operacional.mjs';
 import { calcularBandasSensibilidade } from './sensibilidade.mjs';
 import { calcularErroPercentual, calcularMape, classificarMapePercent } from './backtest.mjs';
-import { requireAllowedOrigin } from './_shared/security.js';
+import { parseCotacaoVendaCsv } from './cotacao-csv.mjs';
+import { fetchComTimeout } from './fetch-timeout.mjs';
+import { analisarCompraEmReais } from './compra-reais.mjs';
+import { requireAllowedOrigin, enforceRateLimit, SECURITY_HEADERS } from './_shared/security.js';
 
 export async function onRequestPost(context) {
-    const defaultHeaders = { "Content-Type": "application/json" };
+    const defaultHeaders = { "Content-Type": "application/json", ...SECURITY_HEADERS };
     try {
         const { request, env } = context;
         const originError = requireAllowedOrigin(request);
         if (originError) return originError;
+        const rateLimitError = await enforceRateLimit(request, env, 'calcular');
+        if (rateLimitError) return rateLimitError;
         const payload = await request.json();
 
         const data_compra = payload.data_compra;
         const valor_original = payload.valor_original;
         const moeda = payload.moeda || 'USD';
         const vet_saldo_existente = payload.vet_saldo_existente || null;
+        const cobrado_em_reais = payload.cobrado_em_reais === true;
+        const valor_fatura_brl = Number.isFinite(payload.valor_fatura_brl) ? payload.valor_fatura_brl : null;
 
         // Parâmetros customizáveis recebidos do frontend (em %)
         const spreadPercentInformado = payload.spread_percent;
@@ -24,7 +31,7 @@ export async function onRequestPost(context) {
         const backtestMapeBoaInformado = payload.backtest_mape_boa_percent;
         const backtestMapeAtencaoInformado = payload.backtest_mape_atencao_percent;
 
-        if (!data_compra || !valor_original || !moeda) {
+        if (!valor_original || !moeda || (!cobrado_em_reais && !data_compra)) {
             return new Response(JSON.stringify({ erro: "Dados incompletos." }), { status: 400, headers: defaultHeaders });
         }
 
@@ -93,6 +100,31 @@ export async function onRequestPost(context) {
 
         const SPREAD_GLOBAL = is_plantao ? SPREAD_GLOBAL_FECHADO : SPREAD_GLOBAL_ABERTO;
 
+        // ═══════════════════════════════════════════════════
+        // 🇧🇷 MODO: COMPRA INTERNACIONAL COBRADA EM REAIS (DCC)
+        // valor_original é o preço em BRL do checkout — sem PTAX/fetch.
+        // ═══════════════════════════════════════════════════
+        if (cobrado_em_reais) {
+            const analise = analisarCompraEmReais({
+                valorReais: valor_original,
+                iof: IOF_CARTAO,
+                spreadCartao: SPREAD_CARTAO,
+                valorFaturaBrl: valor_fatura_brl,
+            });
+            return new Response(JSON.stringify({
+                moeda: 'BRL',
+                valor_original,
+                data_compra,
+                cobrado_em_reais: true,
+                compra_em_reais: analise,
+                parametros_vigentes: {
+                    iof_cartao: IOF_CARTAO,
+                    spread_cartao: SPREAD_CARTAO,
+                    origem,
+                },
+            }), { headers: defaultHeaders });
+        }
+
         let cartaoResult = null;
         let globalResult = null;
         let saldoExistenteResult = null;
@@ -128,7 +160,7 @@ export async function onRequestPost(context) {
                             url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${moeda}'&@dataCotacao='${dataBacen}'&$format=json`;
                         }
                         try {
-                            const response = await fetch(url);
+                            const response = await fetchComTimeout(url);
                             if (response.ok) {
                                 const data = await response.json();
                                 if (data && data.value && data.value.length > 0) {
@@ -138,15 +170,11 @@ export async function onRequestPost(context) {
                         } catch (e) { }
                     } else {
                         try {
-                            const responseCsv = await fetch(`https://www4.bcb.gov.br/Download/fechamento/${dataCsv}.csv`, { headers: { "User-Agent": "Mozilla/5.0" } });
+                            const responseCsv = await fetchComTimeout(`https://www4.bcb.gov.br/Download/fechamento/${dataCsv}.csv`, { headers: { "User-Agent": "Mozilla/5.0" } });
                             if (responseCsv.ok) {
                                 const text = await responseCsv.text();
-                                for (let line of text.split('\n')) {
-                                    const columns = line.split(';');
-                                    if (columns.length >= 6 && columns[2].trim() === moeda) {
-                                        taxa_cartao = parseFloat(columns[5].trim().replace(',', '.')); break;
-                                    }
-                                }
+                                const venda = parseCotacaoVendaCsv(text, moeda);
+                                if (venda != null) taxa_cartao = venda;
                             }
                         } catch (e) { }
                     }
@@ -203,7 +231,7 @@ export async function onRequestPost(context) {
 
                 if (!taxa_global) {
                     try {
-                        const resA = await fetch(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`, { headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" } });
+                        const resA = await fetchComTimeout(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`, { headers: { "User-Agent": "Mozilla/5.0", "Accept": "application/json" } });
                         if (resA.ok) {
                             const dataA = await resA.json();
                             if (dataA[`${moeda}BRL`] && dataA[`${moeda}BRL`].bid) {
@@ -216,7 +244,7 @@ export async function onRequestPost(context) {
                     if (!taxa_global) {
                         try {
                             const parYahoo = moeda === 'USD' ? 'BRL=X' : `${moeda}BRL=X`;
-                            const resY = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${parYahoo}`, { headers: { "User-Agent": "Mozilla/5.0" } });
+                            const resY = await fetchComTimeout(`https://query1.finance.yahoo.com/v8/finance/chart/${parYahoo}`, { headers: { "User-Agent": "Mozilla/5.0" } });
                             if (resY.ok) {
                                 const dataY = await resY.json();
                                 if (dataY.chart?.result?.length > 0) {
@@ -417,9 +445,21 @@ export async function onRequestPost(context) {
             responseBody.global_saldo_existente = saldoExistenteResult;
         }
 
+        // 🧹 Prune oportunístico (fora do caminho da resposta): remove linhas
+        // de spot de minutos de dias anteriores e observações de backtest antigas.
+        if (typeof context.waitUntil === 'function') {
+            const trintaDiasMs = 30 * 24 * 60 * 60 * 1000;
+            context.waitUntil((async () => {
+                try {
+                    await env.BIGDATA_DB.prepare("DELETE FROM calc_ptax_cache WHERE data_cotacao LIKE 'SPOT-%' AND data_cotacao NOT LIKE ?").bind(`SPOT-${dataBrasilISO}-%`).run();
+                    await env.BIGDATA_DB.prepare("DELETE FROM calc_backtest_spot_vs_ptax WHERE created_at < ?").bind(Date.now() - trintaDiasMs).run();
+                } catch (e) { }
+            })());
+        }
+
         return new Response(JSON.stringify(responseBody), { headers: defaultHeaders });
 
     } catch (error) {
-        return new Response(JSON.stringify({ erro: `Erro interno no código: ${error.message}` }), { status: 400, headers: defaultHeaders });
+        return new Response(JSON.stringify({ erro: "Não foi possível processar a simulação." }), { status: 400, headers: defaultHeaders });
     }
 }

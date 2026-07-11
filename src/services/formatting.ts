@@ -7,7 +7,7 @@
    Funções de formatação numérica e moeda
    ==================================================================== */
 
-const APP_VERSION = 'APP v04.01.19';
+const APP_VERSION = 'APP v04.02.00';
 
 export { APP_VERSION };
 
@@ -26,17 +26,33 @@ export function fmt4(v: number | null | undefined): string {
   return brl4Formatter.format(v);
 }
 
-/** Formata percentual com 2 casas (ex: 6,38%) */
+/** Formata fração como percentual com 2 casas (ex: 0,0638 → 6,38%) */
 export function pct(v: number | null | undefined): string {
   if (v == null || Number.isNaN(v)) return '—';
-  return `${brlFormatter.format(v)}%`;
+  return `${brlFormatter.format(v * 100)}%`;
 }
 
-/** Converte input localizado "1.234,56" → 1234.56 */
+/**
+ * Converte input localizado em número, detectando o último separador como
+ * decimal (BR "1.234,56" → 1234.56; en-US "1,234.56" → 1234.56; "5.5" → 5.5).
+ */
 export function parseLocalizedNumber(str: string): number {
   if (!str) return NaN;
-  const cleaned = str.replace(/\./g, '').replace(',', '.');
-  return parseFloat(cleaned);
+  const s = str.trim();
+  const lastDot = s.lastIndexOf('.');
+  const lastComma = s.lastIndexOf(',');
+  let normalized: string;
+  if (lastDot >= 0 && lastComma >= 0) {
+    // Ambos presentes: o último é o decimal, o outro é separador de milhar
+    normalized = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  } else if (lastComma >= 0) {
+    // Só vírgula: decimal BR
+    normalized = s.replace(',', '.');
+  } else {
+    // Só ponto (ou nenhum separador): ponto é decimal
+    normalized = s;
+  }
+  return parseFloat(normalized);
 }
 
 /** Formata taxa de spread como input display: 3.5 → "3,50" */

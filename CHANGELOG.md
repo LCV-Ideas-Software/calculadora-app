@@ -2,6 +2,34 @@
 
 ## [Unreleased]
 
+## [v04.02.00] - 2026-07-11
+
+**Minor — auditoria profunda (118 agentes) + modo "compra internacional cobrada em reais" (DCC).** Auditoria multi-agente com verificação adversarial (84 achados confirmados) e pesquisa fiscal com fontes primárias (IOF 3,5% cartão+global confirmado vigente jul/2026 — Decreto 12.499/2025 restabelecido pelo STF). As 4 recomendações prioritárias aplicadas com TDD. Cross-review dispensado nesta release por diretiva expressa do operador (exceção one-time).
+
+### Adicionado
+
+- **Modo "compra cobrada em reais" (DCC)**: toggle no formulário + `functions/api/compra-reais.mjs` (módulo puro, 9 testes) + `CompraReaisPanel.tsx`. Modela os 3 cenários de compra internacional em BRL — adquirência local/MoR (sem IOF/spread), DCC pura (só IOF 3,5% sobre o valor em reais, base: Decreto 6.306/2007 art. 15-B, VII) e dupla conversão (spread do emissor × IOF) — com **diagnóstico reverso**: informando o valor da fatura, calcula o markup implícito e classifica o cenário provável. Inclui aviso educativo anti-DCC.
+- `functions/api/__tests__/calcular.test.mjs` — primeiro teste do motor principal (stub D1 reutilizável em `__tests__/helpers/d1-stub.mjs`; valida cadeia base→spread→IOF→total→VET, origin 403, payload 400 e modo reais).
+- `.github/workflows/ci.yml` — biome + build + vitest em pull_request/push (testes agora bloqueiam merge); `deploy.yml` ganhou passo `npm test` antes do build.
+- `schema.sql` reconciliado como schema canônico não-destrutivo das 7 tabelas reais (`calc_*` + `ai_usage_logs`), incluindo a PK composta de `calc_ptax_cache` exigida pelo upsert `INSERT OR REPLACE` e índices de lookup.
+
+### Corrigido
+
+- **`pct()` exibia spread/IOF 100× menores** ("0,06%" em vez de "5,50%"): agora converte fração→percentual; caller `mape_7d_percent` (já em escala percentual) ajustado no `BacktestPanel`.
+- **`parseLocalizedNumber` multiplicava por 10–100× entradas com ponto decimal** ("5.5"→55): agora detecta o último separador como decimal, aceitando "1.234,56", "1,234.56", "5.5" e "1,5".
+- **Parser CSV de fechamento do Bacen lia a coluna errada** (`columns[2]`=Tipo A/B em vez de `columns[3]`=sigla): moedas fora da lista Olinda (MXN, ARS, CLP, COP…) nunca obtinham cotação. Extraído para `cotacao-csv.mjs` com teste sobre o layout real.
+
+### Segurança
+
+- `/api/calcular` e `/api/backtest` agora exigem Origin permitida e rate limit (30 req/10min por IP); `/api/backtest` não é mais endpoint público sem proteção.
+- Todos os fetches externos (BCB Olinda, CSV BCB, AwesomeAPI, Yahoo) com timeout de 4s via `AbortSignal` (`fetch-timeout.mjs`) — upstream lento não prende mais o worker.
+- `/api/enviar-email`: sanitizador não permite mais `<a>`/`<img>` (remove vetor de phishing/beacon com remetente verificado); relatório continua com formatação completa (texto+tabelas).
+- `/api/calcular` não vaza mais `error.message` interno ao cliente e passou a emitir os security headers compartilhados.
+
+### Infra
+
+- Prune oportunístico do D1 via `context.waitUntil` (fora do caminho de resposta): spot-por-minuto de dias anteriores, backtest >30 dias e hits de rate-limit fora da janela — tabelas param de crescer sem limite no `bigdata_db` compartilhado.
+
 ## [v04.01.19] - 2026-05-15
 
 **Patch — 4-gate quality directive compliance (eslint + biome + prettier + cross-review).** Workspace directive 2026-05-15: every code change must pass eslint + biome + prettier + cross-review before Commit & Sync / tag / release / deploy / publish. (Note: calculadora-app does not have eslint installed; biome serves both lint and format roles for JS/TS. eslint addition is deferred to a future ship.)

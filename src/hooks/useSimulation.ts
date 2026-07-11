@@ -23,6 +23,10 @@ export interface SimulationFormState {
   globalSpreadFechado: string;
   backtestMapeBoa: string;
   backtestMapeAtencao: string;
+  /** '' = false, 'sim' = compra internacional cobrada em reais (DCC) */
+  cobradoEmReais: string;
+  /** Valor cobrado na fatura, para diagnóstico reverso (opcional) */
+  valorFaturaBrl: string;
 }
 
 const DEFAULT_FORM: SimulationFormState = {
@@ -36,6 +40,8 @@ const DEFAULT_FORM: SimulationFormState = {
   globalSpreadFechado: '',
   backtestMapeBoa: '',
   backtestMapeAtencao: '',
+  cobradoEmReais: '',
+  valorFaturaBrl: '',
 };
 
 export interface UseSimulationReturn {
@@ -85,7 +91,8 @@ export function useSimulation(): UseSimulationReturn {
       setError('Informe um valor válido maior que zero.');
       return;
     }
-    if (!form.dataCompra) {
+    const cobradoEmReais = form.cobradoEmReais === 'sim';
+    if (!cobradoEmReais && !form.dataCompra) {
       setError('Selecione a data da compra.');
       return;
     }
@@ -102,6 +109,8 @@ export function useSimulation(): UseSimulationReturn {
       global_spread_fechado_percent: form.globalSpreadFechado ? parseLocalizedNumber(form.globalSpreadFechado) : null,
       backtest_mape_boa_percent: form.backtestMapeBoa ? parseLocalizedNumber(form.backtestMapeBoa) : null,
       backtest_mape_atencao_percent: form.backtestMapeAtencao ? parseLocalizedNumber(form.backtestMapeAtencao) : null,
+      cobrado_em_reais: cobradoEmReais,
+      valor_fatura_brl: form.valorFaturaBrl ? parseLocalizedNumber(form.valorFaturaBrl) : null,
     };
 
     setLoading(true);

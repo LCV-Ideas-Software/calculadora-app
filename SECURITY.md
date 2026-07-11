@@ -2,7 +2,7 @@
 
 ## Supported status
 
-Latest supported release: v04.01.19. The current main branch is also supported for security fixes until the next release is published.
+Latest supported release: v04.02.00. The current main branch is also supported for security fixes until the next release is published.
 
 ## Reporting a vulnerability
 

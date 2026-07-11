@@ -1,8 +1,12 @@
 ﻿import { calcularMape } from './backtest.mjs';
+import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/security.js';
 
 export async function onRequestGet(context) {
-    const { env } = context;
-    const headers = { 'Content-Type': 'application/json' };
+    const { request, env } = context;
+    const originError = requireAllowedOrigin(request);
+    if (originError) return originError;
+    const rateLimitError = await enforceRateLimit(request, env, 'backtest');
+    if (rateLimitError) return rateLimitError;
 
     try {
         await env.BIGDATA_DB.prepare(`
@@ -33,14 +37,14 @@ export async function onRequestGet(context) {
         const erros = results.map((r) => Number(r.erro_percentual));
         const mape7d = calcularMape(erros);
 
-        return new Response(JSON.stringify({
+        return jsonResponse({
             janela: '7d',
             observacoes: results.length,
             mape_7d: mape7d,
             mape_7d_percent: Number.isFinite(mape7d) ? Number((mape7d * 100).toFixed(4)) : null,
             ultimas_observacoes: results.slice(0, 20)
-        }), { headers });
+        });
     } catch (error) {
-        return new Response(JSON.stringify({ erro: 'Falha ao calcular métricas de backtest.' }), { status: 500, headers });
+        return jsonResponse({ erro: 'Falha ao calcular métricas de backtest.' }, 500);
     }
 }

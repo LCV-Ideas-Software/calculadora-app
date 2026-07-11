@@ -3,22 +3,20 @@ import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/
 
 function sanitizeRichEmailHtml(input) {
     const raw = String(input ?? '').slice(0, 120000);
+    // Sem <a>/<img>: o relatório é texto formatado + tabelas. Bloquear links e
+    // imagens impede uso do remetente verificado para phishing e beacons de rastreamento.
     return sanitizeHtml(raw, {
         allowedTags: [
             'p', 'div', 'span', 'br', 'hr',
             'strong', 'b', 'em', 'i', 'u', 's',
             'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
             'ul', 'ol', 'li',
-            'table', 'thead', 'tbody', 'tr', 'th', 'td',
-            'a', 'img'
+            'table', 'thead', 'tbody', 'tr', 'th', 'td'
         ],
         allowedAttributes: {
-            '*': ['style', 'class'],
-            a: ['href', 'target', 'rel'],
-            img: ['src', 'alt', 'width', 'height']
+            '*': ['style', 'class']
         },
-        allowedSchemes: ['http', 'https', 'mailto'],
-        allowedSchemesByTag: { img: ['http', 'https', 'data'] },
+        allowedSchemes: [],
         disallowedTagsMode: 'discard',
         allowProtocolRelative: false
     });

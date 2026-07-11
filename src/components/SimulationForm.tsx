@@ -128,6 +128,7 @@ function applyCurrencyMask(rawInput: string): string {
 export default function SimulationForm({ form, setField, onSubmit, loading, error }: Props) {
   const currencies = useCurrencyList();
   const isExotic = !['USD', 'EUR', 'GBP'].includes(form.moeda);
+  const cobradoEmReais = form.cobradoEmReais === 'sim';
 
   /** Handler de máscara monetária — aplica a formatação em cada keystroke */
   const handleValorChange = useCallback(
@@ -145,9 +146,28 @@ export default function SimulationForm({ form, setField, onSubmit, loading, erro
         onSubmit();
       }}
     >
+      {/* Toggle: cobrado em reais (DCC) */}
+      <div className="field-box">
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={cobradoEmReais}
+            onChange={(e) => setField('cobradoEmReais', e.target.checked ? 'sim' : '')}
+            className="h-4 w-4 accent-orange-600"
+          />
+          <span className="text-xs font-semibold text-slate-600">🇧🇷 O lojista estrangeiro cobrou em reais (DCC)</span>
+        </label>
+        {cobradoEmReais && (
+          <p className="text-[10px] text-slate-400 mt-1 leading-snug">
+            Informe o preço em R$ do checkout. Comparamos os cenários (adquirência local / DCC / dupla conversão) e, se
+            você tiver a fatura, diagnosticamos a diferença.
+          </p>
+        )}
+      </div>
+
       {/* Row 1: Moeda + Data */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="field-box">
+      <div className={`grid grid-cols-1 ${cobradoEmReais ? '' : 'sm:grid-cols-2'} gap-3`}>
+        <div className="field-box" style={{ display: cobradoEmReais ? 'none' : undefined }}>
           <label htmlFor="moeda" className="block text-xs font-semibold text-slate-500 mb-1">
             💱 Moeda estrangeira
           </label>
@@ -179,11 +199,11 @@ export default function SimulationForm({ form, setField, onSubmit, loading, erro
         </div>
       </div>
 
-      {/* Row 2: Valor + VET Saldo */}
-      <div className={`grid grid-cols-1 ${!isExotic ? 'sm:grid-cols-2' : ''} gap-3`}>
+      {/* Row 2: Valor + VET Saldo (ou Fatura no modo reais) */}
+      <div className={`grid grid-cols-1 ${!isExotic || cobradoEmReais ? 'sm:grid-cols-2' : ''} gap-3`}>
         <div className="field-box">
           <label htmlFor="valorOriginal" className="block text-xs font-semibold text-slate-500 mb-1">
-            💵 Valor em {form.moeda}
+            {cobradoEmReais ? '💵 Valor cobrado em R$ (checkout)' : `💵 Valor em ${form.moeda}`}
           </label>
           <input
             id="valorOriginal"
@@ -196,22 +216,40 @@ export default function SimulationForm({ form, setField, onSubmit, loading, erro
           />
         </div>
 
-        {!isExotic && (
+        {cobradoEmReais ? (
           <div className="field-box">
-            <label htmlFor="vetSaldo" className="block text-xs font-semibold text-slate-500 mb-1">
-              💰 VET saldo existente (R$)
+            <label htmlFor="valorFaturaBrl" className="block text-xs font-semibold text-slate-500 mb-1">
+              🧾 Valor na fatura (R$)
             </label>
-            <p className="text-[10px] text-slate-400 mb-1">Opcional — VET da compra anterior</p>
+            <p className="text-[10px] text-slate-400 mb-1">Opcional — para diagnosticar a diferença</p>
             <input
-              id="vetSaldo"
+              id="valorFaturaBrl"
               type="text"
               inputMode="decimal"
-              placeholder="5,7340"
+              placeholder="1.035,00"
               className="glass-input w-full rounded-lg px-3 py-2 text-sm text-slate-800"
-              value={form.vetSaldoExistente}
-              onChange={(e) => setField('vetSaldoExistente', e.target.value)}
+              value={form.valorFaturaBrl}
+              onChange={(e) => setField('valorFaturaBrl', e.target.value)}
             />
           </div>
+        ) : (
+          !isExotic && (
+            <div className="field-box">
+              <label htmlFor="vetSaldo" className="block text-xs font-semibold text-slate-500 mb-1">
+                💰 VET saldo existente (R$)
+              </label>
+              <p className="text-[10px] text-slate-400 mb-1">Opcional — VET da compra anterior</p>
+              <input
+                id="vetSaldo"
+                type="text"
+                inputMode="decimal"
+                placeholder="5,7340"
+                className="glass-input w-full rounded-lg px-3 py-2 text-sm text-slate-800"
+                value={form.vetSaldoExistente}
+                onChange={(e) => setField('vetSaldoExistente', e.target.value)}
+              />
+            </div>
+          )
         )}
       </div>
 

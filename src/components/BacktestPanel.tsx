@@ -6,7 +6,7 @@
    BacktestPanel — Painel emerald com MAPE 7d + qualidade badge
    ==================================================================== */
 
-import { pct } from '../services/formatting.ts';
+import { fmt, pct } from '../services/formatting.ts';
 import type { BacktestData } from '../types/api.ts';
 
 interface Props {
@@ -28,7 +28,9 @@ export default function BacktestPanel({ data }: Props) {
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-slate-500">MAPE 7d</span>
-          <span className="text-slate-800 font-semibold">{pct(data.mape_7d_percent)}</span>
+          <span className="text-slate-800 font-semibold">
+            {data.mape_7d_percent == null ? '—' : `${fmt(data.mape_7d_percent)}%`}
+          </span>
         </div>
 
         {data.erro_percentual_atual != null && (

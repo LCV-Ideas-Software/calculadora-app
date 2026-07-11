@@ -11,6 +11,7 @@ import { useState } from 'react';
 import ActionButtons from './components/ActionButtons.tsx';
 import BackgroundCanvas from './components/BackgroundCanvas.tsx';
 import { ComplianceBanner } from './components/ComplianceBanner';
+import CompraReaisPanel from './components/CompraReaisPanel.tsx';
 import ContactModal from './components/ContactModal.tsx';
 import EmailModal from './components/EmailModal.tsx';
 import OracleSection from './components/OracleSection.tsx';
@@ -72,17 +73,26 @@ export default function App() {
             {/* Results */}
             {simulation.result && (
               <section className="px-6 pb-4" aria-label="Resultados da simulação">
-                <ResultPanel result={simulation.result} melhorOpcao={simulation.melhorOpcao} />
+                {simulation.result.compra_em_reais ? (
+                  <CompraReaisPanel
+                    analise={simulation.result.compra_em_reais}
+                    valorReais={simulation.result.valor_original}
+                  />
+                ) : (
+                  <>
+                    <ResultPanel result={simulation.result} melhorOpcao={simulation.melhorOpcao} />
 
-                {/* Action buttons */}
-                <ActionButtons
-                  result={simulation.result}
-                  melhorOpcao={simulation.melhorOpcao}
-                  onEmailClick={() => setEmailModalOpen(true)}
-                />
+                    {/* Action buttons */}
+                    <ActionButtons
+                      result={simulation.result}
+                      melhorOpcao={simulation.melhorOpcao}
+                      onEmailClick={() => setEmailModalOpen(true)}
+                    />
 
-                {/* Oracle AI */}
-                <OracleSection oracle={oracle} payload={simulation.oraclePayload} />
+                    {/* Oracle AI */}
+                    <OracleSection oracle={oracle} payload={simulation.oraclePayload} />
+                  </>
+                )}
               </section>
             )}
 
@@ -133,7 +143,7 @@ export default function App() {
       )}
 
       {/* Email modal */}
-      {simulation.result && (
+      {simulation.result && !simulation.result.compra_em_reais && (
         <EmailModal
           isOpen={emailModalOpen}
           onClose={() => setEmailModalOpen(false)}

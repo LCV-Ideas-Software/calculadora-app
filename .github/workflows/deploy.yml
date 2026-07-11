@@ -27,6 +27,7 @@ jobs:
           node-version: 22
       - run: npm ci --no-audit --no-fund
       - run: npm run biome
+      - run: npm test
       - run: npm run build
       - name: Inject D1 database_id from secret
         run: |

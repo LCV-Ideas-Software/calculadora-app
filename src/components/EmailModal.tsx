@@ -42,6 +42,8 @@ export default function EmailModal({ isOpen, onClose, result, melhorOpcao, oracl
       return;
     }
 
+    if (!result.cartao) return;
+
     const data: EmailSimulationData = {
       moeda: result.moeda,
       valorBruto: result.valor_original,
