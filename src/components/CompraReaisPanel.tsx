@@ -100,6 +100,13 @@ export default function CompraReaisPanel({ analise, valorReais }: Props) {
         emissor. Exceção: quando o pagamento em BRL é processado por adquirente local (Pix, boleto, EBANX/dLocal), aí a
         compra vira doméstica, sem IOF nem spread.
       </div>
+
+      <div className="rounded-2xl p-3 text-[11px] text-slate-500 bg-slate-50 border border-slate-200 leading-snug">
+        🌐 <strong>Cartão de conta global (saldo em USD/EUR):</strong> estes cenários modelam cartões emitidos no
+        Brasil. Se você pagar uma cobrança em BRL com cartão de conta global, o provedor faz a conversão{' '}
+        <em>reversa</em> (saldo → reais) com a taxa/tarifa dele — sem novo IOF, mas com custo cambial nas duas pontas.
+        Prefira usar o saldo na moeda em que ele está.
+      </div>
     </div>
   );
 }

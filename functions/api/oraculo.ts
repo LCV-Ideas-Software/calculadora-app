@@ -21,8 +21,10 @@ interface Env {
   BIGDATA_DB?: D1DatabaseLike;
 }
 
+// gemini-2.5-flash tem shutdown anunciado para 2026-10-16 (ai.google.dev/gemini-api/docs/deprecations);
+// gemini-3.5-flash é o substituto oficial GA. Override via env GEMINI_MODEL.
 const GEMINI_CONFIG = {
-  model: 'gemini-2.5-flash',
+  model: 'gemini-3.5-flash',
   maxTokensInput: 120000,
   maxRetries: 2,
   retryDelayMs: 800,
@@ -47,7 +49,7 @@ function structuredLog(level: string, message: string, context = {}) {
 }
 
 // ── Telemetria: registra uso de AI no BIGDATA_DB ──
-function logAiUsage(
+export function logAiUsage(
   db: D1DatabaseLike | undefined,
   entry: {
     module: string;
@@ -87,6 +89,8 @@ function logAiUsage(
           entry.error_detail || null,
         )
         .run();
+      // Retenção LGPD: telemetria de IA não precisa viver mais que 90 dias.
+      await db.prepare(`DELETE FROM ai_usage_logs WHERE timestamp < datetime('now', '-90 days')`).bind().run();
     } catch (err) {
       console.warn('[telemetry] ai_usage_logs INSERT failed:', err instanceof Error ? err.message : err);
     }
@@ -176,11 +180,11 @@ Dados da simulação:
         label: 'advanced',
         systemInstruction:
           'Você é um analista financeiro sênior especializado em operações de câmbio para pessoas físicas no Brasil. Sua comunicação é clara, direta e acessível — quando usar um termo técnico, explique brevemente entre parênteses. Tom de relatório executivo, sem saudações, sem rodapé. Use **negrito** para valores-chave. Português do Brasil. Não invente dados — use EXCLUSIVAMENTE os números fornecidos.',
+        // Idioma Gemini 3.x: sem temperature/topP (não recomendados; podem degradar)
+        // e thinkingLevel no lugar de thinkingBudgetTokens.
         config: {
-          temperature: GEMINI_CONFIG.endpoints.oraculo.temperature,
-          topP: GEMINI_CONFIG.endpoints.oraculo.topP,
           maxOutputTokens: GEMINI_CONFIG.endpoints.oraculo.maxOutputTokensAdvanced,
-          thinkingConfig: { thinkingBudgetTokens: 1024 },
+          thinkingConfig: { thinkingLevel: 'low' },
           safetySettings,
         },
       },

@@ -61,6 +61,18 @@ export async function onRequestPost(context) {
       )
       .run();
 
+    // Retenção LGPD: valor_original + preview são dados pessoais; 90 dias bastam.
+    const noventaDiasMs = 90 * 24 * 60 * 60 * 1000;
+    const prune = (async () => {
+      try {
+        await env.BIGDATA_DB.prepare('DELETE FROM calc_oraculo_observabilidade WHERE created_at < ?')
+          .bind(Date.now() - noventaDiasMs)
+          .run();
+      } catch { }
+    })();
+    if (typeof context.waitUntil === 'function') context.waitUntil(prune);
+    else await prune;
+
     return jsonResponse({ ok: true });
   } catch {
     return jsonResponse({ erro: 'Falha ao registrar observabilidade do Oráculo.' }, 500);

@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [v04.02.01] - 2026-07-11
+
+**Patch — follow-ups da auditoria: retenção LGPD, migração Gemini e nota de conta global.** Cross-review dispensado nesta release por diretiva expressa do operador (gate suspenso até novo aviso; bloqueio técnico do servidor de review documentado na memória do workspace).
+
+### Adicionado
+
+- **Retenção LGPD (90 dias)** nas tabelas de telemetria: `calc_oraculo_observabilidade` (grava `valor_original` + preview de análise — dados pessoais) e `ai_usage_logs`, com prune fora do caminho de resposta (`context.waitUntil`) e coberto por testes (`retencao-lgpd.test.mjs`).
+- Nota educativa no painel "compra cobrada em reais" sobre cartões de conta global (conversão reversa saldo→BRL pelo provedor, sem novo IOF) — fecha o ponto em aberto da auditoria sem lógica especulativa.
+
+### Alterado
+
+- **Modelo Gemini default: `gemini-2.5-flash` → `gemini-3.5-flash`.** O modelo anterior tem shutdown anunciado para 16/10/2026 (ai.google.dev/gemini-api/docs/deprecations); o novo é o substituto oficial GA. Candidato `advanced` migrado para o idioma 3.x (sem `temperature`/`topP`, `thinkingLevel: 'low'` no lugar de `thinkingBudgetTokens`); candidatos `compat`/`minimal` preservados como fallback runtime; override via env `GEMINI_MODEL` mantido. Testes com mock do SDK validam default e override (`oraculo-model.test.mjs`).
+
+### Infra (fora do repositório, executado no D1 compartilhado)
+
+- Índices canônicos `idx_calc_backtest_created_at` e `idx_calc_rate_limit_hits_lookup` criados; equivalentes legados `idx_itau_*` dessas duas tabelas removidos. Verificado em produção: `calc_ptax_cache` já possuía a PK composta exigida pelo upsert.
+
 ## [v04.02.00] - 2026-07-11
 
 **Minor — auditoria profunda (118 agentes) + modo "compra internacional cobrada em reais" (DCC).** Auditoria multi-agente com verificação adversarial (84 achados confirmados) e pesquisa fiscal com fontes primárias (IOF 3,5% cartão+global confirmado vigente jul/2026 — Decreto 12.499/2025 restabelecido pelo STF). As 4 recomendações prioritárias aplicadas com TDD. Cross-review dispensado nesta release por diretiva expressa do operador (exceção one-time).

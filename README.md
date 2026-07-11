@@ -15,12 +15,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.02.00**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current release: **v04.02.01**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.02.01`**                      | **Audit follow-ups.** LGPD 90-day retention on AI telemetry tables; Gemini default migrated to the official GA replacement ahead of the announced model shutdown (3.x-idiomatic config, env override kept); global-account educational note in the BRL-charge panel; canonical D1 indexes.  |
 | **`v04.02.00`**                      | **Deep audit + DCC mode.** 118-agent audit with adversarial verification; new "cobrado em reais" (DCC) mode with reverse invoice diagnostics (3 scenarios: local acquiring / pure DCC / double conversion); display-scale and locale-parsing hotfixes; BCB CSV parser fix for exotic currencies; rate limiting + fetch timeouts + e-mail sanitizer hardening; first engine tests, dedicated CI workflow, D1 pruning and canonical schema.sql.  |
 | **`v04.01.19`**                      | **4-gate quality directive compliance.** Added Biome gate and deploy workflow coverage; eslint remains deferred because this repository does not currently install eslint, so Biome serves as the active JS/TS lint and format gate for this release.                                                                           |
 | **`v04.01.18`**                      | **Site sponsor card iteration.** `site/index.html` GitHub Sponsors iframe (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos).                                                   |
