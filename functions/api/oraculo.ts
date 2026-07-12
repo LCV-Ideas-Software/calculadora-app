@@ -60,9 +60,9 @@ export function logAiUsage(
     status: string;
     error_detail?: string;
   },
-) {
-  if (!db || typeof db.prepare !== 'function') return;
-  (async () => {
+): Promise<void> {
+  if (!db || typeof db.prepare !== 'function') return Promise.resolve();
+  return (async () => {
     try {
       await db
         .prepare(`
@@ -262,7 +262,8 @@ Dados da simulação:
     }
 
     if (!successfulResponse) {
-      void logAiUsage(env.BIGDATA_DB, {
+      // Garantia pós-resposta: telemetria registrada no waitUntil, não órfã (finding do cross-review).
+      const telemetriaErro = logAiUsage(env.BIGDATA_DB, {
         module: 'calculadora-oraculo',
         model: modelName,
         input_tokens: 0,
@@ -271,6 +272,8 @@ Dados da simulação:
         status: 'error',
         error_detail: 'All fallback payloads exhausted',
       });
+      if (typeof context.waitUntil === 'function') context.waitUntil(telemetriaErro);
+      else await telemetriaErro;
       return jsonResponse(
         { erro: 'Falha na IA do Google após exaustão de fallbacks. Tente novamente em instantes.' },
         500,
@@ -285,8 +288,8 @@ Dados da simulação:
       cachedTokens: usage.cachedContentTokenCount || 0,
     });
 
-    // Telemetria de sucesso
-    void logAiUsage(env.BIGDATA_DB, {
+    // Telemetria de sucesso — registrada no waitUntil (garantia pós-resposta; finding do cross-review).
+    const telemetriaOk = logAiUsage(env.BIGDATA_DB, {
       module: 'calculadora-oraculo',
       model: modelName,
       input_tokens: usage.promptTokenCount || 0,
@@ -294,6 +297,8 @@ Dados da simulação:
       latency_ms: Date.now() - _telStart,
       status: 'ok',
     });
+    if (typeof context.waitUntil === 'function') context.waitUntil(telemetriaOk);
+    else await telemetriaOk;
 
     let text = '';
     if (successfulResponse.candidates?.[0]?.content?.parts) {

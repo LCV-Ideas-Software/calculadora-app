@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [v04.02.02] - 2026-07-12
+
+**Patch — finding do cross-review atendido: telemetria de IA com garantia pós-resposta.** Gate cumprido integralmente: cross-review **ALL READY unânime formal** (caller + 5 peers: codex, gemini, deepseek, grok, perplexity; outcome `converged | unanimous_ready`, sessão `4ed963d4`), cobrindo retroativamente o escopo de v04.02.01 + este patch.
+
+### Corrigido
+
+- **`logAiUsage` agora retorna a Promise do insert+prune e os dois call sites a registram em `context.waitUntil`** (senão `await`) — a retenção LGPD de `ai_usage_logs` deixa de ser best-effort órfã e ganha garantia de execução pós-resposta (finding do peer codex no round 1 do retro-review; mesmo padrão do prune de `calc_oraculo_observabilidade`). TDD com RED observado (`oraculo-model.test.mjs`).
+
+### Adicionado
+
+- Teste de fallback do Oráculo: força a rejeição do candidato `advanced` (mock rejeita config com `thinkingConfig`) e prova que o `compat` serve a resposta sem falha dura.
+- Teste de telemetria: valida que INSERT e DELETE de `ai_usage_logs` executam dentro das Promises registradas no `waitUntil`.
+
 ## [v04.02.01] - 2026-07-11
 
 **Patch — follow-ups da auditoria: retenção LGPD, migração Gemini e nota de conta global.** Cross-review dispensado nesta release por diretiva expressa do operador (gate suspenso até novo aviso; bloqueio técnico do servidor de review documentado na memória do workspace).
