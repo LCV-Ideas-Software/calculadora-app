@@ -33,7 +33,7 @@
     "dompurify": "^3.4.12",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "sanitize-html": "^2.17.5"
+    "sanitize-html": "^2.17.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.3",
