@@ -1,6 +1,6 @@
 {
   "name": "calculadora-app",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "Calculadora Financeira — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.",
   "license": "AGPL-3.0-or-later",
   "author": "LCV Ideas & Software",
@@ -49,7 +49,7 @@
   },
   "overrides": {
     "picomatch": "4.0.4",
-    "protobufjs": "7.6.3",
+    "protobufjs": "7.6.5",
     "undici": "6.24.0",
     "vite": "$vite",
     "postcss": "8.5.10"

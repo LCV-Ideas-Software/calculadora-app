@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [v04.02.03] - 2026-07-21
+
+**Patch de segurança — corrige negação de serviço transitiva em `protobufjs`.**
+
+### Segurança
+
+- Atualiza o override transitivo de `protobufjs` de `7.6.3` para `7.6.5`, corrigindo a possibilidade de loop infinito ao analisar opções malformadas em arquivos `.proto` (GHSA-j3f2-48v5-ccww / CVE-2026-59877) usada pela cadeia `@google/genai`.
+- Mantém o escopo mínimo da correção: nenhuma API da aplicação ou dependência direta foi alterada; o lockfile remove apenas o submódulo que deixou de fazer parte de `protobufjs` no patch corrigido.
+
 ## [v04.02.02] - 2026-07-12
 
 **Patch — finding do cross-review atendido: telemetria de IA com garantia pós-resposta.** Gate cumprido integralmente: cross-review **ALL READY unânime formal** (caller + 5 peers: codex, gemini, deepseek, grok, perplexity; outcome `converged | unanimous_ready`, sessão `4ed963d4`), cobrindo retroativamente o escopo de v04.02.01 + este patch.
