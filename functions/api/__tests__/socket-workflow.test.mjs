@@ -10,15 +10,21 @@ const scanSteps = workflow
     .split('      - name: Run Socket Security Scan (audit)')
     .slice(1);
 
-it('bounds the commit message sent by both Socket Security scans', () => {
+it('sends bounded and correctly typed commit metadata in both Socket scans', () => {
     expect(scanSteps).toHaveLength(2);
 
     for (const scanStep of scanSteps) {
         expect(scanStep).toContain(
-            'SOCKET_SCAN_COMMIT_MESSAGE: ${{ github.sha }}',
+            'SOCKET_SCAN_COMMIT_SHA: ${{ github.sha }}',
         );
         expect(scanStep).toContain(
-            '--commit-message "$SOCKET_SCAN_COMMIT_MESSAGE"',
+            'SOCKET_SCAN_COMMIT_MESSAGE="$(git show -s --format=%s "$SOCKET_SCAN_COMMIT_SHA")"',
+        );
+        expect(scanStep).toContain(
+            '--commit-sha "$SOCKET_SCAN_COMMIT_SHA"',
+        );
+        expect(scanStep).toContain(
+            '--commit-message="$SOCKET_SCAN_COMMIT_MESSAGE"',
         );
     }
 });
