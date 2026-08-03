@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [v04.02.04] - 2026-08-03
+
+**Patch — corrige a precedência dos limiares MAPE customizados e resolve os findings de qualidade do motor de cálculo.**
+
+### Corrigido
+
+- Os limiares `backtest_mape_boa_percent` e `backtest_mape_atencao_percent` recebidos no payload deixam de ser ignorados e passam a seguir a precedência documentada: D1 > payload finito > variável de ambiente válida > default.
+- Os limiares MAPE permanecem expressos em pontos percentuais (por exemplo, `1.25` significa 1,25%), sem a divisão por 100 aplicável às taxas fracionárias de spread e IOF.
+- Simplificam-se duas guardas comprovadamente redundantes pelo fluxo de controle: um acerto no cache PTAX já sai do laço antes do fallback de rede, e o resultado do motor Cartão já está materializado antes da contingência da Conta Global.
+
+### Testes
+
+- A suíte do endpoint cobre todos os níveis de precedência, payload e ambiente não finitos, defaults e a escala percentual sem conversão.
+- Um spy explícito comprova que o acerto no cache D1 não realiza chamadas externas.
+
 ## [v04.02.03] - 2026-07-21
 
 **Patch de segurança — corrige negação de serviço transitiva em `protobufjs`.**

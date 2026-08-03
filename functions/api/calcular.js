@@ -84,8 +84,9 @@ export async function onRequestPost(context) {
         const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (env.FATOR_CALIBRAGEM_GLOBAL ? parseFloat(env.FATOR_CALIBRAGEM_GLOBAL) : 0.99934);
         if ('fator_calibragem_global' in parametrosD1) origem.fator_calibragem_global = 'd1';
 
-        const resolveMetricParam = (d1Key, envKey, fallback) => {
+        const resolveMetricParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
+            if (Number.isFinite(payloadVal)) return payloadVal;
             if (envKey && env[envKey] !== undefined) {
                 const v = parseFloat(env[envKey]);
                 if (Number.isFinite(v)) return v;
@@ -93,8 +94,8 @@ export async function onRequestPost(context) {
             return fallback;
         };
 
-        const BACKTEST_MAPE_BOA_PERCENT = resolveMetricParam('backtest_mape_boa_percent', 'BACKTEST_MAPE_BOA_PERCENT', 1.0);
-        const BACKTEST_MAPE_ATENCAO_PERCENT = resolveMetricParam('backtest_mape_atencao_percent', 'BACKTEST_MAPE_ATENCAO_PERCENT', 2.0);
+        const BACKTEST_MAPE_BOA_PERCENT = resolveMetricParam('backtest_mape_boa_percent', backtestMapeBoaInformado, 'BACKTEST_MAPE_BOA_PERCENT', 1.0);
+        const BACKTEST_MAPE_ATENCAO_PERCENT = resolveMetricParam('backtest_mape_atencao_percent', backtestMapeAtencaoInformado, 'BACKTEST_MAPE_ATENCAO_PERCENT', 2.0);
         if ('backtest_mape_boa_percent' in parametrosD1) origem.backtest_mape_boa_percent = 'd1';
         if ('backtest_mape_atencao_percent' in parametrosD1) origem.backtest_mape_atencao_percent = 'd1';
 
@@ -151,33 +152,31 @@ export async function onRequestPost(context) {
                     if (cache) { taxa_cartao = cache.valor_ptax; data_ptax = dataISO; break; }
                 } catch (e) { }
 
-                if (!taxa_cartao) {
-                    if (moedasOlinda.includes(moeda)) {
-                        let url = '';
-                        if (moeda === 'USD') {
-                            url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${dataBacen}'&$top=1&$format=json`;
-                        } else {
-                            url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${moeda}'&@dataCotacao='${dataBacen}'&$format=json`;
-                        }
-                        try {
-                            const response = await fetchComTimeout(url);
-                            if (response.ok) {
-                                const data = await response.json();
-                                if (data && data.value && data.value.length > 0) {
-                                    taxa_cartao = moeda === 'USD' ? data.value[0].cotacaoVenda : (data.value.find(b => b.tipoBoletim === 'Fechamento' || b.tipoBoletim === 'Fechamento PTAX') || data.value[data.value.length - 1]).cotacaoVenda;
-                                }
-                            }
-                        } catch (e) { }
+                if (moedasOlinda.includes(moeda)) {
+                    let url = '';
+                    if (moeda === 'USD') {
+                        url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${dataBacen}'&$top=1&$format=json`;
                     } else {
-                        try {
-                            const responseCsv = await fetchComTimeout(`https://www4.bcb.gov.br/Download/fechamento/${dataCsv}.csv`, { headers: { "User-Agent": "Mozilla/5.0" } });
-                            if (responseCsv.ok) {
-                                const text = await responseCsv.text();
-                                const venda = parseCotacaoVendaCsv(text, moeda);
-                                if (venda != null) taxa_cartao = venda;
-                            }
-                        } catch (e) { }
+                        url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='${moeda}'&@dataCotacao='${dataBacen}'&$format=json`;
                     }
+                    try {
+                        const response = await fetchComTimeout(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data && data.value && data.value.length > 0) {
+                                taxa_cartao = moeda === 'USD' ? data.value[0].cotacaoVenda : (data.value.find(b => b.tipoBoletim === 'Fechamento' || b.tipoBoletim === 'Fechamento PTAX') || data.value[data.value.length - 1]).cotacaoVenda;
+                            }
+                        }
+                    } catch (e) { }
+                } else {
+                    try {
+                        const responseCsv = await fetchComTimeout(`https://www4.bcb.gov.br/Download/fechamento/${dataCsv}.csv`, { headers: { "User-Agent": "Mozilla/5.0" } });
+                        if (responseCsv.ok) {
+                            const text = await responseCsv.text();
+                            const venda = parseCotacaoVendaCsv(text, moeda);
+                            if (venda != null) taxa_cartao = venda;
+                        }
+                    } catch (e) { }
                 }
 
                 if (taxa_cartao) {
@@ -272,7 +271,7 @@ export async function onRequestPost(context) {
 
                 if (!taxa_global) {
                     usou_contingencia = true;
-                    if (cartaoResult && cartaoResult.suportada) {
+                    if (cartaoResult.suportada) {
                         taxa_global = cartaoResult.taxa_utilizada;
                     } else {
                         taxa_global = null;
