@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [v04.03.00] - 2026-08-08
+
+**Minor — migra o transporte do Oráculo IA do endpoint AI Studio (API key) para o Vertex AI (Gemini Enterprise Agent Platform) com autenticação de service account.**
+
+### Alterado
+
+- O endpoint `/api/oraculo` passa a chamar `aiplatform.googleapis.com` (projeto `lcv-ideas-and-software`, location `global`; overrides via `VERTEX_PROJECT`/`VERTEX_LOCATION`) autenticando com service account (`VERTEX_SA_KEY`) via JWT RS256 assinado com WebCrypto e trocado por access token OAuth2. Com isso o consumo Gemini deixa o plano pré-pago do AI Studio e passa a faturar no pós-pago padrão do Cloud Billing. Prompts, cadeia de fallbacks, telemetria e contrato de resposta permanecem intactos.
+
+### Adicionado
+
+- Novo módulo `functions/api/_shared/vertex.ts`: client mínimo que espelha a superfície usada do SDK (`models.generateContent`/`models.countTokens`), com cache de access token por identidade de chave, single-flight para mints concorrentes e erros diagnósticos (status HTTP + trecho do corpo + causa OAuth).
+
+### Removido
+
+- Dependência `@google/genai`, órfã após a migração do transporte, e o override transitivo de `protobufjs` que existia exclusivamente pela cadeia dela. O override de `undici` permanece intocado (config pré-existente sem rationale documentado).
+
+### Testes
+
+- 17 testes novos do client Vertex — claims e assinatura do JWT verificada criptograficamente com a chave pública, mapeamento SDK→REST, URL global/regional, cache/expiração com margem, single-flight, isolamento por identidade de chave e caminhos de erro diagnósticos — e 3 novos do handler (construção do client, overrides de env, secret ausente). Suíte total: 71/71.
+
 ## [v04.02.04] - 2026-08-03
 
 **Patch — corrige a precedência dos limiares MAPE customizados e resolve os findings de qualidade do motor de cálculo.**
