@@ -15,12 +15,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.02.04**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current release: **v04.03.00**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                             |
 | **`v04.02.04`**                      | **Backtest threshold precedence fix.** Custom MAPE thresholds now follow D1 > finite payload > valid environment > default, preserving percentage-point scale; focused tests cover every tier and prove that a PTAX cache hit performs no external request. |
 | **`v04.02.03`**                      | **Dependency security patch.** Resolves GHSA-j3f2-48v5-ccww / CVE-2026-59877 by moving the transitive `protobufjs` override used by `@google/genai` from 7.6.3 to 7.6.5. |
 | **`v04.02.02`**                      | **Cross-review finding fixed.** AI telemetry (insert + LGPD prune of ai_usage_logs) now returns its Promise and is registered via context.waitUntil at both call sites (post-response execution guarantee); fallback-chain and telemetry tests added. Shipped under formal unanimous cross-review ALL READY (caller + 5 peers).  |

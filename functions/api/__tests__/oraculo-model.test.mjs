@@ -2,10 +2,15 @@ import { expect, it, vi } from 'vitest';
 import { createD1Stub } from './helpers/d1-stub.mjs';
 
 const captured = vi.hoisted(() => []);
+const ctorCaptured = vi.hoisted(() => []);
 const mockState = vi.hoisted(() => ({ failAdvanced: false }));
 
-vi.mock('@google/genai', () => ({
-  GoogleGenAI: class {
+vi.mock('../_shared/vertex.ts', () => ({
+  VertexGenAI: class {
+    constructor(opts) {
+      ctorCaptured.push(opts);
+    }
+
     models = {
       countTokens: async () => ({ totalTokens: 100 }),
       generateContent: async (args) => {
@@ -25,6 +30,8 @@ vi.mock('@google/genai', () => ({
   },
 }));
 
+const SA_FAKE = '{"client_email":"t@p.iam.gserviceaccount.com"}';
+
 const { onRequestPost } = await import('../oraculo.ts');
 
 it('quando o candidato advanced é rejeitado, o fallback chain serve via compat (sem falha dura)', async () => {
@@ -38,7 +45,7 @@ it('quando o candidato advanced é rejeitado, o fallback chain serve via compat 
     });
     const res = await onRequestPost({
       request: req,
-      env: { GEMINI_API_KEY: 'test-key', BIGDATA_DB: createD1Stub() },
+      env: { VERTEX_SA_KEY: SA_FAKE, BIGDATA_DB: createD1Stub() },
     });
     expect(res.status).toBe(200);
     // O advanced (com thinkingConfig) foi tentado e rejeitado; o compat (sem thinkingConfig) serviu.
@@ -61,7 +68,7 @@ it('usa gemini-3.5-flash como default e config idiomática 3.x no primeiro candi
   });
   const res = await onRequestPost({
     request: req,
-    env: { GEMINI_API_KEY: 'test-key', BIGDATA_DB: createD1Stub() },
+    env: { VERTEX_SA_KEY: SA_FAKE, BIGDATA_DB: createD1Stub() },
   });
   expect(res.status).toBe(200);
   expect(captured.length).toBeGreaterThan(0);
@@ -103,7 +110,7 @@ it('registra a telemetria de IA (insert+prune de ai_usage_logs) em context.waitU
   });
   const res = await onRequestPost({
     request: req,
-    env: { GEMINI_API_KEY: 'test-key', BIGDATA_DB: db },
+    env: { VERTEX_SA_KEY: SA_FAKE, BIGDATA_DB: db },
     waitUntil: (p) => waited.push(p),
   });
   expect(res.status).toBe(200);
@@ -124,7 +131,59 @@ it('mantém o override via env.GEMINI_MODEL', async () => {
   });
   await onRequestPost({
     request: req,
-    env: { GEMINI_API_KEY: 'test-key', GEMINI_MODEL: 'modelo-custom', BIGDATA_DB: createD1Stub() },
+    env: { VERTEX_SA_KEY: SA_FAKE, GEMINI_MODEL: 'modelo-custom', BIGDATA_DB: createD1Stub() },
   });
   expect(captured[0].model).toBe('modelo-custom');
+});
+
+it('constrói o client Vertex com a SA do env e projeto/location padrão', async () => {
+  ctorCaptured.length = 0;
+  const req = new Request('https://calc.lcv.app.br/api/oraculo', {
+    method: 'POST',
+    headers: { Origin: 'https://calc.lcv.app.br', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transacao: { moeda: 'USD' } }),
+  });
+  await onRequestPost({
+    request: req,
+    env: { VERTEX_SA_KEY: SA_FAKE, BIGDATA_DB: createD1Stub() },
+  });
+  expect(ctorCaptured).toHaveLength(1);
+  expect(ctorCaptured[0].saKeyJson).toBe(SA_FAKE);
+  expect(ctorCaptured[0].project).toBe('lcv-ideas-and-software');
+  expect(ctorCaptured[0].location).toBe('global');
+});
+
+it('permite override de projeto e location via env (VERTEX_PROJECT/VERTEX_LOCATION)', async () => {
+  ctorCaptured.length = 0;
+  const req = new Request('https://calc.lcv.app.br/api/oraculo', {
+    method: 'POST',
+    headers: { Origin: 'https://calc.lcv.app.br', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transacao: { moeda: 'USD' } }),
+  });
+  await onRequestPost({
+    request: req,
+    env: {
+      VERTEX_SA_KEY: SA_FAKE,
+      VERTEX_PROJECT: 'outro-projeto',
+      VERTEX_LOCATION: 'us-central1',
+      BIGDATA_DB: createD1Stub(),
+    },
+  });
+  expect(ctorCaptured[0].project).toBe('outro-projeto');
+  expect(ctorCaptured[0].location).toBe('us-central1');
+});
+
+it('retorna 500 amigável quando VERTEX_SA_KEY não está configurado', async () => {
+  const req = new Request('https://calc.lcv.app.br/api/oraculo', {
+    method: 'POST',
+    headers: { Origin: 'https://calc.lcv.app.br', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transacao: { moeda: 'USD' } }),
+  });
+  const res = await onRequestPost({
+    request: req,
+    env: { BIGDATA_DB: createD1Stub() },
+  });
+  expect(res.status).toBe(500);
+  const body = await res.json();
+  expect(body.erro).toMatch(/não configurou/);
 });

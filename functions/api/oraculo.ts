@@ -1,12 +1,12 @@
 /**
  * Módulo: calculadora-app/functions/api/oraculo.ts
- * Versão: v04.00.00
- * Descrição: API do Oráculo IA — refatorada com SDK oficial @google/genai, TypeScript,
- * e sem vazamento de linting `any`.
+ * Versão: v04.03.00
+ * Descrição: API do Oráculo IA — transporte via Vertex AI (Gemini Enterprise Agent Platform)
+ * com autenticação de service account; prompts, fallbacks e telemetria preservados.
  */
 
-import { GoogleGenAI } from '@google/genai';
 import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/security.js';
+import { VertexGenAI } from './_shared/vertex.ts';
 
 interface D1DatabaseLike {
   prepare: (query: string) => {
@@ -16,7 +16,9 @@ interface D1DatabaseLike {
 }
 
 interface Env {
-  GEMINI_API_KEY: string;
+  VERTEX_SA_KEY: string;
+  VERTEX_PROJECT?: string;
+  VERTEX_LOCATION?: string;
   GEMINI_MODEL?: string;
   BIGDATA_DB?: D1DatabaseLike;
 }
@@ -114,16 +116,18 @@ export async function onRequestPost(context: any) {
     const _telStart = Date.now();
     const promptData = await request.json();
 
-    const { GEMINI_API_KEY } = env;
+    const { VERTEX_SA_KEY } = env;
 
-    if (!GEMINI_API_KEY) {
-      structuredLog('error', 'Missing GEMINI_API_KEY', { endpoint: 'oraculo' });
+    if (!VERTEX_SA_KEY) {
+      structuredLog('error', 'Missing VERTEX_SA_KEY', { endpoint: 'oraculo' });
       return jsonResponse({ erro: 'O administrador ainda não configurou a chave de IA no servidor.' }, 500);
     }
 
     const modelName = env.GEMINI_MODEL || GEMINI_CONFIG.model;
-    const ai = new GoogleGenAI({
-      apiKey: GEMINI_API_KEY,
+    const ai = new VertexGenAI({
+      saKeyJson: VERTEX_SA_KEY,
+      project: env.VERTEX_PROJECT || 'lcv-ideas-and-software',
+      location: env.VERTEX_LOCATION || 'global',
     });
 
     const instrucao = `Analise a simulação de câmbio abaixo e produza exatamente 3 blocos de texto. Cada bloco DEVE começar na primeira linha com o respectivo rótulo seguido de dois-pontos:
