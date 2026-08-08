@@ -1,6 +1,6 @@
 /**
  * Módulo: calculadora-app/functions/api/_shared/vertex.ts
- * Versão: v04.03.00
+ * Versão: v04.03.01
  * Descrição: Client mínimo do Vertex AI (Gemini Enterprise Agent Platform) para Pages Functions.
  * Autentica com service account via JWT RS256 (WebCrypto) trocado por access token OAuth2,
  * com cache por identidade de chave e single-flight para mints concorrentes.
@@ -241,7 +241,9 @@ export class VertexGenAI {
 
   constructor(options: VertexGenAIOptions) {
     this.options = options;
-    this.fetchImpl = options.fetchImpl ?? fetch;
+    // O fetch global do workerd exige `this` global; chamar via this.fetchImpl
+    // vazaria a instância como `this` e lança Illegal invocation em produção.
+    this.fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
     this.now = options.now ?? Date.now;
   }
 

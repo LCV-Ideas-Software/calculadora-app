@@ -277,6 +277,34 @@ it('countTokens monta a URL própria e repassa o retorno', async () => {
   expect(res.totalTokens).toBe(42);
 });
 
+// ── Fetch global (regressão de produção) ─────────────────────────────────────
+
+it('invoca o fetch global desacoplado do this da instância (regressão: Illegal invocation no workerd)', async () => {
+  const sa = await makeTestSa('kid-global-fetch');
+  const urls = [];
+  const originalFetch = globalThis.fetch;
+  // O fetch do workerd de produção lança TypeError quando invocado com um
+  // `this` que não é o escopo global — simulamos essa sensibilidade aqui.
+  globalThis.fetch = function (url, _init) {
+    if (this !== undefined && this !== globalThis) {
+      throw new TypeError('Illegal invocation: function called with incorrect `this` reference.');
+    }
+    urls.push(String(url));
+    if (String(url).includes('oauth2.test.invalid')) {
+      return Promise.resolve(jsonResponse(200, { access_token: 'tok-g', expires_in: 3600 }));
+    }
+    return Promise.resolve(jsonResponse(200, { totalTokens: 1 }));
+  };
+  try {
+    const ai = new VertexGenAI({ saKeyJson: sa.saJson, project: 'proj-x', location: 'global' });
+    const res = await ai.models.countTokens({ model: 'm', contents: 'x' });
+    expect(res.totalTokens).toBe(1);
+    expect(urls).toHaveLength(2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 // ── Erros diagnósticos ───────────────────────────────────────────────────────
 
 it('erro do token endpoint vira Error com status e detalhe do OAuth', async () => {

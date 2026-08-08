@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [v04.03.01] - 2026-08-08
+
+**Hotfix — corrige `Illegal invocation` do fetch no runtime de produção do workerd e atualiza as instruções de setup do secret.**
+
+### Corrigido
+
+- O client Vertex invocava o `fetch` global através de `this.fetchImpl`, vazando a instância como `this` — o workerd de produção rejeita com `TypeError: Illegal invocation` (o dev local tolera, por isso só se manifestou pós-deploy). O default agora encapsula o fetch em um wrapper que o invoca desacoplado. Diagnóstico confirmado pelos logs de produção do deployment (7 warns idênticos, countTokens + 3 candidatos × 2 tentativas).
+- README passo 5: instrução de secret atualizada de `GEMINI_API_KEY` para `VERTEX_SA_KEY` (JSON de service account com `roles/aiplatform.user`), documentando os overrides opcionais `VERTEX_PROJECT`/`VERTEX_LOCATION` (finding P2 do bot de review no PR #163).
+
+### Testes
+
+- Novo teste de regressão simula a sensibilidade a `this` do fetch de produção (fake global que lança `Illegal invocation` quando invocado com `this` não-global): RED reproduziu o erro exato de produção, GREEN com o fix. Suíte total: 72/72.
+
 ## [v04.03.00] - 2026-08-08
 
 **Minor — migra o transporte do Oráculo IA do endpoint AI Studio (API key) para o Vertex AI (Gemini Enterprise Agent Platform) com autenticação de service account.**

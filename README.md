@@ -15,12 +15,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.03.00**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current release: **v04.03.01**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.03.01`**                      | **Production hotfix.** Fixes the workerd-only `Illegal invocation` error: the Vertex client invoked global fetch through an instance property, leaking the instance as `this`; the default now wraps fetch detached. Regression test simulates the this-sensitive production fetch (72/72). Also updates README secret setup to VERTEX_SA_KEY (review-bot P2).    |
 | **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                             |
 | **`v04.02.04`**                      | **Backtest threshold precedence fix.** Custom MAPE thresholds now follow D1 > finite payload > valid environment > default, preserving percentage-point scale; focused tests cover every tier and prove that a PTAX cache hit performs no external request. |
 | **`v04.02.03`**                      | **Dependency security patch.** Resolves GHSA-j3f2-48v5-ccww / CVE-2026-59877 by moving the transitive `protobufjs` override used by `@google/genai` from 7.6.3 to 7.6.5. |
@@ -122,7 +123,7 @@ The Pages Functions self-bootstrap their tables via `CREATE TABLE IF NOT EXISTS`
 
 ### 5. Configure secrets (optional, only if using Gemini analysis)
 
-Set `GEMINI_API_KEY` as a Cloudflare Pages secret via the dashboard or `wrangler secret put GEMINI_API_KEY --env production`.
+Set `VERTEX_SA_KEY` as a Cloudflare Pages secret — the full JSON key of a GCP service account with the `roles/aiplatform.user` role — via the dashboard or `wrangler pages secret put VERTEX_SA_KEY --project-name <project>`. The Oráculo endpoint calls Vertex AI (Gemini Enterprise Agent Platform); optional plain-text vars `VERTEX_PROJECT` and `VERTEX_LOCATION` override the default GCP project and location (`global`).
 
 ### 6. Build + deploy
 
