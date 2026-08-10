@@ -15,12 +15,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.03.02**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current release: **v04.03.03**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.03.03`**                      | **Corrects the guard path recorded in the v04.03.02 notes.** Those notes named `src/services/releaseConsistency.test.ts`, the first attempt; the test lives in `functions/api/__tests__/` because `tsconfig.app.json` compiles `src` without node types. The path is fixed in the v04.03.02 entry and the change is recorded here rather than made silently. |
 | **`v04.03.02`**                      | **Release markers realigned — two releases had shipped untagged.** `auto-release.yml` derives the tag from `APP_VERSION` in `src/services/formatting.ts`, which had stayed at `v04.02.04`, so v04.03.00 and v04.03.01 produced no tag and no release while the UI reported the wrong version. A new `releaseConsistency` test derives the marker from `package.json` and locks `APP_VERSION`, README and SECURITY together so the drift cannot recur silently. |
 | **`v04.03.01`**                      | **Production hotfix.** Fixes the workerd-only `Illegal invocation` error: the Vertex client invoked global fetch through an instance property, leaking the instance as `this`; the default now wraps fetch detached. Regression test simulates the this-sensitive production fetch (72/72). Also updates README secret setup to VERTEX_SA_KEY (review-bot P2).    |
 | **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                             |

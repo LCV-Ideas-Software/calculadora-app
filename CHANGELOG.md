@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [v04.03.03] - 2026-08-10
+
+### Corrigido
+
+- **A entrada da v04.03.02 apontava o guard para o caminho errado.** O texto
+  citava `src/services/releaseConsistency.test.ts`, que foi a primeira
+  tentativa; o teste acabou em `functions/api/__tests__/` porque o
+  `tsconfig.app.json` compila `src` sem os tipos de node e a versão `.ts`
+  quebrava o build com `TS2591`. Notas de release que apontam para um arquivo
+  inexistente valem menos que nenhuma nota, então o caminho foi corrigido na
+  entrada da v04.03.02 — e esta entrada registra a correção, para que a
+  alteração de um texto já publicado não fique silenciosa. Achado do Copilot no
+  PR #170.
+
 ## [v04.03.02] - 2026-08-10
 
 ### Corrigido
@@ -17,10 +31,11 @@
 
 ### Testes
 
-- Novo `src/services/releaseConsistency.test.ts`: deriva o marcador de release do
-  `package.json` e trava `APP_VERSION`, o alvo do `README.md` e o do
+- Novo `functions/api/__tests__/releaseConsistency.test.mjs`: deriva o marcador de
+  release do `package.json` e trava `APP_VERSION`, o alvo do `README.md` e o do
   `SECURITY.md` no mesmo valor. É o guard que faltava para o drift não voltar a
-  passar em silêncio — o `astrologo-app` já tinha o equivalente.
+  passar em silêncio — o `astrologo-app` já tinha o equivalente. (Caminho
+  corrigido na v04.03.03; esta entrada citava a primeira tentativa em `src/`.)
 
 ## [v04.03.01] - 2026-08-08
 
