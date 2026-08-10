@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [v04.03.02] - 2026-08-10
+
+### Corrigido
+
+- **`APP_VERSION` e `SECURITY.md` estavam dois lançamentos atrás, e isso engoliu
+  duas releases.** O `auto-release.yml` deriva a tag de `APP_VERSION` em
+  `src/services/formatting.ts` (`VERSION_FILE`); como a constante ficou em
+  `v04.02.04`, a v04.03.00 (migração Vertex) e a v04.03.01 (hotfix do
+  `Illegal invocation`) foram publicadas **sem tag e sem release** — a última
+  release do repositório era a v04.02.04, de 03/08 — e a interface mostrava
+  `APP v04.02.04` rodando código v04.03.01. As quatro superfícies voltam a
+  concordar; esta é a primeira release marcada que contém o transporte Vertex.
+
+### Testes
+
+- Novo `src/services/releaseConsistency.test.ts`: deriva o marcador de release do
+  `package.json` e trava `APP_VERSION`, o alvo do `README.md` e o do
+  `SECURITY.md` no mesmo valor. É o guard que faltava para o drift não voltar a
+  passar em silêncio — o `astrologo-app` já tinha o equivalente.
+
 ## [v04.03.01] - 2026-08-08
 
 **Hotfix — corrige `Illegal invocation` do fetch no runtime de produção do workerd e atualiza as instruções de setup do secret.**

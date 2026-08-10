@@ -7,7 +7,7 @@
    Funções de formatação numérica e moeda
    ==================================================================== */
 
-const APP_VERSION = 'APP v04.02.04';
+const APP_VERSION = 'APP v04.03.02';
 
 export { APP_VERSION };
 

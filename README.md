@@ -15,12 +15,13 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.03.01**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current release: **v04.03.02**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
 
 The version history at a glance:
 
 | Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.03.02`**                      | **Release markers realigned — two releases had shipped untagged.** `auto-release.yml` derives the tag from `APP_VERSION` in `src/services/formatting.ts`, which had stayed at `v04.02.04`, so v04.03.00 and v04.03.01 produced no tag and no release while the UI reported the wrong version. A new `releaseConsistency` test derives the marker from `package.json` and locks `APP_VERSION`, README and SECURITY together so the drift cannot recur silently. |
 | **`v04.03.01`**                      | **Production hotfix.** Fixes the workerd-only `Illegal invocation` error: the Vertex client invoked global fetch through an instance property, leaking the instance as `this`; the default now wraps fetch detached. Regression test simulates the this-sensitive production fetch (72/72). Also updates README secret setup to VERTEX_SA_KEY (review-bot P2).    |
 | **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                             |
 | **`v04.02.04`**                      | **Backtest threshold precedence fix.** Custom MAPE thresholds now follow D1 > finite payload > valid environment > default, preserving percentage-point scale; focused tests cover every tier and prove that a PTAX cache hit performs no external request. |
