@@ -18,9 +18,9 @@ store. Source lives in `src/`; public formatting is enforced on `index.html`.
 
 ```bash
 npm test
-npm run lint
-npm run format:public:check
+npm run biome
 npm run build
+npm run format:public:check
 npm run projects:boundaries
 ```
 
