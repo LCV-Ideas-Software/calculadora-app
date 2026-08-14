@@ -10,13 +10,13 @@ env:
   NODE_OPTIONS: "--no-deprecation"
 concurrency:
   group: ci-${{ github.ref }}
-  queue: max
   cancel-in-progress: false
 jobs:
   test:
     name: Test application
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -30,4 +30,4 @@ jobs:
       - run: npm run build
       - run: npm test
     timeout-minutes: 15
-permissions: write-all
+permissions: {}

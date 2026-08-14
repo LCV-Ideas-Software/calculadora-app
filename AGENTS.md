@@ -21,7 +21,6 @@ npm test
 npm run biome
 npm run build
 npm run format:public:check
-npm run projects:boundaries
 ```
 
 ## Workspace Policy
@@ -87,8 +86,8 @@ mudar de escopo, vale o texto de la.
 ### Valvula de escape
 
 Bump de dependencia, correcao de typo, lockfile e ajuste de formatacao **dispensam issue**.
-O PR basta — ele entra no quadro sozinho quando o gatilho o alcanca; PR do Dependabot
-e uma lacuna declarada do gatilho e pode depender do backfill/reconciliacao da ativacao.
+O PR basta: os workflows Auto-add nativos dos Projects #9 e #17 adicionam itens novos
+ou atualizados deste repositorio sem GitHub Actions, App, token ou secret do repositorio.
 
 ### Campos
 
