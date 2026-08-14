@@ -7,7 +7,7 @@ Pointer for AI agents working in this repository.
 - Repository: `https://github.com/LCV-Ideas-Software/calculadora-app`
 - App: Calculadora Financeira — simulador comparativo de cambio internacional
 - Branch: `main`
-- License: Apache-2.0
+- License: AGPL-3.0-or-later
 
 ## Runtime Shape
 
