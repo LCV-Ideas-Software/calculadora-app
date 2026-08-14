@@ -112,10 +112,11 @@ Use Cloudflare's native dashboard configuration:
 3. Set the variable name to `BIGDATA_DB` and select the D1 database.
 4. Redeploy the project so the binding takes effect.
 
-For local development, pass the identifier directly to Wrangler without storing
-it in the repository:
+For local development, build `dist` first, then pass the identifier directly to
+Wrangler without storing it in the repository:
 
 ```bash
+npm run build
 npx wrangler pages dev dist --d1 BIGDATA_DB=<DATABASE_ID>
 ```
 
