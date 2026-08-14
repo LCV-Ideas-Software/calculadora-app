@@ -5,7 +5,6 @@
 # calculadora-app
 
 [![status: stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](#status)
-[![release](https://img.shields.io/github/v/release/LCV-Ideas-Software/calculadora-app?sort=semver)](https://github.com/LCV-Ideas-Software/calculadora-app/releases)
 [![Deploy](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml)
 [![Pages](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml)
 [![CodeQL](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml)
@@ -15,11 +14,11 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current release: **v04.03.03**. See [CHANGELOG.md](./CHANGELOG.md) for the full release history.
+**Status.** Stable. Current application version: **v04.03.03**. See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
 
 The version history at a glance:
 
-| Release                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
+| Version                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`v04.03.03`**                      | **Corrects the guard path recorded in the v04.03.02 notes.** Those notes named `src/services/releaseConsistency.test.ts`, the first attempt; the test lives in `functions/api/__tests__/` because `tsconfig.app.json` compiles `src` without node types. The path is fixed in the v04.03.02 entry and the change is recorded here rather than made silently. |
 | **`v04.03.02`**                      | **Release markers realigned — two releases had shipped untagged.** `auto-release.yml` derives the tag from `APP_VERSION` in `src/services/formatting.ts`, which had stayed at `v04.02.04`, so v04.03.00 and v04.03.01 produced no tag and no release while the UI reported the wrong version. A new `releaseConsistency` test derives the marker from `package.json` and locks `APP_VERSION`, README and SECURITY together so the drift cannot recur silently. |
@@ -101,22 +100,23 @@ npx wrangler d1 create example_db
 #   database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
-Take note of the `database_id` value — you need it for step 3 BEFORE any subsequent `wrangler d1 execute` command.
+Keep the `database_id` available for local Wrangler commands, but do not commit
+the real identifier to a public repository.
 
-### 3. Wire the database_id into wrangler.json
+### 3. Bind D1 to the Pages project
 
-Replace the placeholder `00000000-0000-0000-0000-000000000000`:
+Use Cloudflare's native dashboard configuration:
 
-```jsonc
-{
-  "d1_databases": [
-    {
-      "binding": "BIGDATA_DB",
-      "database_name": "example_db",
-      "database_id": "<your-d1-id-from-step-2>",
-    },
-  ],
-}
+1. Open **Workers & Pages** and select the Pages project.
+2. Go to **Settings > Bindings > Add > D1 database bindings**.
+3. Set the variable name to `BIGDATA_DB` and select the D1 database.
+4. Redeploy the project so the binding takes effect.
+
+For local development, pass the identifier directly to Wrangler without storing
+it in the repository:
+
+```bash
+npx wrangler pages dev dist --d1 BIGDATA_DB=<DATABASE_ID>
 ```
 
 ### 4. Apply schema
@@ -136,7 +136,7 @@ npx wrangler pages deploy dist --project-name=calculadora-app
 
 ## CI deploy (this repo)
 
-This repo's [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs `npm install → npm run build → wrangler pages deploy` on every push to `main`. Before the deploy step, a `jq` substitution swaps the placeholder `database_id` in `wrangler.json` from a `D1_DATABASE_ID` GitHub Actions secret — keeping the literal D1 ID out of the public source tree.
+This repo's [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs the project checks and build on every push to `main`, then deploys `dist` with the official Cloudflare Wrangler Action. The Pages project and its `BIGDATA_DB` binding are configured in the Cloudflare dashboard; Cloudflare credentials remain in GitHub Actions secrets.
 
 ## Repository conventions
 

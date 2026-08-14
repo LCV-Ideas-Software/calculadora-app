@@ -4,7 +4,19 @@
 
 ### Added
 
-- Governanca de trabalho sobre GitHub Projects, Issues e Discussions: quadro dedicado do repositorio, formularios de issue para Incident, Maintenance e Spike, atalhos para Discussions no seletor de issues, workflow `add-to-project` (inerte ate a organizacao definir `LCV_PROJECTS_APP_CLIENT_ID`) e o ritual de registro G1..G4 documentado para Claude Code e ChatGPT-Codex.
+- Governanca de trabalho sobre GitHub Projects, Issues e Discussions: quadro dedicado do repositorio, formularios de issue para Incident, Maintenance e Spike, atalhos para Discussions no seletor de issues e o ritual de registro G1..G4 documentado para Claude Code e ChatGPT-Codex.
+
+### Changed
+
+- Security, dependency review and Cloudflare deployment workflows now use the official GitHub, OpenSSF, Zizmor and Cloudflare Actions directly, without organization-specific wrappers or policy manifests. The Pages D1 binding remains in Cloudflare's native dashboard configuration, so no operational database identifier is published in source control.
+- This web application retains its internal `APP_VERSION` and changelog but no longer creates GitHub Releases or version tags; those distribution artifacts are reserved for repositories that publish packages.
+- The npm package is marked `private` because this repository deploys a web application rather than publishing a package.
+- The version guard is renamed from `releaseConsistency` to `versionConsistency` to reflect that it now validates internal application markers rather than GitHub Release artifacts.
+
+### Removed
+
+- The custom Auto-release and Native Auto-merge workflows. GitHub's native merge queue remains the merge mechanism.
+- The repository-level Projects automation workflow. The built-in GitHub Project Auto-add workflow is enabled for `calculadora-app` in both the repository Project #9 and the organization portfolio Project #17.
 
 ## [v04.03.03] - 2026-08-10
 
