@@ -160,6 +160,8 @@ it('mantém precedência D1 sobre payload e ambiente nos parâmetros financeiros
     spread_global_fechado: 0.03,
     fator_calibragem_global: 0.97,
   });
+  expect(body.parametros_vigentes.origem.taxa_fator_calibragem_global).toBe('d1');
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('fator_calibragem_global');
 });
 
 it('ignora parâmetros financeiros inválidos do ambiente e preserva defaults finitos', async () => {
@@ -220,6 +222,40 @@ it('aceita zero finito nas taxas, mas usa o default para calibragem zero', async
   });
   expect(body.cartao.valor_total_brl).toBe(500);
   expect(body.cartao.vet).toBe(5);
+});
+
+it.each([0, -0.5])('ignora calibragem D1 não positiva (%s) e usa o ambiente positivo', async (invalidFactor) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(
+      5,
+      { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+      [{ chave: 'fator_calibragem_global', valor: String(invalidFactor) }],
+    ),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.98);
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('taxa_fator_calibragem_global');
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('fator_calibragem_global');
+});
+
+it.each([0, -0.5])('usa o default quando a calibragem do ambiente não é positiva (%s)', async (invalidFactor) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, { FATOR_CALIBRAGEM_GLOBAL: String(invalidFactor) }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.99934);
 });
 
 it('rejeita calibragem global zero e preserva a cotação calibrada sem contingência', async () => {

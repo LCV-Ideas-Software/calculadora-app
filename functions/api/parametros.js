@@ -1,4 +1,9 @@
 ﻿import { getOperationalContext } from './contexto-operacional.mjs';
+import {
+    FATOR_CALIBRAGEM_GLOBAL_PADRAO,
+    fatorCalibragemValido,
+    resolverFatorCalibragemGlobal
+} from './_shared/calibragem.mjs';
 
 export async function onRequestGet(context) {
     const { env } = context;
@@ -14,12 +19,13 @@ export async function onRequestGet(context) {
             spread_cartao: 0.055,
             spread_global_aberto: 0.0078,
             spread_global_fechado: 0.0118,
-            fator_calibragem_global: 0.99934,
+            fator_calibragem_global: FATOR_CALIBRAGEM_GLOBAL_PADRAO,
             backtest_mape_boa_percent: 1.0,
             backtest_mape_atencao_percent: 2.0
         };
 
         const origem = {};
+        let calibragemD1;
 
         // Tentar carregar parâmetros customizados do D1
         try {
@@ -27,6 +33,10 @@ export async function onRequestGet(context) {
             if (rows.results && rows.results.length > 0) {
                 for (const row of rows.results) {
                     const val = parseFloat(row.valor);
+                    if (row.chave === 'fator_calibragem_global') {
+                        if (Number.isFinite(val) && calibragemD1 === undefined) calibragemD1 = val;
+                        continue;
+                    }
                     if (Number.isFinite(val)) {
                         parametros[row.chave] = val;
                         origem[`taxa_${row.chave}`] = 'd1';
@@ -36,6 +46,10 @@ export async function onRequestGet(context) {
         } catch (e) {
             // tabela pode não existir, usar defaults
         }
+
+        const calibragemEnv = parseFloat(env.FATOR_CALIBRAGEM_GLOBAL);
+        parametros.fator_calibragem_global = resolverFatorCalibragemGlobal(calibragemD1, calibragemEnv);
+        if (fatorCalibragemValido(calibragemD1)) origem.taxa_fator_calibragem_global = 'd1';
 
         const spread_global_aplicado = is_plantao
             ? parametros.spread_global_fechado
