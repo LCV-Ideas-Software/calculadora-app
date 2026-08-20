@@ -119,6 +119,187 @@ it('mantém precedência D1 sobre payload e ambiente nos limiares percentuais', 
   expect(body.parametros_vigentes.backtest_mape_atencao_percent).toBe(3);
 });
 
+it('mantém precedência D1 sobre payload e ambiente nos parâmetros financeiros', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({
+      data_compra: '2026-07-08',
+      moeda: 'USD',
+      valor_original: 100,
+      spread_percent: 6,
+      iof_percent: 4.5,
+      global_spread_aberto_percent: 1.5,
+    }),
+    env: envComPtax(
+      5,
+      {
+        TAXA_SPREAD: '0.08',
+        TAXA_IOF: '0.04',
+        TAXA_IOF_GLOBAL: '0.03',
+        TAXA_SPREAD_GLOBAL_ABERTO: '0.02',
+        TAXA_SPREAD_GLOBAL_FECHADO: '0.03',
+        FATOR_CALIBRAGEM_GLOBAL: '0.98',
+      },
+      [
+        { chave: 'spread_cartao', valor: '0.05' },
+        { chave: 'iof_global', valor: '0.01' },
+        { chave: 'fator_calibragem_global', valor: '0.97' },
+      ],
+    ),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0.05,
+    iof_cartao: 0.045,
+    iof_global: 0.01,
+    spread_global_aberto: 0.015,
+    spread_global_fechado: 0.03,
+    fator_calibragem_global: 0.97,
+  });
+  expect(body.parametros_vigentes.origem.taxa_fator_calibragem_global).toBe('d1');
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('fator_calibragem_global');
+});
+
+it('ignora parâmetros financeiros inválidos do ambiente e preserva defaults finitos', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, {
+      TAXA_SPREAD: '',
+      TAXA_IOF: 'NaN',
+      TAXA_IOF_GLOBAL: 'infinito',
+      TAXA_SPREAD_GLOBAL_ABERTO: '?',
+      TAXA_SPREAD_GLOBAL_FECHADO: '!',
+      FATOR_CALIBRAGEM_GLOBAL: 'n/a',
+    }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0.055,
+    iof_cartao: 0.035,
+    iof_global: 0.035,
+    spread_global_aberto: 0.0078,
+    spread_global_fechado: 0.0118,
+    fator_calibragem_global: 0.99934,
+  });
+  expect(body.cartao.valor_total_brl).toBe(545.96);
+  expect(body.cartao.vet).toBe(5.459625);
+});
+
+it('aceita zero finito nas taxas, mas usa o default para calibragem zero', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, {
+      TAXA_SPREAD: '0',
+      TAXA_IOF: '0',
+      TAXA_IOF_GLOBAL: '0',
+      TAXA_SPREAD_GLOBAL_ABERTO: '0',
+      TAXA_SPREAD_GLOBAL_FECHADO: '0',
+      FATOR_CALIBRAGEM_GLOBAL: '0',
+    }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0,
+    iof_cartao: 0,
+    iof_global: 0,
+    spread_global_aberto: 0,
+    spread_global_fechado: 0,
+    fator_calibragem_global: 0.99934,
+  });
+  expect(body.cartao.valor_total_brl).toBe(500);
+  expect(body.cartao.vet).toBe(5);
+});
+
+it.each([0, -0.5])('ignora calibragem D1 não positiva (%s) e usa o ambiente positivo', async (invalidFactor) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(
+      5,
+      { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+      [{ chave: 'fator_calibragem_global', valor: String(invalidFactor) }],
+    ),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.98);
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('taxa_fator_calibragem_global');
+  expect(body.parametros_vigentes.origem).not.toHaveProperty('fator_calibragem_global');
+});
+
+it.each([0, -0.5])('usa o default quando a calibragem do ambiente não é positiva (%s)', async (invalidFactor) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, { FATOR_CALIBRAGEM_GLOBAL: String(invalidFactor) }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.99934);
+});
+
+it('rejeita calibragem global zero e preserva a cotação calibrada sem contingência', async () => {
+  const fetchSpy = vi.fn(async (url) => {
+    if (String(url).includes('economia.awesomeapi.com.br')) {
+      return new Response(JSON.stringify({ USDBRL: { bid: '5' } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    throw new Error(`fetch inesperado: ${url}`);
+  });
+  vi.stubGlobal('fetch', fetchSpy);
+
+  const db = createD1Stub([
+    {
+      match: (sql) => /FROM calc_parametros_customizados/i.test(sql),
+      all: () => ({ results: [{ chave: 'fator_calibragem_global', valor: '0' }] }),
+    },
+    {
+      match: (sql) => /FROM calc_ptax_cache/i.test(sql),
+      first: (args, sql) => {
+        if (/LATEST_SPOT/i.test(sql) || String(args[0]).startsWith('SPOT-')) return null;
+        return { valor_ptax: 5 };
+      },
+    },
+  ]);
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: { BIGDATA_DB: db, FATOR_CALIBRAGEM_GLOBAL: '0' },
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.99934);
+  expect(body.global).toMatchObject({
+    suportada: true,
+    fonte_cotacao: 'Spot Calibrado (alt)',
+    usou_contingencia: false,
+  });
+  expect(body.global.taxa_utilizada).toBeCloseTo(4.9967, 8);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
+});
+
 it('usa ambiente válido e depois defaults para ambiente ausente ou inválido quando o payload não é finito', async () => {
   vi.stubGlobal('fetch', () => {
     throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
@@ -174,4 +355,37 @@ it('modo cobrado em reais retorna cenários sem tocar em cotação', async () =>
   expect(body.cobrado_em_reais).toBe(true);
   expect(body.compra_em_reais.cenarios.dcc_pura.total_brl).toBe(103.5);
   expect(body.compra_em_reais.diagnostico.cenario_provavel).toBe('dcc_pura');
+});
+
+it.each([
+  {
+    origem: 'D1',
+    bindings: { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+    parametros: [
+      { chave: 'iof_cartao', valor: '0.04' },
+      { chave: 'spread_cartao', valor: '0.05' },
+      { chave: 'fator_calibragem_global', valor: '0.97' },
+      { chave: 'backtest_mape_boa_percent', valor: '1.5' },
+    ],
+    origemEsperada: { taxa_iof_cartao: 'd1', taxa_spread_cartao: 'd1' },
+  },
+  {
+    origem: 'ambiente',
+    bindings: { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+    parametros: [],
+    origemEsperada: {},
+  },
+])('modo cobrado em reais omite valor e origem da calibragem vinda de $origem', async ({ bindings, parametros, origemEsperada }) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede no modo reais');
+  });
+  const res = await onRequestPost({
+    request: req({ valor_original: 100, cobrado_em_reais: true }),
+    env: envComPtax(5, bindings, parametros),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).not.toHaveProperty('fator_calibragem_global');
+  expect(body.parametros_vigentes.origem).toEqual(origemEsperada);
 });

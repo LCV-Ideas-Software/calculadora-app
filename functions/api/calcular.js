@@ -5,6 +5,7 @@ import { parseCotacaoVendaCsv } from './cotacao-csv.mjs';
 import { fetchComTimeout } from './fetch-timeout.mjs';
 import { analisarCompraEmReais } from './compra-reais.mjs';
 import { requireAllowedOrigin, enforceRateLimit, SECURITY_HEADERS } from './_shared/security.js';
+import { fatorCalibragemValido, resolverFatorCalibragemGlobal } from './_shared/calibragem.mjs';
 
 export async function onRequestPost(context) {
     const defaultHeaders = { "Content-Type": "application/json", ...SECURITY_HEADERS };
@@ -68,11 +69,18 @@ export async function onRequestPost(context) {
             } catch (e2) { }
         }
 
+        const readFiniteEnv = (envKey) => {
+            if (!envKey || env[envKey] === undefined) return undefined;
+            const value = parseFloat(env[envKey]);
+            return Number.isFinite(value) ? value : undefined;
+        };
+
         // Resolver valores finais (D1 > payload > env > default)
         const resolveParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1) return parametrosD1[d1Key];
             if (Number.isFinite(payloadVal)) return payloadVal / 100; // payload vem em %
-            if (envKey && env[envKey]) return parseFloat(env[envKey]);
+            const envValue = readFiniteEnv(envKey);
+            if (envValue !== undefined) return envValue;
             return fallback;
         };
 
@@ -81,16 +89,17 @@ export async function onRequestPost(context) {
         const IOF_GLOBAL = resolveParam('iof_global', iofPercentInformado, 'TAXA_IOF_GLOBAL', 0.035);
         const SPREAD_GLOBAL_ABERTO = resolveParam('spread_global_aberto', globalSpreadAbertoInformado, 'TAXA_SPREAD_GLOBAL_ABERTO', 0.0078);
         const SPREAD_GLOBAL_FECHADO = resolveParam('spread_global_fechado', globalSpreadFechadoInformado, 'TAXA_SPREAD_GLOBAL_FECHADO', 0.0118);
-        const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (env.FATOR_CALIBRAGEM_GLOBAL ? parseFloat(env.FATOR_CALIBRAGEM_GLOBAL) : 0.99934);
-        if ('fator_calibragem_global' in parametrosD1) origem.fator_calibragem_global = 'd1';
+        const calibragemD1 = parametrosD1.fator_calibragem_global;
+        const calibragemEnv = readFiniteEnv('FATOR_CALIBRAGEM_GLOBAL');
+        const calibragemD1Valida = fatorCalibragemValido(calibragemD1);
+        const CALIBRAGEM = resolverFatorCalibragemGlobal(calibragemD1, calibragemEnv);
+        if (!calibragemD1Valida) delete origem.taxa_fator_calibragem_global;
 
         const resolveMetricParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
             if (Number.isFinite(payloadVal)) return payloadVal;
-            if (envKey && env[envKey] !== undefined) {
-                const v = parseFloat(env[envKey]);
-                if (Number.isFinite(v)) return v;
-            }
+            const envValue = readFiniteEnv(envKey);
+            if (envValue !== undefined) return envValue;
             return fallback;
         };
 
@@ -112,6 +121,9 @@ export async function onRequestPost(context) {
                 spreadCartao: SPREAD_CARTAO,
                 valorFaturaBrl: valor_fatura_brl,
             });
+            const origemDcc = {};
+            if (origem.taxa_iof_cartao) origemDcc.taxa_iof_cartao = origem.taxa_iof_cartao;
+            if (origem.taxa_spread_cartao) origemDcc.taxa_spread_cartao = origem.taxa_spread_cartao;
             return new Response(JSON.stringify({
                 moeda: 'BRL',
                 valor_original,
@@ -121,7 +133,7 @@ export async function onRequestPost(context) {
                 parametros_vigentes: {
                     iof_cartao: IOF_CARTAO,
                     spread_cartao: SPREAD_CARTAO,
-                    origem,
+                    origem: origemDcc,
                 },
             }), { headers: defaultHeaders });
         }
