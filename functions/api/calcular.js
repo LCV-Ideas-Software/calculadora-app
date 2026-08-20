@@ -121,6 +121,9 @@ export async function onRequestPost(context) {
                 spreadCartao: SPREAD_CARTAO,
                 valorFaturaBrl: valor_fatura_brl,
             });
+            const origemDcc = {};
+            if (origem.taxa_iof_cartao) origemDcc.taxa_iof_cartao = origem.taxa_iof_cartao;
+            if (origem.taxa_spread_cartao) origemDcc.taxa_spread_cartao = origem.taxa_spread_cartao;
             return new Response(JSON.stringify({
                 moeda: 'BRL',
                 valor_original,
@@ -130,7 +133,7 @@ export async function onRequestPost(context) {
                 parametros_vigentes: {
                     iof_cartao: IOF_CARTAO,
                     spread_cartao: SPREAD_CARTAO,
-                    origem,
+                    origem: origemDcc,
                 },
             }), { headers: defaultHeaders });
         }
