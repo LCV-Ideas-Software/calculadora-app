@@ -192,7 +192,7 @@ it('ignora parâmetros financeiros inválidos do ambiente e preserva defaults fi
   expect(body.cartao.vet).toBe(5.459625);
 });
 
-it('aceita zero finito do ambiente sem substituí-lo pelos defaults', async () => {
+it('aceita zero finito nas taxas, mas usa o default para calibragem zero', async () => {
   vi.stubGlobal('fetch', () => {
     throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
   });
@@ -216,10 +216,52 @@ it('aceita zero finito do ambiente sem substituí-lo pelos defaults', async () =
     iof_global: 0,
     spread_global_aberto: 0,
     spread_global_fechado: 0,
-    fator_calibragem_global: 0,
+    fator_calibragem_global: 0.99934,
   });
   expect(body.cartao.valor_total_brl).toBe(500);
   expect(body.cartao.vet).toBe(5);
+});
+
+it('rejeita calibragem global zero e preserva a cotação calibrada sem contingência', async () => {
+  const fetchSpy = vi.fn(async (url) => {
+    if (String(url).includes('economia.awesomeapi.com.br')) {
+      return new Response(JSON.stringify({ USDBRL: { bid: '5' } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+    throw new Error(`fetch inesperado: ${url}`);
+  });
+  vi.stubGlobal('fetch', fetchSpy);
+
+  const db = createD1Stub([
+    {
+      match: (sql) => /FROM calc_parametros_customizados/i.test(sql),
+      all: () => ({ results: [{ chave: 'fator_calibragem_global', valor: '0' }] }),
+    },
+    {
+      match: (sql) => /FROM calc_ptax_cache/i.test(sql),
+      first: (args, sql) => {
+        if (/LATEST_SPOT/i.test(sql) || String(args[0]).startsWith('SPOT-')) return null;
+        return { valor_ptax: 5 };
+      },
+    },
+  ]);
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: { BIGDATA_DB: db, FATOR_CALIBRAGEM_GLOBAL: '0' },
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.fator_calibragem_global).toBe(0.99934);
+  expect(body.global).toMatchObject({
+    suportada: true,
+    fonte_cotacao: 'Spot Calibrado (alt)',
+    usou_contingencia: false,
+  });
+  expect(body.global.taxa_utilizada).toBeCloseTo(4.9967, 8);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
 });
 
 it('usa ambiente válido e depois defaults para ambiente ausente ou inválido quando o payload não é finito', async () => {
