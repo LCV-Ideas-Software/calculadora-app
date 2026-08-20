@@ -88,9 +88,12 @@ export async function onRequestPost(context) {
         const IOF_GLOBAL = resolveParam('iof_global', iofPercentInformado, 'TAXA_IOF_GLOBAL', 0.035);
         const SPREAD_GLOBAL_ABERTO = resolveParam('spread_global_aberto', globalSpreadAbertoInformado, 'TAXA_SPREAD_GLOBAL_ABERTO', 0.0078);
         const SPREAD_GLOBAL_FECHADO = resolveParam('spread_global_fechado', globalSpreadFechadoInformado, 'TAXA_SPREAD_GLOBAL_FECHADO', 0.0118);
+        const calibragemD1 = parametrosD1.fator_calibragem_global;
         const calibragemEnv = readFiniteEnv('FATOR_CALIBRAGEM_GLOBAL');
-        const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (calibragemEnv ?? 0.99934);
-        if ('fator_calibragem_global' in parametrosD1) origem.fator_calibragem_global = 'd1';
+        const calibragemD1Valida = Number.isFinite(calibragemD1) && calibragemD1 > 0;
+        const CALIBRAGEM = calibragemD1Valida ? calibragemD1 : (calibragemEnv > 0 ? calibragemEnv : 0.99934);
+        if (calibragemD1Valida) origem.fator_calibragem_global = 'd1';
+        else delete origem.taxa_fator_calibragem_global;
 
         const resolveMetricParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
