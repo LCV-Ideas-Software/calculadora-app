@@ -7,12 +7,16 @@ function validSnapshot() {
       table_name: table,
       column_name: column,
       pk_position: (D1_CONTRACT.primaryKeys[table] ?? []).indexOf(column) + 1,
+      not_null: table === 'ai_usage_logs' && column === 'timestamp' ? 1 : 0,
+      default_value: table === 'ai_usage_logs' && column === 'timestamp' ? "datetime('now')" : null,
     })),
   );
   schema.push({
     table_name: 'shared_extra_table',
     column_name: 'id',
     pk_position: 1,
+    not_null: 0,
+    default_value: null,
   });
 
   const indexes = Object.entries(D1_CONTRACT.indexes).flatMap(([name, index]) =>
@@ -21,6 +25,8 @@ function validSnapshot() {
       table_name: index.table,
       column_name: column,
       column_position: position,
+      is_unique: 0,
+      is_partial: 0,
     })),
   );
   indexes.push({
@@ -28,6 +34,8 @@ function validSnapshot() {
     table_name: 'shared_extra_table',
     column_name: 'id',
     column_position: 0,
+    is_unique: 0,
+    is_partial: 0,
   });
 
   const retention = Object.entries(D1_CONTRACT.retention).map(([table, maxAgeDays]) => ({
@@ -65,6 +73,7 @@ describe('contrato sanitizado do D1 compartilhado', () => {
         'index positions mismatch: idx_calc_rate_limit_hits_lookup expected [0, 1, 2] got [0, 1]',
         'missing column: calc_oraculo_observabilidade.valor_original',
         'primary key mismatch: calc_ptax_cache expected [data_cotacao, moeda] got [data_cotacao]',
+        'primary key positions mismatch: calc_ptax_cache expected [1, 2] got [1]',
         'retention violation: ai_usage_logs has 1 stale row(s)',
       ],
     });
@@ -94,5 +103,54 @@ describe('contrato sanitizado do D1 compartilhado', () => {
       calc_oraculo_observabilidade: 90,
       ai_usage_logs: 90,
     });
+  });
+
+  it('rejeita índices canônicos UNIQUE ou parciais', () => {
+    const snapshot = validSnapshot();
+    snapshot.indexes = snapshot.indexes.map((row) => {
+      if (row.index_name === 'idx_calc_backtest_created_at') return { ...row, is_unique: 1 };
+      if (row.index_name === 'idx_calc_rate_limit_hits_lookup') return { ...row, is_partial: 1 };
+      return row;
+    });
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('index must be non-unique: idx_calc_backtest_created_at');
+    expect(result.errors).toContain('index must be non-partial: idx_calc_rate_limit_hits_lookup');
+  });
+
+  it('exige a PK de políticas e posições PK canônicas sem lacunas', () => {
+    const snapshot = validSnapshot();
+    snapshot.schema = snapshot.schema.map((row) => {
+      if (row.table_name === 'calc_rate_limit_policies' && row.column_name === 'route_key') {
+        return { ...row, pk_position: 0 };
+      }
+      if (row.table_name === 'calc_ptax_cache' && row.column_name === 'data_cotacao') {
+        return { ...row, pk_position: 2 };
+      }
+      if (row.table_name === 'calc_ptax_cache' && row.column_name === 'moeda') {
+        return { ...row, pk_position: 3 };
+      }
+      return row;
+    });
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('primary key mismatch: calc_rate_limit_policies expected [route_key] got []');
+    expect(result.errors).toContain('primary key positions mismatch: calc_ptax_cache expected [1, 2] got [2, 3]');
+  });
+
+  it('exige NOT NULL e default temporal na telemetria de IA', () => {
+    const snapshot = validSnapshot();
+    snapshot.schema = snapshot.schema.map((row) =>
+      row.table_name === 'ai_usage_logs' && row.column_name === 'timestamp'
+        ? { ...row, not_null: 0, default_value: null }
+        : row,
+    );
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('column must be NOT NULL: ai_usage_logs.timestamp');
+    expect(result.errors).toContain("column default mismatch: ai_usage_logs.timestamp expected datetime('now') got null");
   });
 });

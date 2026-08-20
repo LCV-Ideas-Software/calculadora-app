@@ -43,6 +43,7 @@ export const D1_CONTRACT = Object.freeze({
   },
   primaryKeys: {
     calc_ptax_cache: ['data_cotacao', 'moeda'],
+    calc_rate_limit_policies: ['route_key'],
   },
   indexes: {
     idx_calc_backtest_created_at: {
@@ -58,6 +59,12 @@ export const D1_CONTRACT = Object.freeze({
     calc_oraculo_observabilidade: 90,
     ai_usage_logs: 90,
   },
+  columnConstraints: {
+    'ai_usage_logs.timestamp': {
+      notNull: true,
+      defaultValue: "datetime('now')",
+    },
+  },
 });
 
 const sameOrderedValues = (actual, expected) =>
@@ -71,16 +78,18 @@ export function verifyD1Contract(snapshot) {
 
   const columnsByTable = new Map();
   const primaryKeysByTable = new Map();
+  const schemaByColumn = new Map();
   for (const row of schemaRows) {
     if (typeof row?.table_name !== 'string' || typeof row?.column_name !== 'string') continue;
+    schemaByColumn.set(`${row.table_name}.${row.column_name}`, row);
     const columns = columnsByTable.get(row.table_name) ?? [];
     columns.push(row.column_name);
     columnsByTable.set(row.table_name, columns);
-    if (Number(row.pk_position) > 0) {
+    if (Number.isInteger(row.pk_position) && row.pk_position > 0) {
       const primaryKeys = primaryKeysByTable.get(row.table_name) ?? [];
       primaryKeys.push({
         column: row.column_name,
-        position: Number(row.pk_position),
+        position: row.pk_position,
       });
       primaryKeysByTable.set(row.table_name, primaryKeys);
     }
@@ -98,13 +107,30 @@ export function verifyD1Contract(snapshot) {
   }
 
   for (const [table, expectedColumns] of Object.entries(D1_CONTRACT.primaryKeys)) {
-    const actualColumns = (primaryKeysByTable.get(table) ?? [])
-      .sort((left, right) => left.position - right.position)
-      .map(({ column }) => column);
+    const actual = (primaryKeysByTable.get(table) ?? []).sort((left, right) => left.position - right.position);
+    const actualColumns = actual.map(({ column }) => column);
     if (!sameOrderedValues(actualColumns, expectedColumns)) {
       errors.push(
         `primary key mismatch: ${table} expected [${expectedColumns.join(', ')}] got [${actualColumns.join(', ')}]`,
       );
+    }
+    const actualPositions = actual.map(({ position }) => position);
+    const expectedPositions = expectedColumns.map((_, index) => index + 1);
+    if (!sameOrderedValues(actualPositions, expectedPositions)) {
+      errors.push(
+        `primary key positions mismatch: ${table} expected [${expectedPositions.join(', ')}] got [${actualPositions.join(', ')}]`,
+      );
+    }
+  }
+
+  for (const [key, constraint] of Object.entries(D1_CONTRACT.columnConstraints)) {
+    const actual = schemaByColumn.get(key);
+    if (!actual) continue;
+    if (constraint.notNull && actual.not_null !== 1) {
+      errors.push(`column must be NOT NULL: ${key}`);
+    }
+    if (actual.default_value !== constraint.defaultValue) {
+      errors.push(`column default mismatch: ${key} expected ${constraint.defaultValue} got ${actual.default_value}`);
     }
   }
 
@@ -125,8 +151,12 @@ export function verifyD1Contract(snapshot) {
     const index = indexesByName.get(row.index_name) ?? {
       tables: new Set(),
       columns: [],
+      uniqueFlags: new Set(),
+      partialFlags: new Set(),
     };
     index.tables.add(row.table_name);
+    index.uniqueFlags.add(row.is_unique);
+    index.partialFlags.add(row.is_partial);
     index.columns.push({
       column: row.column_name,
       position: row.column_position,
@@ -146,6 +176,12 @@ export function verifyD1Contract(snapshot) {
     const actualTables = [...actual.tables].sort();
     if (actualTables.length !== 1 || actualTables[0] !== expected.table) {
       errors.push(`index table mismatch: ${name} expected ${expected.table} got [${actualTables.join(', ')}]`);
+    }
+    if (actual.uniqueFlags.size !== 1 || !actual.uniqueFlags.has(0)) {
+      errors.push(`index must be non-unique: ${name}`);
+    }
+    if (actual.partialFlags.size !== 1 || !actual.partialFlags.has(0)) {
+      errors.push(`index must be non-partial: ${name}`);
     }
     const orderedColumns = actual.columns.sort((left, right) => left.position - right.position);
     const actualColumns = orderedColumns.map(({ column }) => column);
