@@ -5,6 +5,7 @@ import { parseCotacaoVendaCsv } from './cotacao-csv.mjs';
 import { fetchComTimeout } from './fetch-timeout.mjs';
 import { analisarCompraEmReais } from './compra-reais.mjs';
 import { requireAllowedOrigin, enforceRateLimit, SECURITY_HEADERS } from './_shared/security.js';
+import { fatorCalibragemValido, resolverFatorCalibragemGlobal } from './_shared/calibragem.mjs';
 
 export async function onRequestPost(context) {
     const defaultHeaders = { "Content-Type": "application/json", ...SECURITY_HEADERS };
@@ -90,10 +91,9 @@ export async function onRequestPost(context) {
         const SPREAD_GLOBAL_FECHADO = resolveParam('spread_global_fechado', globalSpreadFechadoInformado, 'TAXA_SPREAD_GLOBAL_FECHADO', 0.0118);
         const calibragemD1 = parametrosD1.fator_calibragem_global;
         const calibragemEnv = readFiniteEnv('FATOR_CALIBRAGEM_GLOBAL');
-        const calibragemD1Valida = Number.isFinite(calibragemD1) && calibragemD1 > 0;
-        const CALIBRAGEM = calibragemD1Valida ? calibragemD1 : (calibragemEnv > 0 ? calibragemEnv : 0.99934);
-        if (calibragemD1Valida) origem.fator_calibragem_global = 'd1';
-        else delete origem.taxa_fator_calibragem_global;
+        const calibragemD1Valida = fatorCalibragemValido(calibragemD1);
+        const CALIBRAGEM = resolverFatorCalibragemGlobal(calibragemD1, calibragemEnv);
+        if (!calibragemD1Valida) delete origem.taxa_fator_calibragem_global;
 
         const resolveMetricParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
