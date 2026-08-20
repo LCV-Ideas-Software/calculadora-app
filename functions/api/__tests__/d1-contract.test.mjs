@@ -27,6 +27,7 @@ function validSnapshot() {
       column_position: position,
       is_unique: 0,
       is_partial: 0,
+      index_origin: 'c',
     })),
   );
   indexes.push({
@@ -36,6 +37,7 @@ function validSnapshot() {
     column_position: 0,
     is_unique: 0,
     is_partial: 0,
+    index_origin: 'c',
   });
 
   const retention = Object.entries(D1_CONTRACT.retention).map(([table, maxAgeDays]) => ({
@@ -117,6 +119,106 @@ describe('contrato sanitizado do D1 compartilhado', () => {
     expect(result.ok).toBe(false);
     expect(result.errors).toContain('index must be non-unique: idx_calc_backtest_created_at');
     expect(result.errors).toContain('index must be non-partial: idx_calc_rate_limit_hits_lookup');
+  });
+
+  it('rejeita índice UNIQUE inesperado em tabela pertencente ao contrato', () => {
+    const sharedSnapshot = validSnapshot();
+    sharedSnapshot.indexes.push({
+      index_name: 'shared_extra_unique_index',
+      table_name: 'shared_extra_table',
+      column_name: 'id',
+      column_position: 0,
+      is_unique: 1,
+      is_partial: 0,
+      index_origin: 'c',
+    });
+    expect(verifyD1Contract(sharedSnapshot)).toEqual({ ok: true, errors: [] });
+
+    const snapshot = validSnapshot();
+    snapshot.indexes.push(
+      {
+        index_name: 'idx_extra_unique_hits_route_ip',
+        table_name: 'calc_rate_limit_hits',
+        column_name: 'route_key',
+        column_position: 0,
+        is_unique: 1,
+        is_partial: 0,
+        index_origin: 'c',
+      },
+      {
+        index_name: 'idx_extra_unique_hits_route_ip',
+        table_name: 'calc_rate_limit_hits',
+        column_name: 'ip',
+        column_position: 1,
+        is_unique: 1,
+        is_partial: 0,
+        index_origin: 'c',
+      },
+    );
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain(
+      'unexpected unique index on contract-owned table: idx_extra_unique_hits_route_ip',
+    );
+  });
+
+  it('aceita autoíndice de PK quando origem, colunas e posições coincidem com o contrato', () => {
+    const snapshot = validSnapshot();
+    snapshot.indexes.push(
+      {
+        index_name: 'sqlite_autoindex_calc_ptax_cache_1',
+        table_name: 'calc_ptax_cache',
+        column_name: 'data_cotacao',
+        column_position: 0,
+        is_unique: 1,
+        is_partial: 0,
+        index_origin: 'pk',
+      },
+      {
+        index_name: 'sqlite_autoindex_calc_ptax_cache_1',
+        table_name: 'calc_ptax_cache',
+        column_name: 'moeda',
+        column_position: 1,
+        is_unique: 1,
+        is_partial: 0,
+        index_origin: 'pk',
+      },
+    );
+
+    expect(verifyD1Contract(snapshot)).toEqual({ ok: true, errors: [] });
+  });
+
+  it('rejeita índice UNIQUE de expressão mesmo quando a coluna não tem nome', () => {
+    const snapshot = validSnapshot();
+    snapshot.indexes.push({
+      index_name: 'idx_extra_unique_expression',
+      table_name: 'calc_rate_limit_hits',
+      column_name: null,
+      column_position: 0,
+      is_unique: 1,
+      is_partial: 0,
+      index_origin: 'c',
+    });
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('unexpected unique index on contract-owned table: idx_extra_unique_expression');
+  });
+
+  it('rejeita evidência de retenção duplicada sem sobrescrever a primeira leitura', () => {
+    const snapshot = validSnapshot();
+    const aiUsageRetention = snapshot.retention.find((row) => row.table_name === 'ai_usage_logs');
+    snapshot.retention = [
+      ...snapshot.retention.filter((row) => row.table_name !== 'ai_usage_logs'),
+      { ...aiUsageRetention, stale_rows: 5 },
+      { ...aiUsageRetention, stale_rows: 0 },
+    ];
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('duplicate retention evidence: ai_usage_logs');
+    expect(result.errors).toContain('retention violation: ai_usage_logs has 5 stale row(s)');
   });
 
   it('exige a PK de políticas e posições PK canônicas sem lacunas', () => {
