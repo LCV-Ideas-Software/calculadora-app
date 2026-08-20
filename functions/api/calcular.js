@@ -68,11 +68,18 @@ export async function onRequestPost(context) {
             } catch (e2) { }
         }
 
+        const readFiniteEnv = (envKey) => {
+            if (!envKey || env[envKey] === undefined) return undefined;
+            const value = parseFloat(env[envKey]);
+            return Number.isFinite(value) ? value : undefined;
+        };
+
         // Resolver valores finais (D1 > payload > env > default)
         const resolveParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1) return parametrosD1[d1Key];
             if (Number.isFinite(payloadVal)) return payloadVal / 100; // payload vem em %
-            if (envKey && env[envKey]) return parseFloat(env[envKey]);
+            const envValue = readFiniteEnv(envKey);
+            if (envValue !== undefined) return envValue;
             return fallback;
         };
 
@@ -81,16 +88,15 @@ export async function onRequestPost(context) {
         const IOF_GLOBAL = resolveParam('iof_global', iofPercentInformado, 'TAXA_IOF_GLOBAL', 0.035);
         const SPREAD_GLOBAL_ABERTO = resolveParam('spread_global_aberto', globalSpreadAbertoInformado, 'TAXA_SPREAD_GLOBAL_ABERTO', 0.0078);
         const SPREAD_GLOBAL_FECHADO = resolveParam('spread_global_fechado', globalSpreadFechadoInformado, 'TAXA_SPREAD_GLOBAL_FECHADO', 0.0118);
-        const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (env.FATOR_CALIBRAGEM_GLOBAL ? parseFloat(env.FATOR_CALIBRAGEM_GLOBAL) : 0.99934);
+        const calibragemEnv = readFiniteEnv('FATOR_CALIBRAGEM_GLOBAL');
+        const CALIBRAGEM = ('fator_calibragem_global' in parametrosD1) ? parametrosD1.fator_calibragem_global : (calibragemEnv ?? 0.99934);
         if ('fator_calibragem_global' in parametrosD1) origem.fator_calibragem_global = 'd1';
 
         const resolveMetricParam = (d1Key, payloadVal, envKey, fallback) => {
             if (d1Key in parametrosD1 && Number.isFinite(parametrosD1[d1Key])) return parametrosD1[d1Key];
             if (Number.isFinite(payloadVal)) return payloadVal;
-            if (envKey && env[envKey] !== undefined) {
-                const v = parseFloat(env[envKey]);
-                if (Number.isFinite(v)) return v;
-            }
+            const envValue = readFiniteEnv(envKey);
+            if (envValue !== undefined) return envValue;
             return fallback;
         };
 

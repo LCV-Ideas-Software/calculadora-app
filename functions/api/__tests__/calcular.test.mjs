@@ -119,6 +119,109 @@ it('mantém precedência D1 sobre payload e ambiente nos limiares percentuais', 
   expect(body.parametros_vigentes.backtest_mape_atencao_percent).toBe(3);
 });
 
+it('mantém precedência D1 sobre payload e ambiente nos parâmetros financeiros', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({
+      data_compra: '2026-07-08',
+      moeda: 'USD',
+      valor_original: 100,
+      spread_percent: 6,
+      iof_percent: 4.5,
+      global_spread_aberto_percent: 1.5,
+    }),
+    env: envComPtax(
+      5,
+      {
+        TAXA_SPREAD: '0.08',
+        TAXA_IOF: '0.04',
+        TAXA_IOF_GLOBAL: '0.03',
+        TAXA_SPREAD_GLOBAL_ABERTO: '0.02',
+        TAXA_SPREAD_GLOBAL_FECHADO: '0.03',
+        FATOR_CALIBRAGEM_GLOBAL: '0.98',
+      },
+      [
+        { chave: 'spread_cartao', valor: '0.05' },
+        { chave: 'iof_global', valor: '0.01' },
+        { chave: 'fator_calibragem_global', valor: '0.97' },
+      ],
+    ),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0.05,
+    iof_cartao: 0.045,
+    iof_global: 0.01,
+    spread_global_aberto: 0.015,
+    spread_global_fechado: 0.03,
+    fator_calibragem_global: 0.97,
+  });
+});
+
+it('ignora parâmetros financeiros inválidos do ambiente e preserva defaults finitos', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, {
+      TAXA_SPREAD: '',
+      TAXA_IOF: 'NaN',
+      TAXA_IOF_GLOBAL: 'infinito',
+      TAXA_SPREAD_GLOBAL_ABERTO: '?',
+      TAXA_SPREAD_GLOBAL_FECHADO: '!',
+      FATOR_CALIBRAGEM_GLOBAL: 'n/a',
+    }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0.055,
+    iof_cartao: 0.035,
+    iof_global: 0.035,
+    spread_global_aberto: 0.0078,
+    spread_global_fechado: 0.0118,
+    fator_calibragem_global: 0.99934,
+  });
+  expect(body.cartao.valor_total_brl).toBe(545.96);
+  expect(body.cartao.vet).toBe(5.459625);
+});
+
+it('aceita zero finito do ambiente sem substituí-lo pelos defaults', async () => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
+  });
+  const res = await onRequestPost({
+    request: req({ data_compra: '2026-07-08', moeda: 'USD', valor_original: 100 }),
+    env: envComPtax(5, {
+      TAXA_SPREAD: '0',
+      TAXA_IOF: '0',
+      TAXA_IOF_GLOBAL: '0',
+      TAXA_SPREAD_GLOBAL_ABERTO: '0',
+      TAXA_SPREAD_GLOBAL_FECHADO: '0',
+      FATOR_CALIBRAGEM_GLOBAL: '0',
+    }),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).toMatchObject({
+    spread_cartao: 0,
+    iof_cartao: 0,
+    iof_global: 0,
+    spread_global_aberto: 0,
+    spread_global_fechado: 0,
+    fator_calibragem_global: 0,
+  });
+  expect(body.cartao.valor_total_brl).toBe(500);
+  expect(body.cartao.vet).toBe(5);
+});
+
 it('usa ambiente válido e depois defaults para ambiente ausente ou inválido quando o payload não é finito', async () => {
   vi.stubGlobal('fetch', () => {
     throw new Error('não deveria chamar rede (cache D1 cobre as cotações)');
