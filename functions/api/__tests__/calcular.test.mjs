@@ -356,3 +356,36 @@ it('modo cobrado em reais retorna cenários sem tocar em cotação', async () =>
   expect(body.compra_em_reais.cenarios.dcc_pura.total_brl).toBe(103.5);
   expect(body.compra_em_reais.diagnostico.cenario_provavel).toBe('dcc_pura');
 });
+
+it.each([
+  {
+    origem: 'D1',
+    bindings: { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+    parametros: [
+      { chave: 'iof_cartao', valor: '0.04' },
+      { chave: 'spread_cartao', valor: '0.05' },
+      { chave: 'fator_calibragem_global', valor: '0.97' },
+      { chave: 'backtest_mape_boa_percent', valor: '1.5' },
+    ],
+    origemEsperada: { taxa_iof_cartao: 'd1', taxa_spread_cartao: 'd1' },
+  },
+  {
+    origem: 'ambiente',
+    bindings: { FATOR_CALIBRAGEM_GLOBAL: '0.98' },
+    parametros: [],
+    origemEsperada: {},
+  },
+])('modo cobrado em reais omite valor e origem da calibragem vinda de $origem', async ({ bindings, parametros, origemEsperada }) => {
+  vi.stubGlobal('fetch', () => {
+    throw new Error('não deveria chamar rede no modo reais');
+  });
+  const res = await onRequestPost({
+    request: req({ valor_original: 100, cobrado_em_reais: true }),
+    env: envComPtax(5, bindings, parametros),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes).not.toHaveProperty('fator_calibragem_global');
+  expect(body.parametros_vigentes.origem).toEqual(origemEsperada);
+});
