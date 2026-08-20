@@ -119,6 +119,58 @@ describe('contrato sanitizado do D1 compartilhado', () => {
     expect(result.errors).toContain('index must be non-partial: idx_calc_rate_limit_hits_lookup');
   });
 
+  it('rejeita índice UNIQUE inesperado em tabela pertencente ao contrato', () => {
+    const snapshot = validSnapshot();
+    snapshot.indexes.push(
+      {
+        index_name: 'idx_extra_unique_hits_route_ip',
+        table_name: 'calc_rate_limit_hits',
+        column_name: 'route_key',
+        column_position: 0,
+        is_unique: 1,
+        is_partial: 0,
+      },
+      {
+        index_name: 'idx_extra_unique_hits_route_ip',
+        table_name: 'calc_rate_limit_hits',
+        column_name: 'ip',
+        column_position: 1,
+        is_unique: 1,
+        is_partial: 0,
+      },
+      {
+        index_name: 'shared_extra_unique_index',
+        table_name: 'shared_extra_table',
+        column_name: 'id',
+        column_position: 0,
+        is_unique: 1,
+        is_partial: 0,
+      },
+    );
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain(
+      'unexpected unique index on contract-owned table: idx_extra_unique_hits_route_ip',
+    );
+    expect(result.errors).not.toContain('unexpected unique index on contract-owned table: shared_extra_unique_index');
+  });
+
+  it('rejeita evidência de retenção duplicada sem sobrescrever a primeira leitura', () => {
+    const snapshot = validSnapshot();
+    const aiUsageRetention = snapshot.retention.find((row) => row.table_name === 'ai_usage_logs');
+    snapshot.retention = [
+      ...snapshot.retention.filter((row) => row.table_name !== 'ai_usage_logs'),
+      { ...aiUsageRetention, stale_rows: 5 },
+      { ...aiUsageRetention, stale_rows: 0 },
+    ];
+
+    const result = verifyD1Contract(snapshot);
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain('duplicate retention evidence: ai_usage_logs');
+    expect(result.errors).toContain('retention violation: ai_usage_logs has 5 stale row(s)');
+  });
+
   it('exige a PK de políticas e posições PK canônicas sem lacunas', () => {
     const snapshot = validSnapshot();
     snapshot.schema = snapshot.schema.map((row) => {
