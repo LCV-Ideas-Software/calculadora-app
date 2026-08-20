@@ -199,9 +199,26 @@ export function verifyD1Contract(snapshot) {
     }
   }
 
-  const retentionByTable = new Map(
-    retentionRows.filter((row) => typeof row?.table_name === 'string').map((row) => [row.table_name, row]),
-  );
+  const contractTables = new Set(Object.keys(D1_CONTRACT.tables));
+  const canonicalIndexes = new Set(Object.keys(D1_CONTRACT.indexes));
+  for (const [name, index] of indexesByName) {
+    if (canonicalIndexes.has(name) || ![...index.tables].some((table) => contractTables.has(table))) continue;
+    if (index.uniqueFlags.size !== 1 || !index.uniqueFlags.has(0)) {
+      errors.push(`unexpected unique index on contract-owned table: ${name}`);
+    }
+  }
+
+  const retentionByTable = new Map();
+  const duplicateRetentionTables = new Set();
+  for (const row of retentionRows) {
+    if (typeof row?.table_name !== 'string') continue;
+    if (retentionByTable.has(row.table_name)) {
+      if (Object.hasOwn(D1_CONTRACT.retention, row.table_name)) duplicateRetentionTables.add(row.table_name);
+      continue;
+    }
+    retentionByTable.set(row.table_name, row);
+  }
+  for (const table of duplicateRetentionTables) errors.push(`duplicate retention evidence: ${table}`);
   for (const [table, maxAgeDays] of Object.entries(D1_CONTRACT.retention)) {
     const actual = retentionByTable.get(table);
     if (!actual) {

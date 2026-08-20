@@ -120,6 +120,17 @@ describe('contrato sanitizado do D1 compartilhado', () => {
   });
 
   it('rejeita índice UNIQUE inesperado em tabela pertencente ao contrato', () => {
+    const sharedSnapshot = validSnapshot();
+    sharedSnapshot.indexes.push({
+      index_name: 'shared_extra_unique_index',
+      table_name: 'shared_extra_table',
+      column_name: 'id',
+      column_position: 0,
+      is_unique: 1,
+      is_partial: 0,
+    });
+    expect(verifyD1Contract(sharedSnapshot)).toEqual({ ok: true, errors: [] });
+
     const snapshot = validSnapshot();
     snapshot.indexes.push(
       {
@@ -138,14 +149,6 @@ describe('contrato sanitizado do D1 compartilhado', () => {
         is_unique: 1,
         is_partial: 0,
       },
-      {
-        index_name: 'shared_extra_unique_index',
-        table_name: 'shared_extra_table',
-        column_name: 'id',
-        column_position: 0,
-        is_unique: 1,
-        is_partial: 0,
-      },
     );
 
     const result = verifyD1Contract(snapshot);
@@ -153,7 +156,6 @@ describe('contrato sanitizado do D1 compartilhado', () => {
     expect(result.errors).toContain(
       'unexpected unique index on contract-owned table: idx_extra_unique_hits_route_ip',
     );
-    expect(result.errors).not.toContain('unexpected unique index on contract-owned table: shared_extra_unique_index');
   });
 
   it('rejeita evidência de retenção duplicada sem sobrescrever a primeira leitura', () => {
