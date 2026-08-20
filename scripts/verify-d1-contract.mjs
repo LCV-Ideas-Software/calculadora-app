@@ -135,19 +135,39 @@ export function verifyD1Contract(snapshot) {
   }
 
   const indexesByName = new Map();
+  const indexMetadataByName = new Map();
   const invalidIndexPositions = new Set();
   for (const row of indexRows) {
-    if (
-      typeof row?.index_name !== 'string' ||
-      typeof row?.table_name !== 'string' ||
-      typeof row?.column_name !== 'string'
-    ) {
+    if (typeof row?.index_name !== 'string' || typeof row?.table_name !== 'string') continue;
+    const metadata = indexMetadataByName.get(row.index_name) ?? {
+      tables: new Set(),
+      columns: [],
+      uniqueFlags: new Set(),
+      partialFlags: new Set(),
+      origins: new Set(),
+      hasMalformedColumns: false,
+      hasInvalidPositions: false,
+    };
+    metadata.tables.add(row.table_name);
+    metadata.uniqueFlags.add(row.is_unique);
+    metadata.partialFlags.add(row.is_partial);
+    metadata.origins.add(row.index_origin);
+    if (typeof row.column_name !== 'string') {
+      metadata.hasMalformedColumns = true;
+      indexMetadataByName.set(row.index_name, metadata);
       continue;
     }
     if (!Number.isInteger(row.column_position)) {
+      metadata.hasInvalidPositions = true;
+      indexMetadataByName.set(row.index_name, metadata);
       invalidIndexPositions.add(row.index_name);
       continue;
     }
+    metadata.columns.push({
+      column: row.column_name,
+      position: row.column_position,
+    });
+    indexMetadataByName.set(row.index_name, metadata);
     const index = indexesByName.get(row.index_name) ?? {
       tables: new Set(),
       columns: [],
@@ -201,9 +221,26 @@ export function verifyD1Contract(snapshot) {
 
   const contractTables = new Set(Object.keys(D1_CONTRACT.tables));
   const canonicalIndexes = new Set(Object.keys(D1_CONTRACT.indexes));
-  for (const [name, index] of indexesByName) {
+  const isCanonicalPrimaryKeyAutoindex = (name, index) => {
+    const tables = [...index.tables];
+    if (tables.length !== 1) return false;
+    const [table] = tables;
+    const expectedColumns = D1_CONTRACT.primaryKeys[table];
+    if (!expectedColumns || !name.startsWith(`sqlite_autoindex_${table}_`)) return false;
+    if (index.hasMalformedColumns || index.hasInvalidPositions) return false;
+    if (index.origins.size !== 1 || !index.origins.has('pk')) return false;
+    if (index.uniqueFlags.size !== 1 || !index.uniqueFlags.has(1)) return false;
+    if (index.partialFlags.size !== 1 || !index.partialFlags.has(0)) return false;
+    const orderedColumns = [...index.columns].sort((left, right) => left.position - right.position);
+    const actualColumns = orderedColumns.map(({ column }) => column);
+    const actualPositions = orderedColumns.map(({ position }) => position);
+    const expectedPositions = expectedColumns.map((_, position) => position);
+    return sameOrderedValues(actualColumns, expectedColumns) && sameOrderedValues(actualPositions, expectedPositions);
+  };
+  for (const [name, index] of indexMetadataByName) {
     if (canonicalIndexes.has(name) || ![...index.tables].some((table) => contractTables.has(table))) continue;
-    if (index.uniqueFlags.size !== 1 || !index.uniqueFlags.has(0)) {
+    const isProvenNonUnique = index.uniqueFlags.size === 1 && index.uniqueFlags.has(0);
+    if (!isProvenNonUnique && !isCanonicalPrimaryKeyAutoindex(name, index)) {
       errors.push(`unexpected unique index on contract-owned table: ${name}`);
     }
   }
