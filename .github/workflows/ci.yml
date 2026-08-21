@@ -28,6 +28,7 @@ jobs:
           node-version: 24
           check-latest: true
       - run: npm ci --no-audit --no-fund
+      - run: npm run verify:thirdparty
       - run: npm run biome
       - run: npm run build
       - run: npm test

@@ -23,6 +23,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "verify:d1-contract": "node scripts/verify-d1-contract.mjs",
+    "verify:thirdparty": "node scripts/verify-thirdparty.mjs",
     "format": "biome format --write src",
     "lint": "biome check src",
     "biome": "biome check .",
