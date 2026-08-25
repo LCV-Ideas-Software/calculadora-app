@@ -8,7 +8,7 @@
 
 ### Changed
 
-- The production-gated Linear Release workflow now uses the official `linear/linear-release-action` v0.16.0, pinned to its signed full commit SHA, while preserving the exact deployed-SHA checkout, least-privilege permissions, dedicated environment and best-effort behavior.
+- The production-gated Linear Release workflow now uses the official `linear/linear-release-action` v0.16.0, pinned to its signed full commit SHA, while preserving the exact deployed-SHA checkout, least-privilege permissions and dedicated environment. Pending runs use `queue: max`, and action failures now fail the workflow visibly.
 - Security, dependency review and Cloudflare deployment workflows now use the official GitHub, OpenSSF, Zizmor and Cloudflare Actions directly, without organization-specific wrappers or policy manifests. The Pages D1 binding remains in Cloudflare's native dashboard configuration, so no operational database identifier is published in source control.
 - This web application retains its internal `APP_VERSION` and changelog but no longer creates GitHub Releases or version tags; those distribution artifacts are reserved for repositories that publish packages.
 - The npm package is marked `private` because this repository deploys a web application rather than publishing a package.
