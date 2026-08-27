@@ -32,7 +32,7 @@
     "format:public:check": "prettier --check \"**/index.html\""
   },
   "dependencies": {
-    "dompurify": "^3.4.13",
+    "dompurify": "^3.4.14",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sanitize-html": "^2.17.7"
