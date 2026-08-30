@@ -5,6 +5,7 @@
 ### Added
 
 - Governanca de trabalho sobre GitHub Projects, Issues e Discussions: quadro dedicado do repositorio, formularios de issue para Incident, Maintenance e Spike, atalhos para Discussions no seletor de issues e o ritual de registro G1..G4 documentado para Claude Code e ChatGPT-Codex.
+- Native OpenSSF Scorecard schedule observability through GitHub's event-filtered workflow badge and history, with the README documenting scheduled execution as best-effort and `push` on `main` as the supported exact-change validation path.
 
 ### Changed
 
