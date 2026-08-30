@@ -10,19 +10,46 @@ const LEGAL_FILES = {
   LICENSE: `${LEGAL_PUBLIC_BASE}LICENSE.txt`,
   NOTICE: `${LEGAL_PUBLIC_BASE}NOTICE.txt`,
   THIRDPARTY: `${LEGAL_PUBLIC_BASE}THIRDPARTY.md`,
+  BUNDLED_NOTICES: `${LEGAL_PUBLIC_BASE}THIRD-PARTY-NOTICES.json`,
 } as const;
 
 type DocsState = {
   LICENSE: string;
   NOTICE: string;
   THIRDPARTY: string;
+  BUNDLED_NOTICES: string;
 };
+
+type BundledLicenseEntry = {
+  name: string;
+  version: string;
+  identifier: string;
+  text: string;
+};
+
+function isBundledLicenseEntry(value: unknown): value is BundledLicenseEntry {
+  if (typeof value !== 'object' || value === null) return false;
+  const entry = value as Partial<BundledLicenseEntry>;
+  return [entry.name, entry.version, entry.identifier, entry.text].every(
+    (field) => typeof field === 'string' && field.trim().length > 0,
+  );
+}
+
+function formatBundledNotices(value: unknown): string {
+  if (!Array.isArray(value) || !value.every(isBundledLicenseEntry)) {
+    throw new Error('Formato inválido em THIRD-PARTY-NOTICES.json.');
+  }
+  return value
+    .map(({ name, version, identifier, text }) => `${name}@${version}\nSPDX: ${identifier}\n\n${text}`)
+    .join('\n\n---\n\n');
+}
 
 export function LicencasModule() {
   const [content, setContent] = useState<DocsState>({
     LICENSE: 'Carregando...',
     NOTICE: 'Carregando...',
     THIRDPARTY: 'Carregando...',
+    BUNDLED_NOTICES: 'Carregando...',
   });
 
   useEffect(() => {
@@ -36,22 +63,34 @@ export function LicencasModule() {
 
     const fetchFiles = async () => {
       try {
-        const [licenseText, noticeText, thirdPartyText] = await Promise.all([
+        const bundledNoticesPromise = import.meta.env.PROD
+          ? fetch(LEGAL_FILES.BUNDLED_NOTICES, { cache: 'no-store' }).then(async (response) => {
+              if (!response.ok) {
+                throw new Error(`Falha ao carregar BUNDLED_NOTICES: ${response.status}`);
+              }
+              return formatBundledNotices(await response.json());
+            })
+          : Promise.resolve('O relatório completo é gerado pelo build de produção do Vite.');
+
+        const [licenseText, noticeText, thirdPartyText, bundledNoticesText] = await Promise.all([
           fetchFile('LICENSE', LEGAL_FILES.LICENSE),
           fetchFile('NOTICE', LEGAL_FILES.NOTICE),
           fetchFile('THIRDPARTY', LEGAL_FILES.THIRDPARTY),
+          bundledNoticesPromise,
         ]);
 
         setContent({
           LICENSE: licenseText,
           NOTICE: noticeText,
           THIRDPARTY: thirdPartyText,
+          BUNDLED_NOTICES: bundledNoticesText,
         });
       } catch {
         setContent({
           LICENSE: 'Erro ao carregar LICENSE.',
           NOTICE: 'Erro ao carregar NOTICE.',
           THIRDPARTY: 'Erro ao carregar THIRDPARTY.md.',
+          BUNDLED_NOTICES: 'Erro ao carregar THIRD-PARTY-NOTICES.json.',
         });
       }
     };
@@ -113,8 +152,8 @@ export function LicencasModule() {
         Conformidade e Licenças (Open Source Compliance)
       </h1>
       <p style={{ color: '#5f6368', marginBottom: '32px' }}>
-        Este sistema opera sob a GNU Affero General Public License v3 (AGPLv3), com avisos e componentes de terceiros
-        sob Apache License 2.0 devidamente documentados em NOTICE e THIRDPARTY.md.
+        Este sistema opera sob a GNU Affero General Public License v3 (AGPLv3), com componentes de terceiros e suas
+        licenças devidamente documentados em NOTICE, THIRDPARTY.md e no relatório nativo do bundle.
       </p>
 
       <section style={sectionStyle}>
@@ -136,6 +175,23 @@ export function LicencasModule() {
           Componentes de Terceiros (THIRDPARTY)
         </h2>
         <pre style={preStyle}>{content.THIRDPARTY}</pre>
+      </section>
+
+      <section style={sectionStyle}>
+        <h2 style={{ color: '#1a73e8', borderBottom: '2px solid #e8eaed', paddingBottom: '8px', marginBottom: '16px' }}>
+          Licenças do bundle do navegador
+        </h2>
+        <p style={{ color: '#5f6368' }}>
+          Relatório completo gerado pelo <code>build.license</code> oficial do Vite para os componentes efetivamente
+          empacotados.
+          {import.meta.env.PROD && (
+            <>
+              {' '}
+              <a href={LEGAL_FILES.BUNDLED_NOTICES}>Baixar o JSON original.</a>
+            </>
+          )}
+        </p>
+        <pre style={preStyle}>{content.BUNDLED_NOTICES}</pre>
       </section>
     </div>
   );
