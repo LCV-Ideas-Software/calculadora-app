@@ -2,5 +2,10 @@ Copyright © 2026 LCV Ideas & Software
 
 AVISOS DE TERCEIROS (THIRD-PARTY NOTICES)
 -----------------------------------------
-Este repositório pode conter dependências ou componentes de terceiros distribuídos sob licenças compatíveis (ex: Apache License 2.0). 
-Detalhes na tabela THIRDPARTY.md.
+Este projeto distribui componentes de terceiros sob licenças compatíveis,
+documentados em THIRDPARTY.md. Para expressões alternativas, esta distribuição
+adota Apache License 2.0 para DOMPurify e para o Biome usado em desenvolvimento.
+
+O build de produção publica os textos integrais aplicáveis ao bundle do navegador
+em /legal/THIRD-PARTY-NOTICES.json, gerado pelo build.license oficial do Vite e
+exposto na superfície de conformidade da aplicação.

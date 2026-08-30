@@ -28,9 +28,11 @@ jobs:
           check-latest: true
           package-manager-cache: false
       - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run verify:thirdparty
       - run: npm run biome
       - run: npm test
       - run: npm run build
+      - run: npm run verify:thirdparty:artifact
       - name: Deploy Pages
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
