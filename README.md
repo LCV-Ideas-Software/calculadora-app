@@ -8,6 +8,7 @@
 [![Deploy](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml)
 [![Pages](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml)
 [![CodeQL](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard (weekly)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/scorecard.yml/badge.svg?event=schedule)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/scorecard.yml?query=event%3Aschedule)
 [![runtime: Cloudflare Pages](https://img.shields.io/badge/runtime-Cloudflare%20Pages-orange.svg)](https://pages.cloudflare.com/)
 [![framework: React 19 + Vite 8](https://img.shields.io/badge/framework-React%2019%20%2B%20Vite%208-61dafb.svg)](https://react.dev/)
 [![license: AGPL-3.0-or-later](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
@@ -15,6 +16,8 @@
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
 **Status.** Stable. Current application version: **v04.03.03**. See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
+
+**OpenSSF Scorecard freshness.** GitHub Actions schedules are best-effort and [can be delayed during periods of high load](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). The native badge and its schedule-filtered history show the latest weekly result and execution timestamp; supported `push` runs independently validate changes merged into `main`.
 
 The version history at a glance:
 
