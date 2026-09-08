@@ -7,7 +7,6 @@
 [![status: stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](#status)
 [![Deploy](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/deploy.yml)
 [![Pages](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/pages.yml)
-[![CodeQL](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml/badge.svg)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard (weekly)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/scorecard.yml/badge.svg?event=schedule)](https://github.com/LCV-Ideas-Software/calculadora-app/actions/workflows/scorecard.yml?query=event%3Aschedule)
 [![runtime: Cloudflare Pages](https://img.shields.io/badge/runtime-Cloudflare%20Pages-orange.svg)](https://pages.cloudflare.com/)
 [![framework: React 19 + Vite 8](https://img.shields.io/badge/framework-React%2019%20%2B%20Vite%208-61dafb.svg)](https://react.dev/)
@@ -15,30 +14,31 @@
 
 **Calculadora Financeira** — simulador comparativo de câmbio internacional com análise por IA. React 19 + Vite 8 sobre Cloudflare Pages com D1 backing store, integração Gemini para análises contextuais.
 
-**Status.** Stable. Current application version: **v04.03.03**. See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
+**Status.** Stable. Current application version: **v04.03.04**. See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
 
 **OpenSSF Scorecard freshness.** GitHub Actions schedules are best-effort and [can be delayed during periods of high load](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). The native badge and its schedule-filtered history show the latest weekly result and execution timestamp; supported `push` runs independently validate changes merged into `main`.
 
 The version history at a glance:
 
-| Version                              | Scope                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`v04.03.03`**                      | **Corrects the guard path recorded in the v04.03.02 notes.** Those notes named `src/services/releaseConsistency.test.ts`, the first attempt; the test lives in `functions/api/__tests__/` because `tsconfig.app.json` compiles `src` without node types. The path is fixed in the v04.03.02 entry and the change is recorded here rather than made silently. |
+| Version                              | Scope                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`v04.03.04`**                      | **Native governance reform.** Standard repository-local CI, Dependabot auto-merge, CodeQL Default Setup, Pages and Linear Release. Retires custom legal-inventory and Public Format gates while retaining native Vite bundle notices and the existing Pages Functions/D1 application.                                                                                                                                                                          |
+| **`v04.03.03`**                      | **Corrects the guard path recorded in the v04.03.02 notes.** Those notes named `src/services/releaseConsistency.test.ts`, the first attempt; the test lives in `functions/api/__tests__/` because `tsconfig.app.json` compiles `src` without node types. The path is fixed in the v04.03.02 entry and the change is recorded here rather than made silently.                                                                                                   |
 | **`v04.03.02`**                      | **Release markers realigned — two releases had shipped untagged.** `auto-release.yml` derives the tag from `APP_VERSION` in `src/services/formatting.ts`, which had stayed at `v04.02.04`, so v04.03.00 and v04.03.01 produced no tag and no release while the UI reported the wrong version. A new `releaseConsistency` test derives the marker from `package.json` and locks `APP_VERSION`, README and SECURITY together so the drift cannot recur silently. |
-| **`v04.03.01`**                      | **Production hotfix.** Fixes the workerd-only `Illegal invocation` error: the Vertex client invoked global fetch through an instance property, leaking the instance as `this`; the default now wraps fetch detached. Regression test simulates the this-sensitive production fetch (72/72). Also updates README secret setup to VERTEX_SA_KEY (review-bot P2).    |
-| **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                             |
-| **`v04.02.04`**                      | **Backtest threshold precedence fix.** Custom MAPE thresholds now follow D1 > finite payload > valid environment > default, preserving percentage-point scale; focused tests cover every tier and prove that a PTAX cache hit performs no external request. |
-| **`v04.02.03`**                      | **Dependency security patch.** Resolves GHSA-j3f2-48v5-ccww / CVE-2026-59877 by moving the transitive `protobufjs` override used by `@google/genai` from 7.6.3 to 7.6.5. |
-| **`v04.02.02`**                      | **Cross-review finding fixed.** AI telemetry (insert + LGPD prune of ai_usage_logs) now returns its Promise and is registered via context.waitUntil at both call sites (post-response execution guarantee); fallback-chain and telemetry tests added. Shipped under formal unanimous cross-review ALL READY (caller + 5 peers).  |
-| **`v04.02.01`**                      | **Audit follow-ups.** LGPD 90-day retention on AI telemetry tables; Gemini default migrated to the official GA replacement ahead of the announced model shutdown (3.x-idiomatic config, env override kept); global-account educational note in the BRL-charge panel; canonical D1 indexes.  |
-| **`v04.02.00`**                      | **Deep audit + DCC mode.** 118-agent audit with adversarial verification; new "cobrado em reais" (DCC) mode with reverse invoice diagnostics (3 scenarios: local acquiring / pure DCC / double conversion); display-scale and locale-parsing hotfixes; BCB CSV parser fix for exotic currencies; rate limiting + fetch timeouts + e-mail sanitizer hardening; first engine tests, dedicated CI workflow, D1 pruning and canonical schema.sql.  |
-| **`v04.01.19`**                      | **4-gate quality directive compliance.** Added Biome gate and deploy workflow coverage; eslint remains deferred because this repository does not currently install eslint, so Biome serves as the active JS/TS lint and format gate for this release.                                                                           |
-| **`v04.01.18`**                      | **Site sponsor card iteration.** `site/index.html` GitHub Sponsors iframe (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos).                                                   |
-| **`v04.01.17`**                      | **Site visual identity refresh.** `site/index.html` (GitHub Pages) reskinneada para a nova identidade dark-first navy/cyan da LCV Ideas & Software (`#050b18`/`#38bdf8`/`#34d399`, gradientes radiais, glow shadows, gradient text no h1). Coordinated Phase 2 companion ship (calculadora, oraculo, astrologo, admin, mainsite, maestro, mtasts). Sem mudança no app runtime. |
-| **`v04.01.16`**                      | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `example-beneficiary` by explicit beneficiary decision.                                                                     |
-| **`v04.01.15`**                      | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks.                                                                                                                                                                                                          |
-| **`v04.01.14`**                      | **First public release.** Completed the public flip, CodeQL remediation, rebrand cleanup, AGPL publication hygiene, and deployment hardening.                                                                                                                                                                                                                     |
-| **`Security Publication Hardening`** | **Publication boundary tightening.** Hardened ignore rules and package contents before public distribution.                                                                                                                                                                                                                                                       |
+| **`v04.03.01`**                      | **Production hotfix.** Fixes the workerd-only `Illegal invocation` error: the Vertex client invoked global fetch through an instance property, leaking the instance as `this`; the default now wraps fetch detached. Regression test simulates the this-sensitive production fetch (72/72). Also updates README secret setup to VERTEX_SA_KEY (review-bot P2).                                                                                                 |
+| **`v04.03.00`**                      | **Vertex AI transport migration.** Oráculo IA now calls Vertex AI with service-account auth (WebCrypto RS256 JWT -> OAuth2, per-key token cache, single-flight), moving Gemini billing from AI Studio prepaid credits to standard postpaid Cloud billing; prompts, fallback chain, telemetry and the GEMINI_MODEL override unchanged.                                                                                                                          |
+| **`v04.02.04`**                      | **Backtest threshold precedence fix.** Custom MAPE thresholds now follow D1 > finite payload > valid environment > default, preserving percentage-point scale; focused tests cover every tier and prove that a PTAX cache hit performs no external request.                                                                                                                                                                                                    |
+| **`v04.02.03`**                      | **Dependency security patch.** Resolves GHSA-j3f2-48v5-ccww / CVE-2026-59877 by moving the transitive `protobufjs` override used by `@google/genai` from 7.6.3 to 7.6.5.                                                                                                                                                                                                                                                                                       |
+| **`v04.02.02`**                      | **Cross-review finding fixed.** AI telemetry (insert + LGPD prune of ai_usage_logs) now returns its Promise and is registered via context.waitUntil at both call sites (post-response execution guarantee); fallback-chain and telemetry tests added. Shipped under formal unanimous cross-review ALL READY (caller + 5 peers).                                                                                                                                |
+| **`v04.02.01`**                      | **Audit follow-ups.** LGPD 90-day retention on AI telemetry tables; Gemini default migrated to the official GA replacement ahead of the announced model shutdown (3.x-idiomatic config, env override kept); global-account educational note in the BRL-charge panel; canonical D1 indexes.                                                                                                                                                                     |
+| **`v04.02.00`**                      | **Deep audit + DCC mode.** 118-agent audit with adversarial verification; new "cobrado em reais" (DCC) mode with reverse invoice diagnostics (3 scenarios: local acquiring / pure DCC / double conversion); display-scale and locale-parsing hotfixes; BCB CSV parser fix for exotic currencies; rate limiting + fetch timeouts + e-mail sanitizer hardening; first engine tests, dedicated CI workflow, D1 pruning and canonical schema.sql.                  |
+| **`v04.01.19`**                      | **4-gate quality directive compliance.** Added Biome gate and deploy workflow coverage; eslint remains deferred because this repository does not currently install eslint, so Biome serves as the active JS/TS lint and format gate for this release.                                                                                                                                                                                                          |
+| **`v04.01.18`**                      | **Site sponsor card iteration.** `site/index.html` GitHub Sponsors iframe (caixa branca cross-origin) substituído por link card dark navy com ❤ pink + meta cyan + seta animada; card movido para DEPOIS dos botões (lcv.dev/sponsor primário, GitHub Sponsors alternativa). Companion ship Phase 3 (12 repos).                                                                                                                                                |
+| **`v04.01.17`**                      | **Site visual identity refresh.** `site/index.html` (GitHub Pages) reskinneada para a nova identidade dark-first navy/cyan da LCV Ideas & Software (`#050b18`/`#38bdf8`/`#34d399`, gradientes radiais, glow shadows, gradient text no h1). Coordinated Phase 2 companion ship (calculadora, oraculo, astrologo, admin, mainsite, maestro, mtasts). Sem mudança no app runtime.                                                                                 |
+| **`v04.01.16`**                      | **README organizational standardization.** Adopted the shared repository README opening pattern, corrected public release and clone links to the organization, surfaced the top-level version-history table, and kept the GitHub Sponsors link on `example-beneficiary` by explicit beneficiary decision.                                                                                                                                                      |
+| **`v04.01.15`**                      | **Pages modernization.** Migrated fully to the current GitHub Pages artifact-deployment model and enabled idempotent Pages setup for fresh clones/forks.                                                                                                                                                                                                                                                                                                       |
+| **`v04.01.14`**                      | **First public release.** Completed the public flip, CodeQL remediation, rebrand cleanup, AGPL publication hygiene, and deployment hardening.                                                                                                                                                                                                                                                                                                                  |
+| **`Security Publication Hardening`** | **Publication boundary tightening.** Hardened ignore rules and package contents before public distribution.                                                                                                                                                                                                                                                                                                                                                    |
 
 ## What it does
 
@@ -103,8 +103,9 @@ npx wrangler d1 create example_db
 #   database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ```
 
-Keep the `database_id` available for local Wrangler commands, but do not commit
-the real identifier to a public repository.
+Keep the `database_id` available for local Wrangler commands. It is nonsecret
+configuration metadata, not a credential. This project's binding remains in the
+Cloudflare dashboard; no configuration-file migration is required.
 
 ### 3. Bind D1 to the Pages project
 
@@ -116,7 +117,7 @@ Use Cloudflare's native dashboard configuration:
 4. Redeploy the project so the binding takes effect.
 
 For local development, build `dist` first, then pass the identifier directly to
-Wrangler without storing it in the repository:
+Wrangler using the existing dashboard-oriented setup:
 
 ```bash
 npm run build
@@ -142,10 +143,32 @@ npx wrangler pages deploy dist --project-name=calculadora-app
 
 This repo's [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs the project checks and build on every push to `main`, then deploys `dist` with the official Cloudflare Wrangler Action. The Pages project and its `BIGDATA_DB` binding are configured in the Cloudflare dashboard; Cloudflare credentials remain in GitHub Actions secrets.
 
+The same Biome, tests and build commands run in `CI` for pull requests to `main`.
+GitHub Pages publishes the separate `site/` directory, with a read-only artifact
+build on PRs and deployment only from `main`. CodeQL uses GitHub Default Setup;
+Dependency Review, Zizmor and Scorecard use their official actions.
+
+Dependabot checks weekly on Monday at 06:00 America/Sao_Paulo, groups minor and
+patch version updates, and submits major updates separately. GitHub native
+auto-merge is enabled for its same-repository PRs; the rollout requires the four
+native checks (`CI`, `Build Pages artifact`, `Dependency Review`, `Run zizmor`)
+before admission. The workflow does not require human or AI review of those PRs.
+
+Linear Release records successful push-triggered production deployments at the
+exact deployed SHA. Manual Deploy runs are available on `main`, but do not create
+a Linear release, matching the organizational starter workflow. This web app
+does not publish npm or Windows packages, GitHub Releases, or version tags.
+
+Vite generates the browser-bundle license report. The retired custom verifier no
+longer checks inventory parity or the emitted artifact; maintainers review legal
+document copies and notices when relevant changes occur. Biome remains the code
+formatter/linter; the separate Public Format gate is retired.
+
 ## Repository conventions
 
 - **License**: [AGPL-3.0-or-later](./LICENSE). Network-service trigger applies: running a modified fork as a public service obligates you to publish modifications.
 - **Notices**: see [NOTICE](./NOTICE) and [THIRDPARTY](./THIRDPARTY.md).
+- **Inbound rights**: see [INBOUND.md](./INBOUND.md).
 - **Security disclosure**: see [SECURITY.md](./SECURITY.md).
 - **Code of conduct**: see [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md).

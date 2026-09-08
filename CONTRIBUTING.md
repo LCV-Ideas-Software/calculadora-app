@@ -26,12 +26,16 @@ Thanks for your interest. Quick guide for filing issues and opening pull request
 
 ```bash
 npm ci
-npm run lint    # biome check
+npm run biome   # biome check
 npm run build   # tsc + vite build
 npm test        # vitest
 ```
 
-All three must be GREEN. CI will re-run these on push.
+All three must be GREEN. CI repeats them on pull requests to `main`; Deploy
+repeats them before publishing a push to `main` or an authorized manual run.
+The separate Public Format and custom legal-inventory gates are retired by the
+current governance standard. Preserve the native Vite license report and review
+legal-document parity when changing the dependency inventory or legal surface.
 
 ### PR description
 
@@ -45,7 +49,11 @@ This repo enforces SHA-pinned GitHub Actions per supply-chain hardening baseline
 
 ## License
 
-By contributing, you agree your contribution is licensed under [AGPL-3.0-or-later](./LICENSE). AGPL §13 applies to network-service operators of forks.
+The project license remains [AGPL-3.0-or-later](./LICENSE). Read
+[INBOUND.md](./INBOUND.md) for the ownership and written-rights verification
+required before copyrightable contributions are admitted. Opening a PR does not
+transfer copyright. AGPL §13 applies to network-service operators of modified
+forks under its terms.
 
 ---
 

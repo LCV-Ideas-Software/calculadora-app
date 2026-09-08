@@ -1,7 +1,12 @@
 name: Deploy
+
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   NODE_OPTIONS: "--no-deprecation"
@@ -10,8 +15,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   deploy:
-    name: Deploy application
-    if: github.event_name == 'push'
+    name: Validate and deploy application
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,17 +30,19 @@ jobs:
           node-version: 24
           check-latest: true
           package-manager-cache: false
+      - name: Verify npm registry
+        shell: bash
+        run: test "$(npm config get registry)" = "https://registry.npmjs.org/"
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npm run verify:thirdparty
       - run: npm run biome
       - run: npm test
       - run: npm run build
-      - run: npm run verify:thirdparty:artifact
       - name: Deploy Pages
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=calculadora-app
+          packageManager: npm
+          wranglerVersion: 4.129.1
+          command: pages deploy dist --project-name=calculadora-app --branch=main
     timeout-minutes: 30
-permissions: {}
