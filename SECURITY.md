@@ -2,7 +2,27 @@
 
 ## Supported status
 
-Current supported application version: v04.03.03. The current main branch is also supported for security fixes until the next application version is deployed.
+Current supported application version: v04.03.04. The current main branch is also supported for security fixes until the next application version is deployed.
+
+## Automation and credentials
+
+CI checks pull requests to `main`; Deploy repeats the application checks before
+publishing to Cloudflare Pages. CodeQL uses Default Setup. Dependency Review,
+Zizmor and Scorecard are official repository-local actions, not central services
+controlled by another LCV repository.
+
+Dependabot's native auto-merge workflow uses the organization-provided
+`DEPENDABOT_AUTOMERGE_TOKEN` Dependabot secret. The shared credential is an
+explicitly accepted organizational baseline; no new custom GitHub App or
+controller is introduced. Native required checks must be in place before the
+reform is admitted, so a dependency update cannot skip the product CI gate.
+
+Deployment credentials remain scoped to `cloudflare-production`
+(`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`). Linear's official Release action
+reads `LINEAR_ACCESS_KEY` from `linear-release` only after a successful
+push-triggered Deploy from this repository's `main`, at the exact deployed SHA.
+GitHub Pages uses its native deployment identity. No credential values belong in
+source control; nonsecret configuration identifiers are permitted.
 
 ## Reporting a vulnerability
 

@@ -11,8 +11,10 @@ Pointer for AI agents working in this repository.
 
 ## Runtime Shape
 
-React 19 + Vite 8 single-page app deployed on Cloudflare Pages with a D1 backing
-store. Source lives in `src/`; public formatting is enforced on `index.html`.
+React 19 + Vite 8 single-page app deployed on Cloudflare Pages with Pages
+Functions and a D1 backing store. Source lives in `src/`; `functions/` contains
+the backend. The D1 binding is configured in the Cloudflare Pages dashboard.
+The separate GitHub Pages site is built from `site/`.
 
 ## Mandatory Gates
 
@@ -20,17 +22,33 @@ store. Source lives in `src/`; public formatting is enforced on `index.html`.
 npm test
 npm run biome
 npm run build
-npm run format:public:check
 ```
 
 ## Workspace Policy
 
-Follow the workspace-root `AGENTS.md` directives of the private workspace that
-hosts this checkout (not versioned in this public repository). In
-particular: no self-review in cross-review gates, `ultrabrain` plus
-`cross-review-v2` before substantive closure, `cross-review-v1` only as fallback
-for v2, `main` as the deployment branch, and Commit & Sync only after final
-audit when requested.
+The current Enterprise/Organization reform standard supersedes earlier local
+governance instructions. Follow the workspace-root `AGENTS.md` directives:
+official native solutions, independent repositories, Ultrabrain for substantive
+reasoning and cross-review only where complexity warrants it, without self-review.
+Prepare changes locally and present the complete report for operator approval
+before committing, pushing or opening a PR. GitHub configuration changes require
+separate explicit approval. Never change signing configuration or use Codespaces.
+
+This repository deploys a web application; it does not publish npm packages,
+Windows packages, GitHub Releases or version tags. Maintain the internal
+application version consistently in the manifest, source, README and SECURITY.
+
+CI validates PRs to `main` and manual dispatches; Deploy validates and publishes
+`main` through the official Cloudflare Wrangler Action. Do not copy standalone
+Worker or D1 migration commands from a reference repository into this Pages
+Functions application. Preserve the native Vite `build.license` report, its
+bundle reference and the runtime legal surface. Product tests include the D1
+schema/retention and application-version contracts.
+
+Do not restore retired `actions.lock` consumers, Public Format, custom legal
+inventory/artifact gates, advanced CodeQL workflows or merge queue. CodeQL uses
+Default Setup. Dependabot uses GitHub native auto-merge and the approved native
+required checks, without mandatory human or AI review for dependency PRs.
 
 ## Registro de trabalho (GitHub Projects, Issues e Discussions)
 
@@ -108,9 +126,9 @@ com desvios `Bloqueado` e `Descartado`.
 > proprios em cada quadro. Atualize os DOIS quadros — o deste repositorio e o portfolio
 > #17 — a cada transicao; ID de opcao de um quadro nunca vale no outro (Discussion org#176).
 
-### Nada de identificador real em repositorio publico
+### Configuration metadata and secrets
 
-Issues, PRs e Discussions deste repositorio sao publicos e permanentes. Use placeholders
-(`proj-x`, `exemplo-projeto-000`, `exemplo.com`) no lugar de IDs de projeto de nuvem, nomes
-de banco, dominios e contas. Detalhe operacional sensivel vai para o quadro privado ou para
-`.github-private`.
+Nonsecret identifiers needed by official configuration may be versioned under
+the current operator directive. Credentials, tokens, secret values and sensitive
+operational evidence must remain private. Do not move the existing Pages
+dashboard bindings into a new configuration file as an incidental cleanup.

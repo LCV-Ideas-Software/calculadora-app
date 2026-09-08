@@ -1,29 +1,39 @@
-name: "Dependency Review"
+name: Dependency Review
+
 on:
   pull_request:
-  merge_group:
-    types: [checks_requested]
+    branches:
+      - main
+    # `edited` covers a pull request retargeted to the default branch;
+    # without it this required check would not run until the next push.
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - edited
 
-permissions:
-  contents: read
+permissions: {}
+
+concurrency:
+  group: dependency-review-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   dependency-review:
+    name: Dependency Review
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
-      - name: "Checkout Repository"
+      - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: "Dependency Review pull request"
-        if: github.event_name == 'pull_request'
+
+      - name: Review pull request dependencies
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
-          fail-on-scopes: runtime, development, unknown
-      - name: "Dependency Review merge group"
-        if: github.event_name == 'merge_group'
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
-        with:
-          base-ref: ${{ github.event.merge_group.base_sha }}
-          head-ref: ${{ github.event.merge_group.head_sha }}
+          fail-on-severity: low
           fail-on-scopes: runtime, development, unknown

@@ -12,8 +12,9 @@
 /.github/CODEOWNERS @lcv-leo
 /.github/copilot-instructions.md @lcv-leo
 /.github/dependabot.yml @lcv-leo
+/.github/FUNDING.yml @lcv-leo
 /.github/workflows/ @lcv-leo
-/.github/scripts/ @lcv-leo
+/INBOUND.md @lcv-leo
 
 # Application and infra surfaces
 /src/ @lcv-leo
