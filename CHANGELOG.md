@@ -18,6 +18,7 @@
 
 ### Removed
 
+- Retired the stale GitHub Actions dependency lockfile and its generated workflow headers that blocked startup after Dependabot updates; immutable action SHA pins and execution settings are unchanged.
 - The custom Auto-release and Native Auto-merge workflows. GitHub's native merge queue remains the merge mechanism.
 - The repository-level Projects automation workflow. The built-in GitHub Project Auto-add workflow is enabled for `calculadora-app` in both the repository Project #9 and the organization portfolio Project #17.
 
