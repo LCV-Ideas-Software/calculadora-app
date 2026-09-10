@@ -1,5 +1,12 @@
 # Changelog — Calculadora Financeira
 
+## [Unreleased]
+
+### Changed
+
+- Update the official CodeQL Action to v4.38.0 and Zizmor Action to v0.6.4,
+  retaining full commit pins and the existing workflow behavior.
+
 ## [v04.03.04] - 08/09/2026
 
 ### Added
