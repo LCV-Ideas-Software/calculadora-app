@@ -83,7 +83,8 @@ Browser -> Cloudflare Pages (React build)
 You will need:
 
 - A Cloudflare account with Pages + D1 enabled.
-- The Cloudflare CLI [`wrangler`](https://developers.cloudflare.com/workers/wrangler/).
+- The Cloudflare CLI [`wrangler`](https://developers.cloudflare.com/workers/wrangler/),
+  installed by `npm ci` as a development dependency at the version pinned in the lockfile.
 - Node.js 22+.
 - (Optional) A Google AI Studio API key for Gemini integration.
 

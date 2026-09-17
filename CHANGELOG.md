@@ -4,6 +4,12 @@
 
 ### Changed
 
+- Declare `wrangler` 4.130.0 as an exact development dependency, regenerating
+  the lockfile with npm, and drop the `wranglerVersion` pin from the Deploy
+  workflow: the Cloudflare Wrangler Action now runs the Wrangler that `npm ci`
+  installs from the lockfile, which Dependabot keeps current. `THIRDPARTY.md`
+  (both copies) lists the new dependency with the Apache-2.0 election and the
+  README describes the prerequisite (CALCULA-23 / #254, GIT-230).
 - Update the official CodeQL Action to v4.38.0 and Zizmor Action to v0.6.4,
   retaining full commit pins and the existing workflow behavior.
 
