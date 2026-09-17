@@ -10,7 +10,10 @@
   installs from the lockfile, which Dependabot keeps current. The transitive
   `sharp` pulled in by Wrangler's Miniflare is resolved to `0.35.4` through npm's
   native `overrides`, as in the other Cloudflare repositories, so Dependency
-  Review does not flag GHSA-rgj7-g3m4-5g8c. `THIRDPARTY.md` (both copies) lists
+  Review does not flag GHSA-rgj7-g3m4-5g8c. The dormant, undocumented
+  `undici: 6.24.0` override is removed: no dependency requested `undici` before,
+  and once Miniflare did, the override downgraded its `undici` 7.29.0 to a
+  release with seven open advisories. `THIRDPARTY.md` (both copies) lists
   the new dependency with the Apache-2.0 election and the README describes the
   prerequisite (CALCULA-23 / #254, GIT-230).
 - Update the official CodeQL Action to v4.38.0 and Zizmor Action to v0.6.4,
