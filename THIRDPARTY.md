@@ -29,3 +29,4 @@ nativo do Vite não substitui essas verificações editoriais.
 | `typescript`           | desenvolvimento | Apache-2.0                    | Apache-2.0       | Não         | https://www.npmjs.com/package/typescript           |
 | `vite`                 | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vite                 |
 | `vitest`               | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vitest               |
+| `wrangler`             | desenvolvimento | MIT OR Apache-2.0             | Apache-2.0       | Não         | https://www.npmjs.com/package/wrangler             |
