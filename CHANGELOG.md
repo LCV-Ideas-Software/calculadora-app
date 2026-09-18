@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [v04.03.05] - 18/09/2026
+
+### Fixed
+
+- `/parametros` and `/calcular` disagreed on which D1 row wins when
+  `calc_parametros_customizados` holds more than one row for the same key. Both
+  read the table `ORDER BY id DESC`; `calcular.js` kept the first occurrence, so
+  the newest row won, while `parametros.js` overwrote on every row, so the
+  oldest won. Harmless today — measured on 18/09/2026, all 30 rows carry the
+  same value per key — but the first inserted override would have made the
+  panel show one IOF and the result use another. `parametros.js` now keeps the
+  first occurrence, matching `calcular.js`. Regression added, proven to fail
+  against the previous code (CALCULA-24).
+
 ### Changed
 
 - Declare `wrangler` 4.130.0 as an exact development dependency, regenerating

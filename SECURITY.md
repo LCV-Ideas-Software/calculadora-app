@@ -2,7 +2,7 @@
 
 ## Supported status
 
-Current supported application version: v04.03.04. The current main branch is also supported for security fixes until the next application version is deployed.
+Current supported application version: v04.03.05. The current main branch is also supported for security fixes until the next application version is deployed.
 
 ## Automation and credentials
 

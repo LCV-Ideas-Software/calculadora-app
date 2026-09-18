@@ -53,3 +53,18 @@ it('preserva calibragem D1 positiva com precedência sobre o ambiente', async ()
   expect(body.parametros_vigentes.origem.taxa_fator_calibragem_global).toBe('d1');
   expect(body.parametros_vigentes.origem).not.toHaveProperty('fator_calibragem_global');
 });
+
+it('com mais de uma linha para a mesma chave, a mais recente (maior id) vence, como em calcular.js', async () => {
+  const res = await onRequestGet({
+    env: envComParametros([
+      // A consulta real devolve ORDER BY id DESC: a primeira linha é a mais nova.
+      { chave: 'iof_cartao', valor: '0.044' },
+      { chave: 'iof_cartao', valor: '0.035' },
+    ]),
+  });
+
+  expect(res.status).toBe(200);
+  const body = await res.json();
+  expect(body.parametros_vigentes.iof_cartao).toBe(0.044);
+  expect(body.parametros_vigentes.origem.taxa_iof_cartao).toBe('d1');
+});

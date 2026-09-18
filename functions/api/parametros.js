@@ -31,13 +31,20 @@ export async function onRequestGet(context) {
         try {
             const rows = await env.BIGDATA_DB.prepare("SELECT chave, valor FROM calc_parametros_customizados ORDER BY id DESC").all();
             if (rows.results && rows.results.length > 0) {
+                // A consulta vem em ordem decrescente de id, então a primeira
+                // ocorrência de cada chave é a mais recente e é a que vence —
+                // a mesma regra de calcular.js. Sobrescrever a cada linha fazia
+                // a MAIS ANTIGA vencer aqui e a mais nova lá, e o painel
+                // discordava do cálculo (CALCULA-24).
+                const chavesVistas = new Set();
                 for (const row of rows.results) {
                     const val = parseFloat(row.valor);
                     if (row.chave === 'fator_calibragem_global') {
                         if (Number.isFinite(val) && calibragemD1 === undefined) calibragemD1 = val;
                         continue;
                     }
-                    if (Number.isFinite(val)) {
+                    if (Number.isFinite(val) && !chavesVistas.has(row.chave)) {
+                        chavesVistas.add(row.chave);
                         parametros[row.chave] = val;
                         origem[`taxa_${row.chave}`] = 'd1';
                     }
