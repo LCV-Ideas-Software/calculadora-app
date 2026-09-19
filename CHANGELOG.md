@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `vitest` bumped from 5.0.0 to 5.0.1 (`^5.0.1` in `package.json`, lockfile
+  regenerated with npm); `@vitest/mocker` and `@vitest/spy` follow. Closes
+  #259 / CALCULA-25.
+
 ## [v04.03.05] - 18/09/2026
 
 ### Fixed
