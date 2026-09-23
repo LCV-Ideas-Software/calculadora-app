@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Update the exact Wrangler pin to 4.136.2 and regenerate the npm lockfile.
+- Update the exact Wrangler pin to 4.137.0 and regenerate the npm lockfile (LCV-214).
   Remove the redundant Sharp override: Miniflare now requests 0.35.4 directly.
 
 - `vitest` bumped from 5.0.0 to 5.0.1 (`^5.0.1` in `package.json`, lockfile
