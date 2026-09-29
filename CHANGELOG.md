@@ -9,8 +9,11 @@
 
 ### Changed
 
-- Update the exact Wrangler pin to 4.143.0 and regenerate the npm lockfile
-  (CALCULA-26, LCV-239, LCV-241).
+- Update the exact Wrangler pin from 4.142.0 to 4.143.0 and regenerate the
+  npm lockfile (LCV-241).
+
+- Update the exact Wrangler pin to 4.142.0 and regenerate the npm lockfile
+  (CALCULA-26, LCV-239).
 
 - Update the exact Wrangler pin to 4.137.0 and regenerate the npm lockfile (LCV-214).
   Remove the redundant Sharp override: Miniflare now requests 0.35.4 directly.
