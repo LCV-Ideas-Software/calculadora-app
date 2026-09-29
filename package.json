@@ -51,7 +51,7 @@
     "picomatch": "4.0.4",
     "vite": "$vite",
     "miniflare": {
-      "undici": "7.29.1"
+      "undici@7.29.0": "7.29.1"
     }
   }
 }

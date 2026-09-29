@@ -4,10 +4,10 @@
 
 ### Security
 
-- Temporarily override `undici` to 7.29.1 only under `miniflare`, using npm's
-  native nested override while the pinned Cloudflare dependency requests
-  7.29.0 (CALCULA-28, LCV-241). Remove this override once Cloudflare updates
-  its dependency.
+- Temporarily override `undici@7.29.0` to 7.29.1 only under `miniflare`, using
+  npm's native nested override while the pinned Cloudflare dependency requests
+  the vulnerable version (CALCULA-28, LCV-241). A newer upstream request does
+  not match this override; remove the stale rule after Cloudflare updates it.
 
 ### Fixed
 
