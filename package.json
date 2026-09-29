@@ -49,6 +49,9 @@
   },
   "overrides": {
     "picomatch": "4.0.4",
-    "vite": "$vite"
+    "vite": "$vite",
+    "miniflare": {
+      "undici": "7.29.1"
+    }
   }
 }

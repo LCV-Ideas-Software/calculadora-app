@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Security
+
+- Temporarily override `undici` to 7.29.1 only under `miniflare`, using npm's
+  native nested override while the pinned Cloudflare dependency requests
+  7.29.0 (CALCULA-28, LCV-241). Remove this override once Cloudflare updates
+  its dependency.
+
 ### Fixed
 
 - Restore Deploy after the broken Cloudflare Wrangler Action v4.1.1 release by
