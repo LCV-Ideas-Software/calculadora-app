@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Update the exact Wrangler pin from 4.142.0 to 4.143.0 and regenerate the
+  npm lockfile.
+
 ### Fixed
 
 - Restore Deploy after the broken Cloudflare Wrangler Action v4.1.1 release by
