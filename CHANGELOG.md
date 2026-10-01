@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Update the pinned Cloudflare Wrangler CLI to 4.145.0 and regenerate npm dependency locks.
+
 ### Security
 
 - Temporarily override `undici@7.29.0` to 7.29.1 only under `miniflare`, using
