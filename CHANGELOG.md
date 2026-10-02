@@ -2,12 +2,12 @@
 
 ## [Unreleased]
 
-- Update the pinned Cloudflare Wrangler CLI to 4.145.0 and regenerate npm dependency locks.
+- Update the pinned Cloudflare Wrangler CLI to 4.147.0 and regenerate npm dependency locks.
 
 ### Security
 
 - Remove the temporary Miniflare override introduced for `undici@7.29.0`
-  (CALCULA-28, LCV-241). Wrangler 4.145.0 now selects the official Miniflare
+  (CALCULA-28, LCV-241). Wrangler 4.147.0 now selects the official Miniflare
   dependency that requests patched Undici 7.29.1 directly, so npm no longer
   needs that exception (LCV-256).
 
