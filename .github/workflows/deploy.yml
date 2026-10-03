@@ -42,7 +42,13 @@ jobs:
           test ! -e dist/_worker.js
           test ! -e dist/_routes.json
           mkdir -p .wrangler/pages-custody
-          npm exec -- wrangler pages functions build functions --outdir=dist/_worker.js --metafile=.wrangler/pages-custody/metafile.json --output-config-path=.wrangler/pages-custody/functions-config.json --output-routes-path=dist/_routes.json --build-output-directory=dist --project-directory=. --build-metadata-path=.wrangler/pages-custody/build-metadata.json
+          npm exec -- wrangler pages functions build functions --outdir=dist/_worker.js --metafile=.wrangler/pages-custody/metafile.json --output-config-path=.wrangler/pages-custody/functions-config.json --output-routes-path=dist/_routes.json --build-output-directory=dist --project-directory=.
+          test -s dist/_worker.js/index.js
+          test -s dist/_routes.json
+          test -s .wrangler/pages-custody/metafile.json
+          test -s .wrangler/pages-custody/functions-config.json
+          test ! -e dist/functions
+          # Wrangler emits build metadata only for a configured Pages output; this project has no Wrangler config.
 
       - name: Preserve exact Pages deployment inputs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -61,6 +67,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           packageManager: npm
-          wranglerVersion: 4.147.0
-          command: pages deploy dist --no-bundle --project-name=calculadora-app --branch=main
+          # Advanced Mode uses the preserved worker and routes from dist; source Functions are not rebuilt.
+          # Filepath dashboard metadata stays in the private artifact; runtime routing is compiled into the worker.
+          command: pages deploy . --cwd dist --no-bundle --project-name=calculadora-app --branch=main
     timeout-minutes: 30
