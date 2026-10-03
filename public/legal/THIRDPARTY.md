@@ -30,3 +30,7 @@ nativo do Vite não substitui essas verificações editoriais.
 | `vite`                 | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vite                 |
 | `vitest`               | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vitest               |
 | `wrangler`             | desenvolvimento | MIT OR Apache-2.0             | Apache-2.0       | Não         | https://www.npmjs.com/package/wrangler             |
+
+## Atualização documental — 02/10/2026 (LCV-183 / LCV-211)
+
+O Vitest 5.0.3 seleciona `why-is-node-running` 3.2.1, cuja publicação oficial não depende de `stackback`. A árvore exata permanece nos lockfiles regenerados pelo npm. Fonte: https://github.com/vitest-dev/vitest/pull/11316 e https://github.com/vitest-dev/vitest/releases/tag/v5.0.3. Esta atualização de ferramenta de teste não afirma incorporação no produto distribuído.
