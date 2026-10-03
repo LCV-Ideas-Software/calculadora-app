@@ -46,3 +46,41 @@ O artefato WASI incorpora `@tybys/wasm-util@0.10.3`. Os 39 arquivos publicados d
 O tarball 0.10.3 e a cópia incorporada não contêm LICENSE próprio: o texto é obtido da fonte relacionada exata e reproduzido integralmente no NOTICE canônico e público. Essa prova refere-se à versão 0.10.3 selecionada; não declara concessão retroativa para 0.10.2, nem transforma este aviso em prova de conformidade de todos os produtos distribuídos. A seleção dessa ferramenta não afirma incorporação de seu código nos bundles do navegador ou das Functions. Os relatórios de runtime preservam sua finalidade e proveniência próprias.
 
 A fonte `src/wasi/path.ts` reconhece uma adaptação de `lib/path.js` do Node.js sob MIT; a PR upstream https://github.com/toyobayashi/wasm-util/pull/6 preserva essa atribuição. O NOTICE canônico/público reproduz separadamente o cabeçalho integral oficial de permissão e copyright `Joyent, Inc. and other Node contributors`. A concessão de Toyobayashi não substitui direitos ou avisos de terceiros. A PR não identifica a revisão exata do Node adaptada; o cabeçalho de licença foi observado idêntico em Node v22.20.0 e v24.21.0, o que não afirma igualdade byte a byte de toda a implementação nem certifica todas as obrigações de derivados. Nenhuma nova eleição de licença é introduzida.
+
+## Avisos suplementares das Pages Functions — 03/10/2026
+
+Estes avisos completam os textos dos componentes abaixo efetivamente selecionados pelo empacotamento nativo das Pages Functions. O escopo foi conferido no metafile do artefato preservado do mesmo build, distinguindo o código de runtime das dependências usadas somente como ferramentas. Os manifestos e lockfiles continuam sendo as fontes das resoluções exatas. Este suplemento integra o aviso canônico e sua cópia pública em `legal/THIRDPARTY.md`; não substitui os demais avisos nem declara conformidade retroativa de entregas anteriores.
+
+| Componente selecionado | Versão | Licença declarada | Fonte oficial |
+| --- | --- | --- | --- |
+| `path-to-regexp` | 6.3.0 | MIT | https://github.com/pillarjs/path-to-regexp |
+
+O texto abaixo é o arquivo `package/LICENSE` integral do tarball oficial https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-6.3.0.tgz, cuja integridade SHA-512 coincide com o lockfile produtor. Seu SHA-256 é `4eeb3271453a891df609e5a9f4ee79a68307f730c13417a3bfeffa604ac8cf25`. A identificação corresponde ao módulo efetivamente selecionado, inclusive quando o empacotamento resolve uma dependência transitiva.
+
+### path-to-regexp 6.3.0 — MIT
+
+Fonte: https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-6.3.0.tgz
+
+```text
+The MIT License (MIT)
+
+Copyright (c) 2014 Blake Embrey (hello@blakeembrey.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
