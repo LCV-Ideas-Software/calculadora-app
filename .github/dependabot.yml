@@ -40,6 +40,13 @@ updates:
     cooldown:
       default-days: 7
     rebase-strategy: auto
+    ignore:
+      # Keep the exact licensed preview; stable4.x is a major transition from0.x.
+      # Native update-type ignores do not suppress security updates.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@tailwindcss/vite"
+        update-types: ["version-update:semver-major"]
     labels:
       - "dependencies"
     commit-message:
