@@ -45,12 +45,6 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
-    # CALCULA-29: esta versao estavel volta ao wasm-util 0.10.2 sem prova exata.
-    ignore:
-      - dependency-name: "tailwindcss"
-        versions: ["4.3.3"]
-      - dependency-name: "@tailwindcss/vite"
-        versions: ["4.3.3"]
     versioning-strategy: increase
     groups:
       security-updates:
