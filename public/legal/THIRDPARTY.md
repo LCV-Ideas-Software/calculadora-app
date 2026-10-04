@@ -37,6 +37,8 @@ O Vitest 5.0.3 seleciona `why-is-node-running` 3.2.1, cuja publicação oficial 
 
 ## Tailwind CSS — preview oficial e WASI (03/10/2026 UTC)
 
+O Dependabot usa sua opção nativa `ignore.versions` somente para `tailwindcss` e `@tailwindcss/vite` 4.3.3, impedindo a seleção automática conhecida que voltaria ao filho 0.10.2. A exclusão não bloqueia versões futuras, não muda o cooldown nem os demais pacotes. Contrato oficial: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#ignore.
+
 Em 04/10/2026, a correção CALCULA-29 restaurou esta seleção oficial conjunta no manifesto e no lockfile regenerado pelo npm. A seleção estável anterior 4.3.3 incorporava wasm-util 0.10.2; o preview aqui identificado incorpora 0.10.3. Foram reconferidos o SRI do pai, os 39 arquivos completos do filho publicado e os 15 caminhos e conteúdos de fonte, todos idênticos à revisão com o texto MIT integral citado abaixo. Esta prova usa a identidade do código licenciado, sem atribuir alcance retroativo à resposta upstream “Fixed in 0.10.4”.
 
 Os manifestos fixam `tailwindcss` e `@tailwindcss/vite` em `0.0.0-insiders.fa81d69`. O npm seleciona `@tailwindcss/node`, `@tailwindcss/oxide` e todas as variantes oficiais de plataforma na mesma revisão, segundo os contratos publicados pelo mantenedor. Trata-se do canal oficial **insiders**, publicado em 25/09/2026, e não de uma versão estável. A atualização é conjunta: nenhum filho de plataforma foi substituído contra o pin exato do pacote pai, e nenhum override adicional foi introduzido.

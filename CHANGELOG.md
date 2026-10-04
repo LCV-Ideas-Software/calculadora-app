@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Configurada a exclusão nativa exata de Tailwind 4.3.3 no Dependabot para preservar a seleção licenciada de CALCULA-29; os dois pacotes diretos continuam elegíveis para outras versões.
+
 - Restaurada a seleção conjunta oficial Tailwind `0.0.0-insiders.fa81d69` após a resolução estável 4.3.3, mantendo wasm-util 0.10.3 com fonte integral idêntica à revisão MIT. A correção CALCULA-29 preserva os textos completos MIT/Node e não adiciona overrides.
 
 - Fixada a família oficial Tailwind CSS no preview `0.0.0-insiders.fa81d69`, com lockfile regenerado pelo npm e sem overrides novos. O pacote WASI passa a incorporar `@tybys/wasm-util@0.10.3`, cujo código coincide integralmente com a revisão que recebeu MIT; os inventários e o NOTICE canônico/público reproduzem a proveniência e o texto integral. A versão selecionada pertence ao canal insiders, não é release estável e não prova autorização retroativa para 0.10.2.
