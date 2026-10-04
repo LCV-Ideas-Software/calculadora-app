@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Restaurada a seleção conjunta oficial Tailwind `0.0.0-insiders.fa81d69` após a resolução estável 4.3.3, mantendo wasm-util 0.10.3 com fonte integral idêntica à revisão MIT. A correção CALCULA-29 preserva os textos completos MIT/Node e não adiciona overrides.
+
 - Fixada a família oficial Tailwind CSS no preview `0.0.0-insiders.fa81d69`, com lockfile regenerado pelo npm e sem overrides novos. O pacote WASI passa a incorporar `@tybys/wasm-util@0.10.3`, cujo código coincide integralmente com a revisão que recebeu MIT; os inventários e o NOTICE canônico/público reproduzem a proveniência e o texto integral. A versão selecionada pertence ao canal insiders, não é release estável e não prova autorização retroativa para 0.10.2.
 
 - Atualizado o Vitest para 5.0.3, que seleciona o `why-is-node-running` oficial 3.2.1 sem `stackback`; manifestos e lockfiles regenerados pelo npm.
