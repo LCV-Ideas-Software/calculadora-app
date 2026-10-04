@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-- Fixados os dois pacotes diretos Tailwind na revisão oficial exata `0.0.0-insiders.fa81d69`, preservada no lockfile nativo. Duas regras nativas restritas a esses pacotes ignoram transições major nas atualizações de versão do Dependabot e impedem a restauração automática de stable4.x a partir deste preview0.x. Atualizações de segurança continuam elegíveis; futuros previews exigem revisão de grants. A correção CALCULA-29 preserva cooldown, grupos e política de licença.
+- Fixados os dois pacotes diretos Tailwind na revisão oficial exata `0.0.0-insiders.fa81d69`, preservada no lockfile nativo. As duas regras nativas desses pacotes ignoram transições major, minor e patch nas atualizações ordinárias de versão do Dependabot. Novas seleções exatas exigem revisão manual da família e dos grants, inclusive previews0.x, sem presumir permissão a partir da versão anterior. Atualizações de segurança continuam elegíveis; futuros previews exigem revisão de grants. A correção CALCULA-29 preserva cooldown, grupos e política de licença.
 
 - Restaurada a seleção conjunta oficial Tailwind `0.0.0-insiders.fa81d69` no manifesto e no lockfile após a resolução estável 4.3.3, mantendo wasm-util 0.10.3 com fonte integral idêntica à revisão MIT. A correção CALCULA-29 preserva os textos completos MIT/Node e não adiciona overrides.
 
