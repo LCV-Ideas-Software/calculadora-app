@@ -44,9 +44,9 @@ updates:
       # Keep the exact licensed preview; stable4.x is a major transition from0.x.
       # Native update-type ignores do not suppress security updates.
       - dependency-name: "tailwindcss"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "@tailwindcss/vite"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
     labels:
       - "dependencies"
     commit-message:
