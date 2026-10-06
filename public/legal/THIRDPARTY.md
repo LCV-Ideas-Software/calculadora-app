@@ -712,3 +712,14 @@ TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
 END OF TERMS AND CONDITIONS
 ```
+
+## Scoped Miniflare security correction
+
+The operator approved the temporary npm override `miniflare` → `sharp` 0.35.5 on
+06/10/2026 for GHSA-wq5f-xc86-pv6w. npm regenerates the affected lockfile; existing
+Wrangler and Miniflare selections remain unchanged. Remove this override after
+the official upstream selects a corrected Sharp version. Sharp retains its
+Apache-2.0 grant and the native libvips components retain their own LGPL notices;
+this build-tool correction does not certify complete distribution compliance.
+
+Source: <https://github.com/advisories/GHSA-wq5f-xc86-pv6w>.

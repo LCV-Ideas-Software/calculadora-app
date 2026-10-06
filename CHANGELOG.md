@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Corrigido o `source-map-js` transitivo para 1.2.2 por atualização oficial do npm, eliminando GHSA-68fv-2mgg-jv7q sem novo override.
+
+- Corrigido o Sharp transitivo do Miniflare para 0.35.5 com a exceção npm aprovada para GHSA-wq5f-xc86-pv6w e lockfile regenerado; atualizada a Action oficial Linear Release para 0.18.1 com pin de SHA completo, selecionando a versão oficial 0.18.0 do CLI.
+
 - Fixados os dois pacotes diretos Tailwind na revisão oficial exata `0.0.0-insiders.fa81d69`, preservada no lockfile nativo. As duas regras nativas desses pacotes ignoram transições major, minor e patch nas atualizações ordinárias de versão do Dependabot. Novas seleções exatas exigem revisão manual da família e dos grants, inclusive previews0.x, sem presumir permissão a partir da versão anterior. Atualizações de segurança continuam elegíveis; futuros previews exigem revisão de grants. A correção CALCULA-29 preserva cooldown, grupos e política de licença.
 
 - Restaurada a seleção conjunta oficial Tailwind `0.0.0-insiders.fa81d69` no manifesto e no lockfile após a resolução estável 4.3.3, mantendo wasm-util 0.10.3 com fonte integral idêntica à revisão MIT. A correção CALCULA-29 preserva os textos completos MIT/Node e não adiciona overrides.
