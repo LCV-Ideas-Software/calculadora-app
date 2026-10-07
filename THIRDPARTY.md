@@ -89,11 +89,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-## Inventário completo das Pages Functions — complemento de 03/10/2026
+## Inventário completo das Pages Functions — complemento de 07/10/2026
 
-O suplemento anterior preserva o grant integral de `path-to-regexp` 6.3.0. Os avisos abaixo cobrem também os demais componentes selecionados no worker de referência, separadamente do inventário nativo do Vite para o navegador. A referência é [Deploy 37139350366, tentativa 1](https://github.com/LCV-Ideas-Software/calculadora-app/actions/runs/37139350366), fonte `3597dcc92d357f6dccd2604063369d46bc4f124c`, artefato nativo `11279402304`: `index.js` tem 453825 bytes e SHA-256 `ac87e4eeca3a3bfed7d10d71dbd9f3b6328fc2cc8fd01b042a3fe773d531affb`. O metafile preserva 88 inputs e 18 identidades reais de pacotes; cinco entradas `(disabled)` são placeholders, não código dos pacotes nomeados. O lockfile e a árvore completa `functions/` permanecem iguais na fonte `853d767eab7729e900f9d226a6a7012f9250df27` do complemento documental anterior. Esta referência identifica a execução examinada, sem prever hashes de builds futuros.
+O suplemento anterior preserva o grant integral de `path-to-regexp` 6.3.0. Os avisos abaixo cobrem também os demais componentes selecionados na captura local de preparação, separadamente do inventário nativo do Vite para o navegador. A fonte examinada é o commit `deda15b4e2c36fecc597adce9c9e30dc6bbb6951` da [PR #300](https://github.com/LCV-Ideas-Software/calculadora-app/pull/300), com Functions e lockfile desse head, em 07/10/2026. O comando oficial Wrangler 4.148.0 produziu `../dist/_worker.js/index.js` com 453825 bytes e SHA-256 `50c6fd8a6d8444c256a52ec2679009296544c9a3a28fc7842dd5bca7e83e48f7`. O metafile SHA-256 `4c70338fc3578b30f6f7c1bec0f981ffd48b621be23d9a9ae4a7a92af257bc1a` preserva 88 inputs e 18 identidades reais de pacotes; cinco entradas `(disabled)` são placeholders, não código dos pacotes nomeados. O lockfile examinado tem SHA-256 `e157807098752d826cfcc7e2102e6cf79be987e07e58156291adc712973c96d3`. Esta referência identifica a captura local efetivamente examinada; não atribui a seleção 4.148.0 ao Deploy histórico de 03/10 nem afirma execução futura de produção ou igualdade binária entre ambientes.
 
-As resoluções abaixo usam o diretório de pacote mais específico de cada input, inclusive descendentes de `sanitize-html/node_modules`. “Inputs com código” conta somente `bytesInOutput` positivo. Os tarballs oficiais foram conferidos contra a integridade SHA-512 desse lockfile. Os textos completos correspondem aos artefatos selecionados; não se aplica a licença do compilador aos componentes que ele incorpora.
+- Comando oficial de captura: `npm exec -- wrangler pages functions build functions --outdir=dist/_worker.js --metafile=.wrangler/pages-custody/metafile.json --output-config-path=.wrangler/pages-custody/functions-config.json --output-routes-path=dist/_routes.json --build-output-directory=dist --project-directory=.`. O workflow de produção preserva esses inputs antes de `pages deploy . --cwd dist --no-bundle`; a prova de sua próxima execução/deploy permanece distinta desta preparação local.
+
+As resoluções abaixo usam o diretório de pacote mais específico de cada input, inclusive descendentes de `sanitize-html/node_modules`. “Inputs com código” conta somente `bytesInOutput` positivo. Todas as URLs e SRIs da tabela coincidem com o lockfile desta captura. As 17 seleções distintas de Wrangler conservam as identidades imutáveis e os grants integrais já conferidos; o tarball oficial de Wrangler 4.148.0 foi conferido contra seu SRI atual e a proveniência de origem descrita abaixo. Nenhuma nova verificação criptográfica de assinatura npm é alegada. Os textos completos correspondem aos artefatos selecionados; não se aplica a licença do compilador aos componentes que ele incorpora.
 
 | Componente | Licença declarada | Inputs com código | Tarball oficial | SRI do lock |
 | --- | --- | ---: | --- | --- |
@@ -114,7 +116,7 @@ As resoluções abaixo usam o diretório de pacote mais específico de cada inpu
 | `picocolors@1.1.1` | ISC | 1 | https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz | sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA== |
 | `postcss@8.5.28` | MIT | 27 | https://registry.npmjs.org/postcss/-/postcss-8.5.28.tgz | sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A== |
 | `sanitize-html@2.17.7` | MIT | 1 | https://registry.npmjs.org/sanitize-html/-/sanitize-html-2.17.7.tgz | sha512-PGtEkc9cbnedU3s9TmzDbpsZ8w086g/0Q8k8/oIO1NLNU3i5k9yn835CrjJSajp1KMmkisbO1qPXxNKO3welAg== |
-| `wrangler@4.147.0` | MIT OR Apache-2.0 | 1 | https://registry.npmjs.org/wrangler/-/wrangler-4.147.0.tgz | sha512-pQYRoiq8PTAxphaG69z8+GC1DkSGd19EDZehQ8zxjo/Ko3mRB6Qs1mTrd8ZuKAarLklIjTqr1lUdCK9r4q2hUg== |
+| `wrangler@4.148.0` | MIT OR Apache-2.0 | 1 | https://registry.npmjs.org/wrangler/-/wrangler-4.148.0.tgz | sha512-wgbll8cA/7qOMJSoYQuJrw9M9lmedGzYtg6wvUK2p/7G1KaE88jFmQ/CvtQzVUF9C8PQtC4Y5p9vbpAsJGAlpA== |
 
 Os 17 componentes abaixo complementam o texto de `path-to-regexp` já reproduzido integralmente. As expressões alternativas permanecem preservadas. Nenhuma eleição nova, dependência, configuração ou código de runtime é alterado.
 
@@ -494,13 +496,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### wrangler@4.147.0
+### wrangler@4.148.0
 
-O template Pages selecionado vem do tarball exato de Wrangler 4.147.0 e coincide byte a byte com o template do commit `64c1337155a6bc7224b5d47f58ca521d8b8ee3fe` de workers-sdk. A proveniência npm publicada relaciona o SHA-512 exato desse tarball ao mesmo commit, produzido pelo workflow oficial `changesets.yml`, [execução 37000143168, tentativa 1](https://github.com/cloudflare/workers-sdk/actions/runs/37000143168/attempts/1). A comparação documental do sujeito não afirma verificação criptográfica da atestação. O pacote declara `MIT OR Apache-2.0`; ambos os textos integrais da origem são preservados abaixo, sem nova eleição.
+O template Pages selecionado vem do tarball exato de Wrangler 4.148.0 e coincide byte a byte com o template do commit `540f0844667abacb36dee94c078d403192bab1bd` de workers-sdk. A proveniência npm publicada relaciona o SHA-512 exato desse tarball ao mesmo commit, produzido pelo workflow oficial `changesets.yml`, [execução 37510364980, tentativa 1](https://github.com/cloudflare/workers-sdk/actions/runs/37510364980/attempts/1). A comparação documental do sujeito não afirma verificação criptográfica da atestação. O pacote declara `MIT OR Apache-2.0`; ambos os textos integrais da origem são preservados abaixo, sem nova eleição.
 
 #### LICENSE-MIT
 
-Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/64c1337155a6bc7224b5d47f58ca521d8b8ee3fe/LICENSE-MIT>.
+Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/540f0844667abacb36dee94c078d403192bab1bd/LICENSE-MIT>.
 
 ```text
 Copyright (c) 2020 Cloudflare, Inc. <wrangler@cloudflare.com>
@@ -532,7 +534,7 @@ DEALINGS IN THE SOFTWARE.
 
 #### LICENSE-APACHE
 
-Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/64c1337155a6bc7224b5d47f58ca521d8b8ee3fe/LICENSE-APACHE>.
+Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/540f0844667abacb36dee94c078d403192bab1bd/LICENSE-APACHE>.
 
 ```text
                               Apache License
