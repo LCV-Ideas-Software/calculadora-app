@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Atualizada a CLI oficial Cloudflare Wrangler para 4.148.0, com lockfiles regenerados pelo npm; preservado o override autorizado de Sharp 0.35.5 enquanto o Miniflare oficial 5.20261006.0-alpha ainda exige 0.35.4 (LCV-334).
+
+- Update the official `actions/upload-artifact` to v7.0.2 at complete commit SHAs (LCV-334).
+
 - Corrigido o `source-map-js` transitivo para 1.2.2 por atualização oficial do npm, eliminando GHSA-68fv-2mgg-jv7q sem novo override.
 
 - Corrigido o Sharp transitivo do Miniflare para 0.35.5 com a exceção npm aprovada para GHSA-wq5f-xc86-pv6w e lockfile regenerado; atualizada a Action oficial Linear Release para 0.18.1 com pin de SHA completo, selecionando a versão oficial 0.18.0 do CLI.

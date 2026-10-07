@@ -114,7 +114,7 @@ As resoluções abaixo usam o diretório de pacote mais específico de cada inpu
 | `picocolors@1.1.1` | ISC | 1 | https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz | sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA== |
 | `postcss@8.5.28` | MIT | 27 | https://registry.npmjs.org/postcss/-/postcss-8.5.28.tgz | sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A== |
 | `sanitize-html@2.17.7` | MIT | 1 | https://registry.npmjs.org/sanitize-html/-/sanitize-html-2.17.7.tgz | sha512-PGtEkc9cbnedU3s9TmzDbpsZ8w086g/0Q8k8/oIO1NLNU3i5k9yn835CrjJSajp1KMmkisbO1qPXxNKO3welAg== |
-| `wrangler@4.147.0` | MIT OR Apache-2.0 | 1 | https://registry.npmjs.org/wrangler/-/wrangler-4.147.0.tgz | sha512-pQYRoiq8PTAxphaG69z8+GC1DkSGd19EDZehQ8zxjo/Ko3mRB6Qs1mTrd8ZuKAarLklIjTqr1lUdCK9r4q2hUg== |
+| `wrangler@4.148.0` | MIT OR Apache-2.0 | 1 | https://registry.npmjs.org/wrangler/-/wrangler-4.148.0.tgz | sha512-wgbll8cA/7qOMJSoYQuJrw9M9lmedGzYtg6wvUK2p/7G1KaE88jFmQ/CvtQzVUF9C8PQtC4Y5p9vbpAsJGAlpA== |
 
 Os 17 componentes abaixo complementam o texto de `path-to-regexp` já reproduzido integralmente. As expressões alternativas permanecem preservadas. Nenhuma eleição nova, dependência, configuração ou código de runtime é alterado.
 
@@ -494,13 +494,13 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
-### wrangler@4.147.0
+### wrangler@4.148.0
 
-O template Pages selecionado vem do tarball exato de Wrangler 4.147.0 e coincide byte a byte com o template do commit `64c1337155a6bc7224b5d47f58ca521d8b8ee3fe` de workers-sdk. A proveniência npm publicada relaciona o SHA-512 exato desse tarball ao mesmo commit, produzido pelo workflow oficial `changesets.yml`, [execução 37000143168, tentativa 1](https://github.com/cloudflare/workers-sdk/actions/runs/37000143168/attempts/1). A comparação documental do sujeito não afirma verificação criptográfica da atestação. O pacote declara `MIT OR Apache-2.0`; ambos os textos integrais da origem são preservados abaixo, sem nova eleição.
+O template Pages selecionado vem do tarball exato de Wrangler 4.148.0 e coincide byte a byte com o template do commit `540f0844667abacb36dee94c078d403192bab1bd` de workers-sdk. A proveniência npm publicada relaciona o SHA-512 exato desse tarball ao mesmo commit, produzido pelo workflow oficial `changesets.yml`, [execução 37510364980, tentativa 1](https://github.com/cloudflare/workers-sdk/actions/runs/37510364980/attempts/1). A comparação documental do sujeito não afirma verificação criptográfica da atestação. O pacote declara `MIT OR Apache-2.0`; ambos os textos integrais da origem são preservados abaixo, sem nova eleição.
 
 #### LICENSE-MIT
 
-Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/64c1337155a6bc7224b5d47f58ca521d8b8ee3fe/LICENSE-MIT>.
+Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/540f0844667abacb36dee94c078d403192bab1bd/LICENSE-MIT>.
 
 ```text
 Copyright (c) 2020 Cloudflare, Inc. <wrangler@cloudflare.com>
@@ -532,7 +532,7 @@ DEALINGS IN THE SOFTWARE.
 
 #### LICENSE-APACHE
 
-Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/64c1337155a6bc7224b5d47f58ca521d8b8ee3fe/LICENSE-APACHE>.
+Fonte exata: <https://github.com/cloudflare/workers-sdk/blob/540f0844667abacb36dee94c078d403192bab1bd/LICENSE-APACHE>.
 
 ```text
                               Apache License
