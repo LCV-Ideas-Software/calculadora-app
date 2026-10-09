@@ -717,11 +717,53 @@ END OF TERMS AND CONDITIONS
 
 ## Scoped Miniflare security correction
 
-The operator approved the temporary npm override `miniflare` → `sharp` 0.35.5 on
-06/10/2026 for GHSA-wq5f-xc86-pv6w. npm regenerates the affected lockfile; existing
-Wrangler and Miniflare selections remain unchanged. Remove this override after
-the official upstream selects a corrected Sharp version. Sharp retains its
-Apache-2.0 grant and the native libvips components retain their own LGPL notices;
-this build-tool correction does not certify complete distribution compliance.
+Historical approval: on 06/10/2026, the operator authorized the temporary npm
+override `miniflare` → `sharp` 0.35.5 for GHSA-wq5f-xc86-pv6w.
 
-Source: <https://github.com/advisories/GHSA-wq5f-xc86-pv6w>.
+Current native selection, 09/10/2026 (LCV-341): Wrangler 4.149.0 selects the
+official Miniflare 5.20261006.1-alpha, which requests Sharp 0.35.5 directly.
+The expired scoped override was removed; npm regenerated the lockfile.
+Sharp retains its Apache-2.0 grant, and libvips components retain their own LGPL
+notices. These are build-tool selections; the Pages Functions snapshot records
+runtime inputs separately.
+
+Sources: <https://registry.npmjs.org/miniflare/5.20261006.1-alpha> and
+<https://github.com/advisories/GHSA-wq5f-xc86-pv6w>.
+
+## Revalidação nativa das Pages Functions — 09/10/2026 (LCV-341)
+
+Esta seção acrescenta a seleção atual conferida e mantém integralmente os registros datados de 03/10 e 07/10, seus hashes, versões, fontes e textos jurídicos. A captura local usa o empacotador oficial Wrangler 4.149.0 e o lockfile abaixo. A próxima execução de produção conserva sua própria prova de artefato e deployment.
+
+- Base da preparação: [`a9986c2f2354778d6bd04922f22d0cb75eea8b6a`](https://github.com/LCV-Ideas-Software/calculadora-app/tree/a9986c2f2354778d6bd04922f22d0cb75eea8b6a), com o manifesto e lockfile atualizados localmente para esta revisão; a base não é identificada como commit dos novos bytes.
+- Lockfile integral: SHA-256 `228a80e31d4d7c25400e6f9ec87b55ba1a2860f6ae681bf75ce8006d1fac6906`.
+- Metafile nativo integral: 78641 bytes; SHA-256 `8e54ba5a0033185bcee3d1d6fb65dafc1793c91ef9a85b2da4fd9f0916a044c7`; 88 inputs.
+- Worker integral desta captura: 458877 bytes; SHA-256 `f7fff6082d3a3c503f9ecfc46e651dea9180669c785ca9a699f195cf8439e52a`.
+- Comparação independente: 65 inputs físicos de 18 identidades reais coincidem byte a byte com os membros dos tarballs exatos do lock; todos os SRIs dos tarballs foram calculados sobre os bytes completos. 62 inputs físicos contribuem bytes ao output. 5 placeholders desabilitados, 0 polyfills virtuais e 0 adaptadores nativos de built-ins permanecem categorias separadas.
+- Seleções com código alteradas frente à captura de 07/10: `is-plain-object 5.0.0 → 5.1.0`, `sanitize-html 2.17.7 → 2.18.0`, `wrangler 4.148.0 → 4.149.0`.
+
+Comando oficial: `wrangler pages functions build functions --outdir=<destino> --metafile=<metafile> --output-config-path=<config> --output-routes-path=<rotas> --build-output-directory=dist --project-directory=. --build-metadata-path=<metadata>`. Os parâmetros são os do workflow Deploy; os destinos desta preparação ficam na custódia privada da auditoria. O workflow preserva seu artefato antes de `pages deploy . --cwd dist --no-bundle`.
+
+| Componente exato | Licença declarada | Inputs / com código | Tarball oficial | SRI completo | SHA-256 dos arquivos jurídicos integrais de origem |
+| --- | --- | ---: | --- | --- | --- |
+| `dayjs@1.11.23` | MIT | 1 / 1 | https://registry.npmjs.org/dayjs/-/dayjs-1.11.23.tgz | `sha512-QDTCU0M0MxR3hQfnlDJfwekQiaanm1ubOD231u73WBckQ/fsamwRLiE2GBz6D3a/xF1NgfiDLJjXBa1hYOYTtQ==` | `5faab7526d055651be3aab769d58897be6bd91f3d39d137f25f12dba1b31d5dc` |
+| `deepmerge@4.3.1` | MIT | 1 / 1 | https://registry.npmjs.org/deepmerge/-/deepmerge-4.3.1.tgz | `sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==` | `6cfc4687cb2f2d86f4a77e6b526290d3878e5e512f3fec2f4cb36a9cb36f798b` |
+| `dom-serializer@3.1.1` | MIT | 2 / 2 | https://registry.npmjs.org/dom-serializer/-/dom-serializer-3.1.1.tgz | `sha512-4MEa38/QexBob6gFNwu+EGdWvhJ1OKuNwdYY3Y3NyeWDQfnGeDYQUDfIRzWu5B5gsv03so2Uxd28YC6zrsx3Lw==` | `fd495b1bdd024995c6b3bd612584a4e37513250317bb5a6586f62c7756f9aff1` |
+| `domelementtype@3.0.0` | BSD-2-Clause | 1 / 1 | https://registry.npmjs.org/domelementtype/-/domelementtype-3.0.0.tgz | `sha512-umCQid3jKbDmVjx8jGaW7uUykm4DEUeyV21hPxNMo2nV955DhUThwqyOIDtreepP31hl84X7G5U9ZfsWvIB3Pg==` | `cb992345949ccd6e8394b2cd6c465f7b897c864f845937dbf64e8997f389e164` |
+| `domhandler@6.0.1` | BSD-2-Clause | 2 / 2 | https://registry.npmjs.org/domhandler/-/domhandler-6.0.1.tgz | `sha512-gYzvtM72ZtxQO0T048kd6HWSbbGCNOUwcnfQ01cqIJ4X2IYKFFHZ5mKvrQETcFXxsRObZulDaKmy//R7TPtsBg==` | `cb992345949ccd6e8394b2cd6c465f7b897c864f845937dbf64e8997f389e164` |
+| `domutils@4.0.2` | BSD-2-Clause | 8 / 8 | https://registry.npmjs.org/domutils/-/domutils-4.0.2.tgz | `sha512-qI4JLRKnSzqFqr7hAlS5xQDusBCjKSEG4t4+7aNrIQMHBcsC2TGEhuyABJdYkgSewL57PNLYEiibY2iPKhKpaA==` | `cb992345949ccd6e8394b2cd6c465f7b897c864f845937dbf64e8997f389e164` |
+| `entities@8.0.0` | BSD-2-Clause | 11 / 8 | https://registry.npmjs.org/entities/-/entities-8.0.0.tgz | `sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==` | `cb992345949ccd6e8394b2cd6c465f7b897c864f845937dbf64e8997f389e164` |
+| `escape-string-regexp@4.0.0` | MIT | 1 / 1 | https://registry.npmjs.org/escape-string-regexp/-/escape-string-regexp-4.0.0.tgz | `sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==` | `5c932d88256b4ab958f64a856fa48e8bd1f55bc1d96b8149c65689e0c61789d3` |
+| `htmlparser2@12.0.0` | MIT | 3 / 3 | https://registry.npmjs.org/htmlparser2/-/htmlparser2-12.0.0.tgz | `sha512-Tz7u1i95/g2x2jz81+x0FBVhBhY5aRTvD3tXXdFaljuNdzDLJ8UGNRrTcj2cgQvAg3iW/h77Fz15nLW0L0CrZw==` | `204cfa747341660e4da64cd23e8c876c6b20279d247f48564993d3fc4a2eab47` |
+| `is-plain-object@5.1.0` | MIT | 1 / 1 | https://registry.npmjs.org/is-plain-object/-/is-plain-object-5.1.0.tgz | `sha512-bUi/yjmtKYcRVUtWRGr0UA6xEFh2I6zWUwMrUXB3s7bmYCaZ8a+0ZsTRkrawh/mzlSD1Y0Ph8bp/U+TvBpWDNw==` | `4cd903859549d4b20b571041f96dfae1136ed079c476126268f9d7cc1b611150` |
+| `launder@1.7.2` | MIT | 1 / 1 | https://registry.npmjs.org/launder/-/launder-1.7.2.tgz | `sha512-DLg3HPnHUfBi5/MxMLmJD12dmlMpFEC2HgMW6vkZ/9JR0RU00kXoRGvDxAvFmdO0o610OA77i4FgNTLucmhDVg==` | `04023acc083d1f83f526f7f7f73c33f4e863df9fb80b300b758324a9e9244a93` |
+| `nanoid@3.3.18` | MIT | 1 / 1 | https://registry.npmjs.org/nanoid/-/nanoid-3.3.18.tgz | `sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==` | `da4db1480d9beea3483a2eda5c53b22238d0827d57da162b48f122e04d2d9987` |
+| `parse-srcset@1.0.2` | MIT | 1 / 1 | https://registry.npmjs.org/parse-srcset/-/parse-srcset-1.0.2.tgz | `sha512-/2qh0lav6CmI15FzA3i/2Bzk2zCgQhGMkvhOhKNcBVQ1ldgpbfiNTVslmooUmWJcADi1f1kIeynbDRVzNlfR6Q==` | `240b6a23478dc1b044a457f1e9260c725d50b66b2502f7c3240f54f79c13ab58` |
+| `path-to-regexp@6.3.0` | MIT | 1 / 1 | https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-6.3.0.tgz | `sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==` | `4eeb3271453a891df609e5a9f4ee79a68307f730c13417a3bfeffa604ac8cf25` |
+| `picocolors@1.1.1` | ISC | 1 / 1 | https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz | `sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==` | `6582629e2979466878f6014313dcc2f3756c9616148682227ce3063dde310750` |
+| `postcss@8.5.28` | MIT | 27 / 27 | https://registry.npmjs.org/postcss/-/postcss-8.5.28.tgz | `sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==` | `5be1f3465bba68a626777f984878814aaf35e7ef8e9fd314d469bcf887050fb8` |
+| `sanitize-html@2.18.0` | MIT | 1 / 1 | https://registry.npmjs.org/sanitize-html/-/sanitize-html-2.18.0.tgz | `sha512-CvY+PV+NBhxe3BnjFI5f//vEDKLULm9OlZArso7gdgVsWvanBuq9PNDx+/2llfL+8XFYa/UNBxvqRBg3TWU2Ug==` | `24526b61784870909780321dac50fcd3a33ff0bdfd507549dd63163899237bd1` |
+| `wrangler@4.149.0` | MIT OR Apache-2.0 | 1 / 1 | https://registry.npmjs.org/wrangler/-/wrangler-4.149.0.tgz | `sha512-OzK7xmB5r5iLKb3cIT3783g13fe6T7xyeKu9LEdUyl+DKAM2KP/jkjnE0OUhyw+mB/XJM9ycjgF3MWm8PR9amg==` | `9bb3b077cc8628334bab25961223dd8207252c8a56aa054195be38f1c042aaf4`; `62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a` |
+
+Cada hash jurídico da tabela identifica o arquivo integral de origem e vincula seu corpo completo ao componente e à versão atuais. Os corpos aqui entregues foram comparados integralmente após a delimitação do whitespace externo pela cerca Markdown, sem procura de trechos genéricos. Os grants de `is-plain-object` 5.1.0 e `sanitize-html` 2.18.0 são integralmente iguais aos respectivos corpos aqui preservados nas seções datadas. A seleção atual acrescenta a nova identidade e proveniência; os registros antigos permanecem datados.
+
+O template Pages de Wrangler 4.149.0 foi comparado inteiro com seu membro publicado e com a origem [`84c4e959bbd349b1d0f88ffe64679aff69c6328a`](https://github.com/cloudflare/workers-sdk/tree/84c4e959bbd349b1d0f88ffe64679aff69c6328a); seus 5.788 bytes têm SHA-256 `f159bb8a73bdb8efb1fa1022fcbcfd6fda6958a8c855ed357369441040d69e33`. Os 16 templates publicados coincidem integralmente com 4.148.0. Os textos atuais MIT (1.086 bytes; SHA-256 `9bb3b077cc8628334bab25961223dd8207252c8a56aa054195be38f1c042aaf4`) e Apache-2.0 (9.723 bytes; SHA-256 `62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a`) também coincidem com os corpos integrais preservados. A proveniência publicada relaciona o SHA-512 integral do tarball àquela origem; esta comparação documental não alega nova verificação criptográfica de atestação. As eleições e os avisos anteriores permanecem.
