@@ -2,11 +2,13 @@
 
 ## [Unreleased]
 
+- Revalidado o snapshot das Pages Functions com o output e metafile oficiais de Wrangler 4.149.0: versões atuais, grants completos e inputs inteiros iguais aos artefatos publicados, preservando as capturas históricas datadas e as cópias públicas (LCV-341).
+
 - Update the official CodeQL SARIF upload Action to v4.38.3 at its complete release commit SHA (LCV-336).
 
 - Corrigida a proveniência integral do inventário das Pages Functions para a captura local oficial de Wrangler 4.148.0, com fonte/lockfile/metafile/output efetivamente examinados; preservados os grants e as duas cópias do aviso, sem atribuir a nova seleção ao deploy histórico (LCV-334 / #300).
 
-- Atualizada a CLI oficial Cloudflare Wrangler para 4.148.0, com lockfiles regenerados pelo npm; preservado o override autorizado de Sharp 0.35.5 enquanto o Miniflare oficial 5.20261006.0-alpha ainda exige 0.35.4 (LCV-334).
+- Atualizada a CLI oficial Cloudflare Wrangler para 4.149.0, com lockfiles regenerados pelo npm; removido o override temporário de Sharp porque o Miniflare oficial 5.20261006.1-alpha já exige 0.35.5 diretamente (LCV-341).
 
 - Update the official `actions/upload-artifact` to v7.0.2 at complete commit SHAs (LCV-334).
 
@@ -21,8 +23,6 @@
 - Fixada a família oficial Tailwind CSS no preview `0.0.0-insiders.fa81d69`, com lockfile regenerado pelo npm e sem overrides novos. O pacote WASI passa a incorporar `@tybys/wasm-util@0.10.3`, cujo código coincide integralmente com a revisão que recebeu MIT; os inventários e o NOTICE canônico/público reproduzem a proveniência e o texto integral. A versão selecionada pertence ao canal insiders, não é release estável e não prova autorização retroativa para 0.10.2.
 
 - Atualizado o Vitest para 5.0.3, que seleciona o `why-is-node-running` oficial 3.2.1 sem `stackback`; manifestos e lockfiles regenerados pelo npm.
-
-- Update the pinned Cloudflare Wrangler CLI to 4.147.0 and regenerate npm dependency locks.
 
 ### Security
 
