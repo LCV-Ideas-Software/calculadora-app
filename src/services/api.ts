@@ -24,7 +24,7 @@ export async function fetchSimulation(payload: SimulationPayload): Promise<Simul
     const text = await res.text().catch(() => '');
     throw new Error(`Erro ${res.status}: ${text || res.statusText}`);
   }
-  return res.json();
+  return (await res.json()) as SimulationResponse;
 }
 
 /**
@@ -33,7 +33,7 @@ export async function fetchSimulation(payload: SimulationPayload): Promise<Simul
 export async function fetchParametros(): Promise<Record<string, unknown>> {
   const res = await fetch(`${BASE}/parametros`);
   if (!res.ok) throw new Error(`Erro ${res.status}`);
-  return res.json();
+  return (await res.json()) as Record<string, unknown>;
 }
 
 /**

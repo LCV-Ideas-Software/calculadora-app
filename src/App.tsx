@@ -59,7 +59,9 @@ export default function App() {
               <SimulationForm
                 form={simulation.form}
                 setField={simulation.setField}
-                onSubmit={simulation.handleSubmit}
+                onSubmit={() => {
+                  void simulation.handleSubmit();
+                }}
                 loading={simulation.loading}
                 error={simulation.error}
               />

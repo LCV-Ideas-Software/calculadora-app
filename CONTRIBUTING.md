@@ -26,8 +26,8 @@ Thanks for your interest. Quick guide for filing issues and opening pull request
 
 ```bash
 npm ci
-npm run biome   # biome check
-npm run build   # tsc + vite build
+npm run lint    # typed ESLint + Biome
+npm run build   # native TypeScript 7 + Vite build
 npm test        # vitest
 ```
 

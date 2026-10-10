@@ -23,13 +23,13 @@ interface VertexGenAIOptions {
   now?: () => number;
 }
 
-interface GenerateContentConfig {
+export interface GenerateContentConfig {
   temperature?: number;
   topP?: number;
   maxOutputTokens?: number;
   thinkingConfig?: Record<string, unknown>;
   safetySettings?: unknown[];
-  systemInstruction?: string | Record<string, unknown>;
+  systemInstruction?: string | Record<string, unknown> | undefined;
 }
 
 interface GenerateContentArgs {
@@ -43,7 +43,7 @@ interface CountTokensArgs {
   contents: unknown;
 }
 
-interface VertexResponsePart {
+export interface VertexResponsePart {
   text?: string;
   thought?: boolean;
 }
@@ -54,7 +54,11 @@ interface VertexCandidate {
 
 export interface VertexGenerateContentResponse {
   candidates?: VertexCandidate[];
-  usageMetadata?: Record<string, unknown>;
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    cachedContentTokenCount?: number;
+  };
   modelVersion?: string;
   text: string;
 }
@@ -96,10 +100,11 @@ function pemToPkcs8Bytes(pem: string): Uint8Array<ArrayBuffer> {
 function parseServiceAccountKey(saKeyJson: string): ServiceAccountKey {
   let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(saKeyJson);
+    parsed = JSON.parse(saKeyJson) as Record<string, unknown>;
   } catch (err) {
     throw new Error(
       `VERTEX_SA_KEY inválido: o conteúdo do secret não é JSON parseável (${err instanceof Error ? err.message : 'erro desconhecido'}).`,
+      { cause: err },
     );
   }
   for (const field of ['client_email', 'private_key', 'private_key_id', 'token_uri'] as const) {

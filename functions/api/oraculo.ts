@@ -6,7 +6,12 @@
  */
 
 import { enforceRateLimit, jsonResponse, requireAllowedOrigin } from './_shared/security.js';
-import { VertexGenAI } from './_shared/vertex.ts';
+import {
+  type GenerateContentConfig,
+  VertexGenAI,
+  type VertexGenerateContentResponse,
+  type VertexResponsePart,
+} from './_shared/vertex.ts';
 
 interface D1DatabaseLike {
   prepare: (query: string) => {
@@ -99,22 +104,26 @@ export function logAiUsage(
   })();
 }
 
-function extractTextFromParts(parts: any[]): string {
+function extractTextFromParts(parts: VertexResponsePart[]): string {
   return (parts || [])
     .filter((p) => typeof p.text === 'string' && !p.thought)
     .map((p) => p.text)
     .join('');
 }
 
-export async function onRequestPost(context: any) {
+export async function onRequestPost(context: {
+  request: Request;
+  env: Env;
+  waitUntil?: (promise: Promise<unknown>) => void;
+}) {
   try {
-    const { request, env } = context as { request: Request; env: Env };
+    const { request, env } = context;
     const originError = requireAllowedOrigin(request);
     if (originError) return originError;
     const rateLimitError = await enforceRateLimit(request, env, 'oraculo_ia');
     if (rateLimitError) return rateLimitError;
     const _telStart = Date.now();
-    const promptData = await request.json();
+    const promptData: unknown = await request.json();
 
     const { VERTEX_SA_KEY } = env;
 
@@ -168,7 +177,7 @@ Dados da simulação:
     type PayloadCandidate = {
       label: string;
       systemInstruction?: string;
-      config: any;
+      config: GenerateContentConfig;
     };
 
     const safetySettings = [
@@ -214,7 +223,7 @@ Dados da simulação:
       },
     ];
 
-    let successfulResponse: any = null;
+    let successfulResponse: VertexGenerateContentResponse | null = null;
 
     for (let i = 0; i < payloadCandidates.length; i++) {
       const candidate = payloadCandidates[i];

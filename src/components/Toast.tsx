@@ -8,19 +8,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type ToastType = 'info' | 'success' | 'error';
+import { setToastHandler, type ToastType } from '../services/toast.ts';
 
 interface ToastState {
   message: string;
   type: ToastType;
   visible: boolean;
-}
-
-let globalShowToast: ((message: string, type?: ToastType, durationMs?: number) => void) | null = null;
-
-/** Imperativa: permite disparar toast de qualquer módulo */
-export function showToast(message: string, type: ToastType = 'info', durationMs = 3500): void {
-  globalShowToast?.(message, type, durationMs);
 }
 
 const COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
@@ -40,9 +33,9 @@ export default function Toast() {
   }, []);
 
   useEffect(() => {
-    globalShowToast = show;
+    setToastHandler(show);
     return () => {
-      globalShowToast = null;
+      setToastHandler(null);
     };
   }, [show]);
 

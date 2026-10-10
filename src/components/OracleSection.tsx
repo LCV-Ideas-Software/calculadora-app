@@ -17,8 +17,12 @@ interface Props {
 export default function OracleSection({ oracle, payload }: Props) {
   if (!payload) return null;
 
-  const handleAnalyze = () => oracle.executar(payload, false);
-  const handleRefresh = () => oracle.executar(payload, true);
+  const handleAnalyze = () => {
+    void oracle.executar(payload, false);
+  };
+  const handleRefresh = () => {
+    void oracle.executar(payload, true);
+  };
 
   return (
     <div id="secao-oraculo" className="mt-6">

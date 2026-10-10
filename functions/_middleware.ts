@@ -1,4 +1,4 @@
-export async function onRequest(context: any) {
+export async function onRequest(context: { request: Request; next: () => Promise<Response> }) {
   const url = new URL(context.request.url);
 
   // Bloqueio de exposição pública via URL interna .pages.dev
@@ -7,5 +7,5 @@ export async function onRequest(context: any) {
     return Response.redirect(url.toString(), 301);
   }
 
-  return context.next();
+  return await context.next();
 }

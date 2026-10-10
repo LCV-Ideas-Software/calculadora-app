@@ -15,6 +15,13 @@ nativo do Vite não substitui essas verificações editoriais.
 
 | Componente             | Escopo          | Licença declarada no lockfile | Licença aplicada | Modificado? | Origem                                             |
 | ---------------------- | --------------- | ----------------------------- | ---------------- | ----------- | -------------------------------------------------- |
+| `@eslint/js` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/@eslint/js |
+| `@typescript/native` | desenvolvimento | Apache-2.0 | Apache-2.0 | Não | https://www.npmjs.com/package/typescript |
+| `eslint` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/eslint |
+| `eslint-plugin-react-hooks` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/eslint-plugin-react-hooks |
+| `eslint-plugin-react-refresh` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/eslint-plugin-react-refresh |
+| `globals` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/globals |
+| `typescript-eslint` | desenvolvimento | MIT | MIT | Não | https://www.npmjs.com/package/typescript-eslint |
 | `@biomejs/biome`       | desenvolvimento | MIT OR Apache-2.0             | Apache-2.0       | Não         | https://www.npmjs.com/package/@biomejs/biome       |
 | `@tailwindcss/vite`    | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/@tailwindcss/vite    |
 | `@types/react`         | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/@types/react         |
@@ -26,10 +33,27 @@ nativo do Vite não substitui essas verificações editoriais.
 | `react-dom`            | runtime         | MIT                           | MIT              | Não         | https://www.npmjs.com/package/react-dom            |
 | `sanitize-html`        | runtime         | MIT                           | MIT              | Não         | https://www.npmjs.com/package/sanitize-html        |
 | `tailwindcss`          | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/tailwindcss          |
-| `typescript`           | desenvolvimento | Apache-2.0                    | Apache-2.0       | Não         | https://www.npmjs.com/package/typescript           |
+| `typescript` | desenvolvimento | Apache-2.0 | Apache-2.0 | Não | https://www.npmjs.com/package/@typescript/typescript6 |
 | `vite`                 | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vite                 |
 | `vitest`               | desenvolvimento | MIT                           | MIT              | Não         | https://www.npmjs.com/package/vitest               |
 | `wrangler`             | desenvolvimento | MIT OR Apache-2.0             | Apache-2.0       | Não         | https://www.npmjs.com/package/wrangler             |
+
+## TypeScript — compilador e API oficiais lado a lado (10/10/2026)
+
+O portão ESLint usa as recomendações tipadas oficiais de `typescript-eslint` 8.71.1,
+ESLint 10.12.0, React Hooks 7.1.1 e React Refresh 0.5.7. As dependências adicionais
+`@eslint/js` 10.0.1 e `globals` 17.13.0 também estão selecionadas pelo lockfile nativo.
+São ferramentas de desenvolvimento; esta seleção não afirma incorporação no bundle.
+
+A [arquitetura oficial documentada pela Microsoft](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)
+usa os aliases npm `typescript` → `@typescript/typescript6` 6.0.2 e
+`@typescript/native` → `typescript` 7.0.2. O primeiro fornece a API JavaScript
+TypeScript 6.0.3 por seu alias transitivo `@typescript/old`; o segundo mantém o
+compilador nativo 7.0.2, invocado diretamente pelo ponto de entrada oficial
+`node node_modules/@typescript/native/bin/tsc -b` no build de produção. As três
+publicações aplicam Apache-2.0. O inventário nomeia cada alias direto e identifica
+seu publicador real; os nomes, versões, URLs e SRI exatos constam no lockfile.
+Não há alteração das eleições de licença existentes ou relaxamento de peers.
 
 ## Atualização documental — 02/10/2026 (LCV-183 / LCV-211)
 

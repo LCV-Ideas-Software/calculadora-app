@@ -29,11 +29,15 @@ export async function sendSimulationEmail(
     }),
   });
 
-  const json = await res.json().catch(() => null);
+  const response: unknown = await res.json().catch(() => null);
+  const json = typeof response === 'object' && response !== null ? (response as Record<string, unknown>) : null;
   if (!res.ok) {
-    return { ok: false, message: json?.error || `Erro ${res.status}` };
+    return { ok: false, message: typeof json?.error === 'string' && json.error ? json.error : `Erro ${res.status}` };
   }
-  return { ok: true, message: json?.message || 'E-mail enviado com sucesso!' };
+  return {
+    ok: true,
+    message: typeof json?.message === 'string' && json.message ? json.message : 'E-mail enviado com sucesso!',
+  };
 }
 
 /* ------- HTML Builder ------- */

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Implantado o portão nativo ESLint tipado com `projectService`, recomendações oficiais de TypeScript, React Hooks em todos os arquivos TS/TSX de `src` e Vite React Refresh nos componentes TSX, seguido por Biome em CI e Deploy. A arquitetura oficial lado a lado da Microsoft preserva o compilador TypeScript 7.0.2, invocado diretamente pelo ponto de entrada oficial no build, e fornece a API TypeScript 6.0.3 ao parser pelo pacote de compatibilidade 6.0.2. Corrigidas as ocorrências concretas de tipos e promessas apontadas pelo novo portão, sem desativação de regras (CALCULA-1 / LCV-347).
+
 - Revalidado o snapshot das Pages Functions com o output e metafile oficiais de Wrangler 4.149.0: versões atuais, grants completos e inputs inteiros iguais aos artefatos publicados, preservando as capturas históricas datadas e as cópias públicas (LCV-341).
 
 - Update the official CodeQL SARIF upload Action to v4.38.3 at its complete release commit SHA (LCV-336).

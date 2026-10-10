@@ -8,7 +8,7 @@
    ==================================================================== */
 
 import { useState } from 'react';
-import { showToast } from './Toast.tsx';
+import { showToast } from '../services/toast.ts';
 
 interface ContactForm {
   name: string;
@@ -54,14 +54,15 @@ export default function ContactModal({ isOpen, onClose }: Props) {
         body: JSON.stringify(form),
       });
 
-      const json = await res.json().catch(() => null);
+      const data: unknown = await res.json().catch(() => null);
+      const json = typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : null;
 
       if (res.ok && json?.ok) {
-        showToast(json.message ?? 'Mensagem enviada com sucesso!', 'success');
+        showToast(typeof json.message === 'string' ? json.message : 'Mensagem enviada com sucesso!', 'success');
         setForm({ name: '', phone: '', email: '', message: '' });
         onClose();
       } else {
-        showToast(json?.error ?? `Erro ${res.status}`, 'error');
+        showToast(typeof json?.error === 'string' ? json.error : `Erro ${res.status}`, 'error');
       }
     } catch {
       showToast('Erro na comunicação com o servidor.', 'error');
@@ -94,7 +95,12 @@ export default function ContactModal({ isOpen, onClose }: Props) {
         </h3>
         <p className="text-sm text-slate-500 mb-4">Entre em contato e responderemos o mais breve possível.</p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form
+          onSubmit={(event) => {
+            void handleSubmit(event);
+          }}
+          className="flex flex-col gap-3"
+        >
           <input
             required
             type="text"

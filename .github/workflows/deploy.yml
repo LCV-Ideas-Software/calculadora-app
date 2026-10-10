@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: test "$(npm config get registry)" = "https://registry.npmjs.org/"
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npm run biome
+      - run: npm run lint
       - run: npm test
       - run: npm run build
       - name: Build exact Pages Functions artifact
