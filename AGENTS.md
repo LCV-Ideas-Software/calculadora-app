@@ -20,6 +20,7 @@ The separate GitHub Pages site is built from `site/`.
 
 ```bash
 npm test
+npm run lint
 npm run biome
 npm run build
 ```

@@ -19,14 +19,15 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node node_modules/@typescript/native/bin/tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "verify:d1-contract": "node scripts/verify-d1-contract.mjs",
     "format": "biome format --write src",
-    "lint": "biome check src",
+    "lint": "npm run lint:eslint && npm run biome",
     "biome": "biome check .",
-    "biome:write": "biome check --write ."
+    "biome:write": "biome check --write .",
+    "lint:eslint": "eslint \"**/*.{ts,tsx}\" --max-warnings=0"
   },
   "dependencies": {
     "dompurify": "^3.4.16",
@@ -36,13 +37,20 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
+    "@eslint/js": "10.0.1",
     "@tailwindcss/vite": "0.0.0-insiders.fa81d69",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@typescript/native": "npm:typescript@7.0.2",
     "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "10.12.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.7",
+    "globals": "17.13.0",
     "prettier": "^3.9.9",
     "tailwindcss": "0.0.0-insiders.fa81d69",
-    "typescript": "~7.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "typescript-eslint": "8.71.1",
     "vite": "^8.3.2",
     "vitest": "^5.0.3",
     "wrangler": "4.149.0"

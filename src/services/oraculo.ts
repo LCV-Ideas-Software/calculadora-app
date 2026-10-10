@@ -35,10 +35,15 @@ function getCache(hash: string): CacheEntry | null {
   try {
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const entry: CacheEntry = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return null;
+    const entry = parsed as Record<string, unknown>;
+    if (typeof entry.html !== 'string' || typeof entry.ts !== 'number' || typeof entry.payloadHash !== 'string') {
+      return null;
+    }
     if (entry.payloadHash !== hash) return null;
     if (Date.now() - entry.ts > CACHE_TTL_MS) return null;
-    return entry;
+    return { html: entry.html, ts: entry.ts, payloadHash: entry.payloadHash };
   } catch {
     return null;
   }
@@ -172,8 +177,10 @@ export async function obterAnaliseOraculoComMeta(opts: OraculoOptions): Promise<
     throw new Error(`Erro IA: ${res.status} — ${errText || res.statusText}`);
   }
 
-  const data = await res.json();
-  const markdown: string = data.analise || data.analysis || data.result || '';
+  const response: unknown = await res.json();
+  const data = typeof response === 'object' && response !== null ? (response as Record<string, unknown>) : {};
+  const selectedText = data.analise || data.analysis || data.result;
+  const markdown = typeof selectedText === 'string' ? selectedText : '';
   const html = sanitizeOracleHtml(markdownParaHtml(markdown));
   const durationMs = performance.now() - t0;
 
@@ -182,7 +189,7 @@ export async function obterAnaliseOraculoComMeta(opts: OraculoOptions): Promise<
   updateAiTelemetry(durationMs, false, false);
 
   // Telemetria backend (fire-and-forget)
-  postOraculoObservabilidade({
+  void postOraculoObservabilidade({
     evento: 'analise_ia',
     duracao_ms: Math.round(durationMs),
     moeda: payload.transacao.moeda,

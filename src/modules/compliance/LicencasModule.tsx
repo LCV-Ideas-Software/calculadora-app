@@ -95,7 +95,7 @@ export function LicencasModule() {
       }
     };
 
-    fetchFiles();
+    void fetchFiles();
   }, []);
 
   const sectionStyle = {

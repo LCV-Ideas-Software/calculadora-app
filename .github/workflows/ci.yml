@@ -49,6 +49,6 @@ jobs:
 
       - name: Validate application
         run: |
-          npm run biome
+          npm run lint
           npm test
           npm run build

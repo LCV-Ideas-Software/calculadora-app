@@ -8,8 +8,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { sendSimulationEmail } from '../services/email.ts';
+import { showToast } from '../services/toast.ts';
 import type { EmailSimulationData, SimulationResponse } from '../types/api.ts';
-import { showToast } from './Toast.tsx';
 
 interface Props {
   isOpen: boolean;
@@ -99,7 +99,7 @@ export default function EmailModal({ isOpen, onClose, result, melhorOpcao, oracl
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSend();
+            if (e.key === 'Enter') void handleSend();
           }}
         />
 
@@ -113,7 +113,9 @@ export default function EmailModal({ isOpen, onClose, result, melhorOpcao, oracl
           </button>
           <button
             type="button"
-            onClick={handleSend}
+            onClick={() => {
+              void handleSend();
+            }}
             disabled={sending}
             className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white transition-all"
             style={{

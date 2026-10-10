@@ -164,8 +164,22 @@ does not publish npm or Windows packages, GitHub Releases, or version tags.
 
 Vite generates the browser-bundle license report. The retired custom verifier no
 longer checks inventory parity or the emitted artifact; maintainers review legal
-document copies and notices when relevant changes occur. Biome remains the code
-formatter/linter; the separate Public Format gate is retired.
+document copies and notices when relevant changes occur. `npm run lint` runs the
+standard ESLint flat configuration with the official type-checked recommendations,
+React Hooks and Vite React Refresh presets, followed by Biome. CI and Deploy require
+this same local gate. All TypeScript/TSX source, tests, Functions and Vite configuration
+use the parser project service. Biome also maintains formatting.
+
+The compiler remains TypeScript 7.0.2. Production builds invoke its official entry
+point directly: `node node_modules/@typescript/native/bin/tsc -b && vite build`. Microsoft
+[documents the side-by-side npm aliases](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/):
+`@typescript/native` selects compiler 7.0.2, while `typescript` selects the official
+`@typescript/typescript6` 6.0.2 compatibility package and its TypeScript 6.0.3 API for
+the ESLint parser. `tsc6` is available for API tooling; production builds use the
+explicit compiler 7 entry point, independently of npm's `.bin/tsc` selection.
+Installation uses the native npm lockfile without peer overrides. This architecture
+is the operator-approved acceptance for CALCULA-1; it does not claim that the parser
+consumes the compiler 7 API. The separate Public Format gate is retired.
 
 ## Repository conventions
 

@@ -6,9 +6,9 @@
    ActionButtons — Copiar / WhatsApp / E-Mail
    ==================================================================== */
 
+import { showToast } from '../services/toast.ts';
 import { buildCopyText, shareViaWhatsApp } from '../services/whatsapp.ts';
 import type { SimulationResponse } from '../types/api.ts';
-import { showToast } from './Toast.tsx';
 
 interface Props {
   result: SimulationResponse;
@@ -33,7 +33,15 @@ export default function ActionButtons({ result, melhorOpcao, onEmailClick }: Pro
 
   return (
     <div className="flex flex-wrap gap-3 justify-center mt-4">
-      <ActionBtn emoji="📋" label="Copiar" onClick={handleCopy} bg="rgba(37,99,235,0.08)" color="#1d4ed8" />
+      <ActionBtn
+        emoji="📋"
+        label="Copiar"
+        onClick={() => {
+          void handleCopy();
+        }}
+        bg="rgba(37,99,235,0.08)"
+        color="#1d4ed8"
+      />
       <ActionBtn emoji="💬" label="WhatsApp" onClick={handleWhatsApp} bg="rgba(22,163,74,0.08)" color="#15803d" />
       <ActionBtn emoji="📧" label="E-mail" onClick={onEmailClick} bg="rgba(168,85,247,0.08)" color="#7e22ce" />
     </div>
